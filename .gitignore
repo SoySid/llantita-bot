@@ -1,0 +1,25 @@
+# Entorno virtual
+venv/
+.venv/
+env/
+
+# Archivos temporales y caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Credenciales y variables de entorno locales
+.env
+.env.local
+
+# Archivos locales de prueba o historial viejo
+precios_historicos.json
+*.db
+*.sqlite3
+
+# Archivos del sistema y del editor
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
