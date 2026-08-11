@@ -1,4 +1,5 @@
 import os
+import time
 import psycopg2
 import requests
 
@@ -45,7 +46,11 @@ def procesar_mensajes_telegram():
     return
 
   url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-  res = requests.get(url).json()
+  try:
+    res = requests.get(url, timeout=10).json()
+  except Exception as e:
+    print(f"Error al conectar con Telegram: {e}")
+    return
 
   if not res.get("ok"):
     return
@@ -91,10 +96,14 @@ def procesar_mensajes_telegram():
 def enviar_mensaje_telegram(chat_id, texto):
   if not TELEGRAM_BOT_TOKEN:
     return
-  requests.post(
-      f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-      json={"chat_id": chat_id, "text": texto, "parse_mode": "Markdown"},
-  )
+  try:
+    requests.post(
+        f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+        json={"chat_id": chat_id, "text": texto, "parse_mode": "Markdown"},
+        timeout=10,
+    )
+  except Exception as e:
+    print(f"Error enviando mensaje a {chat_id}: {e}")
 
 
 def notificar_oferta_masiva(nombre, precio_anterior, precio_nuevo, url_producto):
@@ -180,6 +189,12 @@ def extraer_catalogo():
   ]
 
   productos_dict = {}
+  headers = {
+      "User-Agent": (
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+      )
+  }
 
   for min_p, max_p in rangos:
     page = 1
@@ -187,14 +202,17 @@ def extraer_catalogo():
 
     while True:
       url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado&fq=P:[{min_p} TO {max_p}]"
-      res = requests.get(url)
 
-      if res.status_code != 200:
+      try:
+        res = requests.get(url, headers=headers, timeout=15)
+        if res.status_code != 200:
+          break
+        data = res.json()
+      except Exception as e:
+        print(f"Error consultando la API ({url}): {e}")
         break
 
-      data = res.json()
       items = data.get("products", [])
-
       if not items:
         break
 
@@ -219,6 +237,7 @@ def extraer_catalogo():
           }
 
       page += 1
+      time.sleep(0.3)
 
   return list(productos_dict.values())
 
