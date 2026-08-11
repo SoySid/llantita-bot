@@ -1,4 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor
+from psycopg2.extras import execute_values
 import os
 import time
 import psycopg2
@@ -48,7 +49,7 @@ def procesar_mensajes_telegram():
 
   url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
   try:
-    res = requests.get(url, timeout=10).json()
+    res = requests.get(url, timeout=15).json()
   except Exception as e:
     print(f"Error al conectar con Telegram: {e}")
     return
@@ -140,43 +141,53 @@ def obtener_precios_anteriores():
 
 def procesar_y_guardar(productos_actuales):
   precios_anteriores = obtener_precios_anteriores()
+  
+  ofertas = []
+  nuevos_registros = []
 
+  # Etapa 1: Calcular diferencias en memoria limpia
+  for prod in productos_actuales:
+    p_id = str(prod["id"])
+    p_nombre = prod["nombre"]
+    p_url = prod["url"]
+    p_precio = float(prod["precio"])
+
+    precio_viejo = precios_anteriores.get(p_id)
+
+    if precio_viejo is not None and p_precio < precio_viejo:
+      ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+
+    # Preparamos la tupla para el bulk insert
+    nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+
+  # Etapa 2: Guardar historial y enviar mensajes
   with obtener_conexion() as conn:
     with conn.cursor() as cur:
-      for prod in productos_actuales:
-        p_id = str(prod["id"])
-        p_nombre = prod["nombre"]
-        p_url = prod["url"]
-        p_precio = prod["precio"]
-
-        precio_viejo = precios_anteriores.get(p_id)
-
-        if precio_viejo is not None and p_precio < precio_viejo:
-          print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
-          cur.execute(
-              """
-                        INSERT INTO historial_precios (producto_id, precio, fecha)
-                        VALUES (%s, %s, CURRENT_TIMESTAMP);
-                    """,
-              (p_id, p_precio),
-          )
-
-          notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
-
+      for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
+        print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
         cur.execute(
             """
-                    INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
-                    VALUES (%s, %s, %s, %s, CURRENT_TIMESTAMP)
-                    ON CONFLICT (id) DO UPDATE SET
-                        nombre = EXCLUDED.nombre,
-                        url = EXCLUDED.url,
-                        precio = EXCLUDED.precio,
-                        ultima_actualizacion = CURRENT_TIMESTAMP;
+                    INSERT INTO historial_precios (producto_id, precio, fecha)
+                    VALUES (%s, %s, CURRENT_TIMESTAMP);
                 """,
-            (p_id, p_nombre, p_url, p_precio),
+            (p_id, p_precio),
         )
+        notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
 
-      conn.commit()
+      # Etapa 3: Bulk Upsert masivo de todo el catálogo en 1 segundo
+      if nuevos_registros:
+        query = """
+            INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
+            VALUES %s
+            ON CONFLICT (id) DO UPDATE SET
+                nombre = EXCLUDED.nombre,
+                url = EXCLUDED.url,
+                precio = EXCLUDED.precio,
+                ultima_actualizacion = CURRENT_TIMESTAMP;
+        """
+        execute_values(cur, query, nuevos_registros)
+
+    conn.commit()
 
 
 def obtener_productos_por_rango(rango, session):
@@ -187,14 +198,24 @@ def obtener_productos_por_rango(rango, session):
 
   while True:
     url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado&fq=P:[{min_p} TO {max_p}]"
+    
+    exito = False
+    data = {}
+    
+    # Sistema de reintentos para no perder paginas por timeout
+    for intento in range(3):
+      try:
+        res = session.get(url, timeout=20)
+        if res.status_code == 200:
+          data = res.json()
+          exito = True
+          break
+      except Exception as e:
+        print(f"Fallo de conexion en rango {min_p}-{max_p} (pag {page}), intento {intento + 1}: {e}")
+        time.sleep(2)
 
-    try:
-      res = session.get(url, timeout=10)
-      if res.status_code != 200:
-        break
-      data = res.json()
-    except Exception as e:
-      print(f"Error consultando el rango {min_p}-{max_p} (pag {page}): {e}")
+    if not exito:
+      print(f"Saltando pagina {page} del rango {min_p}-{max_p} tras 3 intentos.")
       break
 
     items = data.get("products", [])
@@ -224,7 +245,7 @@ def obtener_productos_por_rango(rango, session):
         })
 
     page += 1
-    time.sleep(0.1)
+    time.sleep(0.3)
 
   return productos_rango
 
@@ -249,7 +270,8 @@ def extraer_catalogo():
 
   productos_dict = {}
 
-  with ThreadPoolExecutor(max_workers=6) as executor:
+  # Bajamos a 4 hilos para ser mas amables con el servidor
+  with ThreadPoolExecutor(max_workers=4) as executor:
     resultados = executor.map(
         lambda r: obtener_productos_por_rango(r, session), rangos
     )
