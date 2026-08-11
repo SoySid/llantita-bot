@@ -1,8 +1,6 @@
 name: Monitor de Precios Llantitas
 
 on:
-  schedule:
-    - cron: "0 0,12 * * *"
   workflow_dispatch:
 
 jobs:
