@@ -145,7 +145,6 @@ def procesar_y_guardar(productos_actuales):
   ofertas = []
   nuevos_registros = []
 
-  # Etapa 1: Calcular diferencias en memoria limpia
   for prod in productos_actuales:
     p_id = str(prod["id"])
     p_nombre = prod["nombre"]
@@ -157,10 +156,9 @@ def procesar_y_guardar(productos_actuales):
     if precio_viejo is not None and p_precio < precio_viejo:
       ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
 
-    # Preparamos la tupla para el bulk insert
+    # Preparamos la tupla exacta de 4 elementos
     nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
 
-  # Etapa 2: Guardar historial y enviar mensajes
   with obtener_conexion() as conn:
     with conn.cursor() as cur:
       for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
@@ -174,10 +172,10 @@ def procesar_y_guardar(productos_actuales):
         )
         notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
 
-      # Etapa 3: Bulk Upsert masivo de todo el catálogo en 1 segundo
+      # Aca esta el fix: quitamos ultima_actualizacion de la primera linea de columnas
       if nuevos_registros:
         query = """
-            INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
+            INSERT INTO productos (id, nombre, url, precio)
             VALUES %s
             ON CONFLICT (id) DO UPDATE SET
                 nombre = EXCLUDED.nombre,
@@ -202,7 +200,6 @@ def obtener_productos_por_rango(rango, session):
     exito = False
     data = {}
     
-    # Sistema de reintentos para no perder paginas por timeout
     for intento in range(3):
       try:
         res = session.get(url, timeout=20)
@@ -270,7 +267,6 @@ def extraer_catalogo():
 
   productos_dict = {}
 
-  # Bajamos a 4 hilos para ser mas amables con el servidor
   with ThreadPoolExecutor(max_workers=4) as executor:
     resultados = executor.map(
         lambda r: obtener_productos_por_rango(r, session), rangos
