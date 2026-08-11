@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import os
 import time
 import psycopg2
@@ -123,7 +124,7 @@ def notificar_oferta_masiva(nombre, precio_anterior, precio_nuevo, url_producto)
       f"👟 *{nombre}*\n"
       f"❌ Precio anterior: ~${precio_anterior:,.2f}~\n"
       f"🔥 *Precio nuevo: ${precio_nuevo:,.2f}*\n\n"
-      f"🔗 [Ver producto en la tienda]({url_producto})"
+      f"🔗 {url_producto}"
   )
 
   for (chat_id,) in usuarios:
@@ -178,6 +179,56 @@ def procesar_y_guardar(productos_actuales):
       conn.commit()
 
 
+def obtener_productos_por_rango(rango, session):
+  min_p, max_p = rango
+  productos_rango = []
+  page = 1
+  page_size = 50
+
+  while True:
+    url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado&fq=P:[{min_p} TO {max_p}]"
+
+    try:
+      res = session.get(url, timeout=10)
+      if res.status_code != 200:
+        break
+      data = res.json()
+    except Exception as e:
+      print(f"Error consultando el rango {min_p}-{max_p} (pag {page}): {e}")
+      break
+
+    items = data.get("products", [])
+    if not items:
+      break
+
+    for item in items:
+      raw_id = item.get("productId")
+      p_id = str(raw_id) if raw_id is not None else None
+      p_nombre = item.get("productName")
+
+      raw_link = item.get("linkText", "").strip("/")
+      p_link = f"https://www.sporting.com.ar/{raw_link}/p"
+
+      price = None
+      if item.get("items"):
+        sellers = item["items"][0].get("sellers", [])
+        if sellers:
+          price = sellers[0].get("commertialOffer", {}).get("Price")
+
+      if p_id and p_precio_valido(price):
+        productos_rango.append({
+            "id": p_id,
+            "nombre": p_nombre,
+            "url": p_link,
+            "precio": price,
+        })
+
+    page += 1
+    time.sleep(0.1)
+
+  return productos_rango
+
+
 def extraer_catalogo():
   rangos = [
       (0, 30000),
@@ -188,56 +239,24 @@ def extraer_catalogo():
       (200001, 9999999),
   ]
 
-  productos_dict = {}
-  headers = {
+  session = requests.Session()
+  session.headers.update({
       "User-Agent": (
           "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
           " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
       )
-  }
+  })
 
-  for min_p, max_p in rangos:
-    page = 1
-    page_size = 50
+  productos_dict = {}
 
-    while True:
-      url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado&fq=P:[{min_p} TO {max_p}]"
+  with ThreadPoolExecutor(max_workers=6) as executor:
+    resultados = executor.map(
+        lambda r: obtener_productos_por_rango(r, session), rangos
+    )
 
-      try:
-        res = requests.get(url, headers=headers, timeout=15)
-        if res.status_code != 200:
-          break
-        data = res.json()
-      except Exception as e:
-        print(f"Error consultando la API ({url}): {e}")
-        break
-
-      items = data.get("products", [])
-      if not items:
-        break
-
-      for item in items:
-        raw_id = item.get("productId")
-        p_id = str(raw_id) if raw_id is not None else None
-        p_nombre = item.get("productName")
-        p_link = f"https://www.sporting.com.ar{item.get('linkText')}/p"
-
-        price = None
-        if item.get("items"):
-          sellers = item["items"][0].get("sellers", [])
-          if sellers:
-            price = sellers[0].get("commertialOffer", {}).get("Price")
-
-        if p_id and p_precio_valido(price):
-          productos_dict[p_id] = {
-              "id": p_id,
-              "nombre": p_nombre,
-              "url": p_link,
-              "precio": price,
-          }
-
-      page += 1
-      time.sleep(0.3)
+  for lista_productos in resultados:
+    for prod in lista_productos:
+      productos_dict[prod["id"]] = prod
 
   return list(productos_dict.values())
 
