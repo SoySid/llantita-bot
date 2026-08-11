@@ -67,17 +67,14 @@ def procesar_mensajes_telegram():
                         VALUES (%s, TRUE)
                         ON CONFLICT (chat_id) DO UPDATE SET activo = TRUE;
                     """, (chat_id,))
-                    enviar_mensaje_telegram(chat_id, "¡Gooool! Te suscribiste a las alertas de ofertas de zapatillas. 👟🔥")
 
                 elif texto.startswith("/stop") or texto.startswith("/desuscribir"):
                     cur.execute("""
                         UPDATE usuarios_telegram SET activo = FALSE WHERE chat_id = %s;
                     """, (chat_id,))
-                    enviar_mensaje_telegram(chat_id, "Te desuscribiste de las alertas. Mandá /start cuando quieras volver.")
 
             conn.commit()
 
-    # Limpiar las novedades leídas en Telegram para no repetirlas
     ultimo_update_id = updates[-1]["update_id"]
     requests.get(f"{url}?offset={ultimo_update_id + 1}")
 
@@ -102,7 +99,7 @@ def notificar_oferta_masiva(nombre, precio_anterior, precio_nuevo, url_producto)
         return
 
     mensaje = (
-        f"🚨 *OFERTA EN LLANTITAS* 🚨\n\n"
+        f"🚨 *OFERTA* 🚨\n\n"
         f"👟 *{nombre}*\n"
         f"❌ Precio anterior: ~${precio_anterior:,.2f}~\n"
         f"🔥 *Precio nuevo: ${precio_nuevo:,.2f}*\n\n"
@@ -134,11 +131,10 @@ def procesar_y_guardar(productos_actuales):
                 if precio_viejo is not None and p_precio < precio_viejo:
                     print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
                     cur.execute("""
-                        INSERT INTO historial_precios (producto_id, precio)
-                        VALUES (%s, %s);
+                        INSERT INTO historial_precios (producto_id, precio, fecha)
+                        VALUES (%s, %s, CURRENT_TIMESTAMP);
                     """, (p_id, p_precio))
                     
-                    # Notifica por Telegram a los suscriptos
                     notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
 
                 cur.execute("""
@@ -176,7 +172,6 @@ def extraer_catalogo():
             p_nombre = item.get("productName")
             p_link = f"https://www.sporting.com.ar{item.get('linkText')}/p"
             
-            # Buscar el precio dentro de items/sellers
             price = None
             if item.get("items"):
                 sellers = item["items"][0].get("sellers", [])
