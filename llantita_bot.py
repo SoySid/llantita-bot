@@ -113,7 +113,7 @@ def obtener_precios_anteriores():
     with obtener_conexion() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT id, precio FROM productos;")
-            return {row[0]: float(row[1]) for row in cur.fetchall()}
+            return {str(row[0]): float(row[1]) for row in cur.fetchall()}
 
 def procesar_y_guardar(productos_actuales):
     precios_anteriores = obtener_precios_anteriores()
@@ -121,7 +121,7 @@ def procesar_y_guardar(productos_actuales):
     with obtener_conexion() as conn:
         with conn.cursor() as cur:
             for prod in productos_actuales:
-                p_id = prod["id"]
+                p_id = str(prod["id"])
                 p_nombre = prod["nombre"]
                 p_url = prod["url"]
                 p_precio = prod["precio"]
@@ -168,7 +168,8 @@ def extraer_catalogo():
             break
 
         for item in items:
-            p_id = item.get("productId")
+            raw_id = item.get("productId")
+            p_id = str(raw_id) if raw_id is not None else None
             p_nombre = item.get("productName")
             p_link = f"https://www.sporting.com.ar{item.get('linkText')}/p"
             
