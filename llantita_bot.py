@@ -153,14 +153,17 @@ def procesar_y_guardar(productos_actuales):
 
     precio_viejo = precios_anteriores.get(p_id)
 
+    # 1. Alerta Telegram
     if precio_viejo is not None and p_precio < precio_viejo:
       ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
 
-    # Preparamos la tupla exacta de 4 elementos
-    nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+    # 2. FILTRO DELTA: Solo guardamos en base de datos si es nuevo o si cambió el precio
+    if precio_viejo is None or p_precio != precio_viejo:
+      nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
 
   with obtener_conexion() as conn:
     with conn.cursor() as cur:
+      # Guardamos el historial y disparamos Telegram
       for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
         print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
         cur.execute(
@@ -172,10 +175,10 @@ def procesar_y_guardar(productos_actuales):
         )
         notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
 
-      # Aca esta el fix: quitamos ultima_actualizacion de la primera linea de columnas
+      # 3. Guardado Masivo (Bulk Upsert) con Template para arreglar el NULL
       if nuevos_registros:
         query = """
-            INSERT INTO productos (id, nombre, url, precio)
+            INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
             VALUES %s
             ON CONFLICT (id) DO UPDATE SET
                 nombre = EXCLUDED.nombre,
@@ -183,10 +186,18 @@ def procesar_y_guardar(productos_actuales):
                 precio = EXCLUDED.precio,
                 ultima_actualizacion = CURRENT_TIMESTAMP;
         """
-        execute_values(cur, query, nuevos_registros)
+        # Aca esta la magia: acomoda las 4 variables y le inyecta el CURRENT_TIMESTAMP
+        execute_values(
+            cur, 
+            query, 
+            nuevos_registros, 
+            template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
+        )
+        print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
+      else:
+        print("✅ Ningun precio cambio. No se hicieron escrituras en Neon.")
 
     conn.commit()
-
 
 def obtener_productos_por_rango(rango, session):
   min_p, max_p = rango
