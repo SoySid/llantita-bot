@@ -1,4 +1,3 @@
-from concurrent.futures import ThreadPoolExecutor
 from psycopg2.extras import execute_values
 import os
 import time
@@ -16,13 +15,13 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
 
 def obtener_conexion():
-  return psycopg2.connect(DATABASE_URL)
+    return psycopg2.connect(DATABASE_URL)
 
 
-def inicializar_bd():
-  with obtener_conexion() as conn:
-    with conn.cursor() as cur:
-      cur.execute("""
+def inicializar_bd(conn):
+    with conn:
+        with conn.cursor() as cur:
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS productos (
                     id VARCHAR(255) PRIMARY KEY,
                     nombre VARCHAR(255),
@@ -31,7 +30,7 @@ def inicializar_bd():
                     ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-      cur.execute("""
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS historial_precios (
                     id SERIAL PRIMARY KEY,
                     producto_id VARCHAR(255),
@@ -39,278 +38,274 @@ def inicializar_bd():
                     fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-      cur.execute("""
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_historial_producto_id
+                ON historial_precios (producto_id);
+            """)
+            cur.execute("""
                 CREATE TABLE IF NOT EXISTS usuarios_telegram (
                     chat_id BIGINT PRIMARY KEY,
                     activo BOOLEAN DEFAULT TRUE,
                     fecha_suscripcion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
-      conn.commit()
 
 
-def procesar_mensajes_telegram():
-  if not TELEGRAM_BOT_TOKEN:
-    return
+def procesar_mensajes_telegram(conn):
+    if not TELEGRAM_BOT_TOKEN:
+        return
 
-  url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-  try:
-    res = requests.get(url, timeout=15).json()
-  except Exception as e:
-    print(f"Error al conectar con Telegram: {e}")
-    return
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
+    try:
+        res = requests.get(url, timeout=15).json()
+    except Exception as e:
+        print(f"Error al conectar con Telegram: {e}")
+        return
 
-  if not res.get("ok"):
-    return
+    if not res.get("ok"):
+        return
 
-  updates = res.get("result", [])
-  if not updates:
-    return
+    updates = res.get("result", [])
+    if not updates:
+        return
 
-  with obtener_conexion() as conn:
-    with conn.cursor() as cur:
-      for update in updates:
-        mensaje = update.get("message", {})
-        texto = mensaje.get("text", "").strip().lower()
-        chat_id = mensaje.get("chat", {}).get("id")
+    with conn:
+        with conn.cursor() as cur:
+            for update in updates:
+                mensaje = update.get("message", {})
+                texto = mensaje.get("text", "").strip().lower()
+                chat_id = mensaje.get("chat", {}).get("id")
 
-        if not chat_id:
-          continue
+                if not chat_id:
+                    continue
 
-        if texto.startswith("/start"):
-          cur.execute(
-              """
+                if texto.startswith("/start"):
+                    cur.execute("""
                         INSERT INTO usuarios_telegram (chat_id, activo)
                         VALUES (%s, TRUE)
                         ON CONFLICT (chat_id) DO UPDATE SET activo = TRUE;
-                    """,
-              (chat_id,),
-          )
-
-        elif texto.startswith("/stop") or texto.startswith("/desuscribir"):
-          cur.execute(
-              """
+                    """, (chat_id,))
+                elif texto.startswith("/stop") or texto.startswith("/desuscribir"):
+                    cur.execute("""
                         UPDATE usuarios_telegram SET activo = FALSE WHERE chat_id = %s;
-                    """,
-              (chat_id,),
-          )
+                    """, (chat_id,))
 
-      conn.commit()
-
-  ultimo_update_id = updates[-1]["update_id"]
-  requests.get(f"{url}?offset={ultimo_update_id + 1}")
+    ultimo_update_id = updates[-1]["update_id"]
+    requests.get(f"{url}?offset={ultimo_update_id + 1}")
 
 
 def enviar_mensaje_telegram(chat_id, texto):
-  if not TELEGRAM_BOT_TOKEN:
-    return
-  try:
-    requests.post(
-        f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-        json={"chat_id": chat_id, "text": texto, "parse_mode": "Markdown"},
-        timeout=10,
+    if not TELEGRAM_BOT_TOKEN:
+        return
+    try:
+        res = requests.post(
+            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
+            json={
+                "chat_id": chat_id, 
+                "text": texto, 
+                "parse_mode": "HTML",
+                "disable_web_page_preview": False
+            },
+            timeout=10,
+        )
+        if res.status_code != 200:
+            print(f"Telegram devolvió {res.status_code} para chat {chat_id}: {res.text}")
+    except Exception as e:
+        print(f"Error enviando mensaje a {chat_id}: {e}")
+
+
+def obtener_usuarios_activos(conn):
+    with conn.cursor() as cur:
+        cur.execute("SELECT chat_id FROM usuarios_telegram WHERE activo = TRUE;")
+        return [row[0] for row in cur.fetchall()]
+
+
+def notificar_oferta_masiva(usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto):
+    if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
+        return
+
+    mensaje = (
+        f"🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨\n"
+        f"━━━━━━━━━━━━━━━━━━\n\n"
+        f"👟 <b>{nombre}</b>\n\n"
+        f"💸 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
+        f"🔥 <b>AHORA: ${precio_nuevo:,.2f}</b> 🔥\n\n"
+        f"━━━━━━━━━━━━━━━━━━\n"
+        f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
     )
-  except Exception as e:
-    print(f"Error enviando mensaje a {chat_id}: {e}")
+
+    for chat_id in usuarios_activos:
+        enviar_mensaje_telegram(chat_id, mensaje)
+        time.sleep(0.05)
 
 
-def notificar_oferta_masiva(nombre, precio_anterior, precio_nuevo, url_producto):
-  if not TELEGRAM_BOT_TOKEN:
-    return
-
-  with obtener_conexion() as conn:
+def obtener_precios_anteriores(conn):
     with conn.cursor() as cur:
-      cur.execute("SELECT chat_id FROM usuarios_telegram WHERE activo = TRUE;")
-      usuarios = cur.fetchall()
-
-  if not usuarios:
-    return
-
-  mensaje = (
-      f"🚨 *OFERTA* 🚨\n\n"
-      f"👟 *{nombre}*\n"
-      f"❌ Precio anterior: ~${precio_anterior:,.2f}~\n"
-      f"🔥 *Precio nuevo: ${precio_nuevo:,.2f}*\n\n"
-      f"🔗 {url_producto}"
-  )
-
-  for (chat_id,) in usuarios:
-    enviar_mensaje_telegram(chat_id, mensaje)
+        cur.execute("SELECT id, precio FROM productos;")
+        return {str(row[0]): round(float(row[1]), 2) for row in cur.fetchall()}
 
 
-def obtener_precios_anteriores():
-  with obtener_conexion() as conn:
-    with conn.cursor() as cur:
-      cur.execute("SELECT id, precio FROM productos;")
-      return {str(row[0]): float(row[1]) for row in cur.fetchall()}
+def procesar_y_guardar(conn, productos_actuales):
+    precios_anteriores = obtener_precios_anteriores(conn)
 
+    ofertas = []
+    nuevos_registros = []
 
-def procesar_y_guardar(productos_actuales):
-  precios_anteriores = obtener_precios_anteriores()
-  
-  ofertas = []
-  nuevos_registros = []
+    for prod in productos_actuales:
+        p_id = str(prod["id"])
+        p_nombre = prod["nombre"]
+        p_url = prod["url"]
+        p_precio = round(float(prod["precio"]), 2)
 
-  for prod in productos_actuales:
-    p_id = str(prod["id"])
-    p_nombre = prod["nombre"]
-    p_url = prod["url"]
-    p_precio = float(prod["precio"])
+        precio_viejo = precios_anteriores.get(p_id)
 
-    precio_viejo = precios_anteriores.get(p_id)
+        if precio_viejo is not None and p_precio < precio_viejo:
+            ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
 
-    # 1. Alerta Telegram
-    if precio_viejo is not None and p_precio < precio_viejo:
-      ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+        if precio_viejo is None or p_precio != precio_viejo:
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
 
-    # 2. FILTRO DELTA: Solo guardamos en base de datos si es nuevo o si cambió el precio
-    if precio_viejo is None or p_precio != precio_viejo:
-      nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+    usuarios_activos = obtener_usuarios_activos(conn) if ofertas else []
 
-  with obtener_conexion() as conn:
-    with conn.cursor() as cur:
-      # Guardamos el historial y disparamos Telegram
-      for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
-        print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
-        cur.execute(
-            """
+    with conn:
+        with conn.cursor() as cur:
+            for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
+                print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
+                cur.execute("""
                     INSERT INTO historial_precios (producto_id, precio, fecha)
                     VALUES (%s, %s, CURRENT_TIMESTAMP);
-                """,
-            (p_id, p_precio),
-        )
-        notificar_oferta_masiva(p_nombre, precio_viejo, p_precio, p_url)
+                """, (p_id, p_precio))
+                
+                notificar_oferta_masiva(usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
 
-      # 3. Guardado Masivo (Bulk Upsert) con Template para arreglar el NULL
-      if nuevos_registros:
-        query = """
-            INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
-            VALUES %s
-            ON CONFLICT (id) DO UPDATE SET
-                nombre = EXCLUDED.nombre,
-                url = EXCLUDED.url,
-                precio = EXCLUDED.precio,
-                ultima_actualizacion = CURRENT_TIMESTAMP;
-        """
-        # Aca esta la magia: acomoda las 4 variables y le inyecta el CURRENT_TIMESTAMP
-        execute_values(
-            cur, 
-            query, 
-            nuevos_registros, 
-            template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
-        )
-        print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
-      else:
-        print("✅ Ningun precio cambio. No se hicieron escrituras en Neon.")
-
-    conn.commit()
-
-def obtener_productos_por_rango(rango, session):
-  min_p, max_p = rango
-  productos_rango = []
-  page = 1
-  page_size = 50
-
-  while True:
-    url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado&fq=P:[{min_p} TO {max_p}]"
-    
-    exito = False
-    data = {}
-    
-    for intento in range(3):
-      try:
-        res = session.get(url, timeout=20)
-        if res.status_code == 200:
-          data = res.json()
-          exito = True
-          break
-      except Exception as e:
-        print(f"Fallo de conexion en rango {min_p}-{max_p} (pag {page}), intento {intento + 1}: {e}")
-        time.sleep(2)
-
-    if not exito:
-      print(f"Saltando pagina {page} del rango {min_p}-{max_p} tras 3 intentos.")
-      break
-
-    items = data.get("products", [])
-    if not items:
-      break
-
-    for item in items:
-      raw_id = item.get("productId")
-      p_id = str(raw_id) if raw_id is not None else None
-      p_nombre = item.get("productName")
-
-      raw_link = item.get("linkText", "").strip("/")
-      p_link = f"https://www.sporting.com.ar/{raw_link}/p"
-
-      price = None
-      if item.get("items"):
-        sellers = item["items"][0].get("sellers", [])
-        if sellers:
-          price = sellers[0].get("commertialOffer", {}).get("Price")
-
-      if p_id and p_precio_valido(price):
-        productos_rango.append({
-            "id": p_id,
-            "nombre": p_nombre,
-            "url": p_link,
-            "precio": price,
-        })
-
-    page += 1
-    time.sleep(0.3)
-
-  return productos_rango
+            if nuevos_registros:
+                query = """
+                    INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
+                    VALUES %s
+                    ON CONFLICT (id) DO UPDATE SET
+                        nombre = EXCLUDED.nombre,
+                        url = EXCLUDED.url,
+                        precio = EXCLUDED.precio,
+                        ultima_actualizacion = CURRENT_TIMESTAMP;
+                """
+                execute_values(
+                    cur,
+                    query,
+                    nuevos_registros,
+                    template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
+                )
+                print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
+            else:
+                print("✅ Ningún precio cambió. No se hicieron escrituras en Neon.")
 
 
 def extraer_catalogo():
-  rangos = [
-      (0, 30000),
-      (30001, 60000),
-      (60001, 90000),
-      (90001, 130000),
-      (130001, 200000),
-      (200001, 9999999),
-  ]
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        )
+    })
 
-  session = requests.Session()
-  session.headers.update({
-      "User-Agent": (
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-          " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-      )
-  })
+    productos_dict = {}
+    page = 1
+    page_size = 50
 
-  productos_dict = {}
+    print("🔎 Escaneando catálogo completo...")
 
-  with ThreadPoolExecutor(max_workers=4) as executor:
-    resultados = executor.map(
-        lambda r: obtener_productos_por_rango(r, session), rangos
-    )
+    while True:
+        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado"
 
-  for lista_productos in resultados:
-    for prod in lista_productos:
-      productos_dict[prod["id"]] = prod
+        exito = False
+        data = {}
 
-  return list(productos_dict.values())
+        for intento in range(3):
+            try:
+                res = session.get(url, timeout=20)
+                if res.status_code == 200:
+                    data = res.json()
+                    exito = True
+                    break
+                elif res.status_code == 429:
+                    espera = 5 * (intento + 1)
+                    print(f"⚠️ Rate limit 429 en pág {page}. Esperando {espera}s...")
+                    time.sleep(espera)
+                else:
+                    espera = 2 * (intento + 1)
+                    print(f"⚠️ Status {res.status_code} en pág {page}. Esperando {espera}s...")
+                    time.sleep(espera)
+            except Exception as e:
+                espera = 2 * (intento + 1)
+                print(f"⚠️ Error de red en pág {page} (Intento {intento + 1}): {e}")
+                time.sleep(espera)
+
+        if not exito:
+            print(f"❌ Falló pág {page} tras 3 intentos. Saltando a la siguiente.")
+            page += 1
+            continue
+
+        items = data.get("products", [])
+        if not items:
+            break
+
+        for item in items:
+            raw_id = item.get("productId")
+            p_id = str(raw_id) if raw_id is not None else None
+            p_nombre = item.get("productName")
+
+            raw_link = item.get("linkText", "").strip("/")
+            p_link = f"https://www.sporting.com.ar/{raw_link}/p"
+
+            price = None
+            if item.get("items"):
+                sellers = item["items"][0].get("sellers", [])
+                if sellers:
+                    price = sellers[0].get("commertialOffer", {}).get("Price")
+
+            if p_id and p_precio_valido(price):
+                productos_dict[p_id] = {
+                    "id": p_id,
+                    "nombre": p_nombre,
+                    "url": p_link,
+                    "precio": price,
+                }
+
+        page += 1
+        time.sleep(0.2)
+
+    print(f"✅ Catálogo finalizado: {len(productos_dict)} productos en {page - 1} páginas.")
+    return list(productos_dict.values())
 
 
 def p_precio_valido(val):
-  return val is not None and isinstance(val, (int, float)) and val > 0
+    return val is not None and isinstance(val, (int, float)) and val > 0
 
 
 if __name__ == "__main__":
-  print("Inicializando base de datos...")
-  inicializar_bd()
+    inicio_total = time.time()
 
-  print("Procesando altas y bajas en Telegram...")
-  procesar_mensajes_telegram()
+    # 1. Conexión corta para inicio y usuarios[cite: 7]
+    conn_inicial = obtener_conexion()
+    try:
+        print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
+        inicializar_bd(conn_inicial)
+        procesar_mensajes_telegram(conn_inicial)
+    finally:
+        conn_inicial.close()  # Cerramos para no dejar la conexión idle en Neon mientras scrapeamos[cite: 7]
 
-  print("Iniciando extracción del catálogo...")
-  datos = extraer_catalogo()
+    # 2. Extracción secuencial única por HTTP[cite: 7]
+    print("🚀 Iniciando extracción del catálogo...")
+    datos = extraer_catalogo()
 
-  print(f"Productos obtenidos: {len(datos)}. Guardando en base de datos...")
-  procesar_y_guardar(datos)
+    # 3. Conexión corta para guardado y alertas[cite: 7]
+    if datos:
+        conn_guardado = obtener_conexion()
+        try:
+            print(f"💾 [BD] Procesando {len(datos)} productos en Neon...")
+            procesar_y_guardar(conn_guardado, datos)
+        finally:
+            conn_guardado.close()
 
-  print("Proceso finalizado con éxito.")
+    duracion = time.time() - inicio_total
+    print(f"🎉 Proceso finalizado con éxito en {duracion:.2f} segundos.")
