@@ -1,4 +1,4 @@
-# 👟 Llantita Bot - Monitor de Precios
+# Llantita Bot - Monitor de Precios
 
 Bot de Telegram público (**[@llantita_bot](https://t.me/llantita_bot)**) para rastrear el catálogo de **zapatillas de hombre** en [Sporting Argentina](https://www.sporting.com.ar). Revisa la tienda cada media hora y manda una alerta automática a cualquier usuario suscrito al bot en Telegram cada vez que un precio baja.
 
