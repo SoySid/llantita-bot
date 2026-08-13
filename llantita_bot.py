@@ -2,8 +2,8 @@ from psycopg2.extras import execute_values
 import os
 import time
 import psycopg2
-import requests
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import asyncio
+import aiohttp
 
 try:
     from dotenv import load_dotenv
@@ -52,21 +52,24 @@ def inicializar_bd(conn):
             """)
 
 
-def procesar_mensajes_telegram(conn):
+async def procesar_mensajes_telegram(conn, session):
     if not TELEGRAM_BOT_TOKEN:
         return
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
     try:
-        res = requests.get(url, timeout=15).json()
+        async with session.get(url, timeout=15) as res:
+            if res.status != 200:
+                return
+            data = await res.json()
     except Exception as e:
         print(f"Error al conectar con Telegram: {e}")
         return
 
-    if not res.get("ok"):
+    if not data.get("ok"):
         return
 
-    updates = res.get("result", [])
+    updates = data.get("result", [])
     if not updates:
         return
 
@@ -92,25 +95,27 @@ def procesar_mensajes_telegram(conn):
                     """, (chat_id,))
 
     ultimo_update_id = updates[-1]["update_id"]
-    requests.get(f"{url}?offset={ultimo_update_id + 1}")
+    try:
+        await session.get(f"{url}?offset={ultimo_update_id + 1}")
+    except Exception:
+        pass
 
 
-def enviar_mensaje_telegram(chat_id, texto):
+async def enviar_mensaje_telegram(session, chat_id, texto):
     if not TELEGRAM_BOT_TOKEN:
         return
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": chat_id, 
+        "text": texto, 
+        "parse_mode": "HTML",
+        "disable_web_page_preview": False
+    }
     try:
-        res = requests.post(
-            f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
-            json={
-                "chat_id": chat_id, 
-                "text": texto, 
-                "parse_mode": "HTML",
-                "disable_web_page_preview": False
-            },
-            timeout=10,
-        )
-        if res.status_code != 200:
-            print(f"Telegram devolvió {res.status_code} para chat {chat_id}: {res.text}")
+        async with session.post(url, json=payload, timeout=10) as res:
+            if res.status != 200:
+                error_text = await res.text()
+                print(f"Telegram devolvió {res.status} para chat {chat_id}: {error_text}")
     except Exception as e:
         print(f"Error enviando mensaje a {chat_id}: {e}")
 
@@ -121,7 +126,7 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-def notificar_oferta_masiva(usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto):
+async def notificar_oferta_masiva(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto):
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
         return
 
@@ -135,9 +140,8 @@ def notificar_oferta_masiva(usuarios_activos, nombre, precio_anterior, precio_nu
         f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
     )
 
-    with ThreadPoolExecutor(max_workers=5) as executor:
-        for chat_id in usuarios_activos:
-            executor.submit(enviar_mensaje_telegram, chat_id, mensaje)
+    tareas = [enviar_mensaje_telegram(session, chat_id, mensaje) for chat_id in usuarios_activos]
+    await asyncio.gather(*tareas)
 
 
 def obtener_precios_anteriores(conn):
@@ -146,7 +150,7 @@ def obtener_precios_anteriores(conn):
         return {str(row[0]): round(float(row[1]), 2) for row in cur.fetchall()}
 
 
-def procesar_y_guardar(conn, productos_actuales):
+async def procesar_y_guardar(conn, session, productos_actuales):
     precios_anteriores = obtener_precios_anteriores(conn)
 
     ofertas = []
@@ -186,7 +190,7 @@ def procesar_y_guardar(conn, productos_actuales):
 
             for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
                 print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
-                notificar_oferta_masiva(usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
+                await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
 
             if nuevos_registros:
                 query_productos = """
@@ -209,77 +213,63 @@ def procesar_y_guardar(conn, productos_actuales):
                 print("✅ Ningún precio cambió. No se hicieron escrituras en Neon.")
 
 
-def extraer_catalogo():
-    session = requests.Session()
-    session.headers.update({
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        )
-    })
+async def obtener_pagina(sem, session, p, estado):
+    if estado["terminar"]:
+        return p, None, 400
 
-    productos_dict = {}
-    page = 1
-    page_size = 50
-    max_workers = 10
-
-    print("🔎 Escaneando catálogo completo de forma concurrente...")
-
-    def obtener_pagina(p):
-        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={p}&count={page_size}&query=calzado"
+    async with sem:
+        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={p}&count=50&query=calzado"
         for intento in range(3):
             try:
-                res = session.get(url, timeout=20)
-                if res.status_code == 200:
-                    return p, res.json(), 200
-                elif res.status_code == 400:
-                    return p, None, 400
-                elif res.status_code == 429:
-                    time.sleep(5 * (intento + 1))
-                else:
-                    time.sleep(2 * (intento + 1))
+                async with session.get(url, timeout=20) as res:
+                    if res.status == 200:
+                        data = await res.json()
+                        return p, data, 200
+                    elif res.status == 400:
+                        estado["terminar"] = True
+                        return p, None, 400
+                    elif res.status == 429:
+                        await asyncio.sleep(5 * (intento + 1))
+                    else:
+                        await asyncio.sleep(2 * (intento + 1))
             except Exception:
-                time.sleep(2 * (intento + 1))
+                await asyncio.sleep(2 * (intento + 1))
         return p, None, 500
 
-    terminar = False
 
-    while not terminar:
-        futures = []
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for i in range(max_workers):
-                futures.append(executor.submit(obtener_pagina, page + i))
+async def extraer_catalogo(session):
+    productos_dict = {}
+    sem = asyncio.Semaphore(20)
+    estado = {"terminar": False}
+    
+    tareas = [obtener_pagina(sem, session, p, estado) for p in range(1, 500)]
 
-            for future in as_completed(futures):
-                p_num, data, status = future.result()
+    print("🔎 Escaneando catálogo completo de forma asíncrona continua...")
 
-                if status == 400 or not data or not data.get("products"):
-                    terminar = True
+    for tarea in asyncio.as_completed(tareas):
+        p_num, data, status = await tarea
+
+        if status == 200 and data:
+            for item in data.get("products", []):
+                raw_id = item.get("productId")
+                p_id = str(raw_id) if raw_id is not None else None
+                
+                if not p_id:
                     continue
 
-                if status == 200 and data:
-                    for item in data.get("products", []):
-                        raw_id = item.get("productId")
-                        p_id = str(raw_id) if raw_id is not None else None
-                        
-                        if not p_id:
-                            continue
+                price = None
+                if item.get("items"):
+                    sellers = item["items"][0].get("sellers", [])
+                    if sellers:
+                        price = sellers[0].get("commertialOffer", {}).get("Price")
 
-                        price = None
-                        if item.get("items"):
-                            sellers = item["items"][0].get("sellers", [])
-                            if sellers:
-                                price = sellers[0].get("commertialOffer", {}).get("Price")
-
-                        if p_precio_valido(price):
-                            productos_dict[p_id] = {
-                                "id": p_id,
-                                "nombre": item.get("productName"),
-                                "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
-                                "precio": price,
-                            }
-        
-        page += max_workers
+                if p_precio_valido(price):
+                    productos_dict[p_id] = {
+                        "id": p_id,
+                        "nombre": item.get("productName"),
+                        "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
+                        "precio": price,
+                    }
 
     print(f"✅ Catálogo finalizado: {len(productos_dict)} productos extraídos.")
     return list(productos_dict.values())
@@ -289,27 +279,39 @@ def p_precio_valido(val):
     return val is not None and isinstance(val, (int, float)) and val > 0
 
 
-if __name__ == "__main__":
+async def main():
     inicio_total = time.time()
+    
+    headers = {
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+        )
+    }
 
-    conn_inicial = obtener_conexion()
-    try:
-        print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
-        inicializar_bd(conn_inicial)
-        procesar_mensajes_telegram(conn_inicial)
-    finally:
-        conn_inicial.close() 
-
-    print("🚀 Iniciando extracción del catálogo...")
-    datos = extraer_catalogo()
-
-    if datos:
-        conn_guardado = obtener_conexion()
+    async with aiohttp.ClientSession(headers=headers) as session:
+        conn_inicial = obtener_conexion()
         try:
-            print(f"💾 [BD] Procesando {len(datos)} productos en Neon...")
-            procesar_y_guardar(conn_guardado, datos)
+            print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
+            inicializar_bd(conn_inicial)
+            await procesar_mensajes_telegram(conn_inicial, session)
         finally:
-            conn_guardado.close()
+            conn_inicial.close() 
+
+        print("🚀 Iniciando extracción del catálogo...")
+        datos = await extraer_catalogo(session)
+
+        if datos:
+            conn_guardado = obtener_conexion()
+            try:
+                print(f"💾 [BD] Procesando {len(datos)} productos en Neon...")
+                await procesar_y_guardar(conn_guardado, session, datos)
+            finally:
+                conn_guardado.close()
 
     duracion = time.time() - inicio_total
-    print(f"🎉 Proceso finalizado con éxito en {duracion:.2f} segundos.")
+    print(f"🎉 Proceso asíncrono finalizado con éxito en {duracion:.2f} segundos.")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
