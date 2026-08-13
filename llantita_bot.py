@@ -57,16 +57,24 @@ async def procesar_mensajes_telegram(conn, session):
         return
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/getUpdates"
-    try:
-        async with session.get(url, timeout=15) as res:
-            if res.status != 200:
-                return
-            data = await res.json()
-    except Exception as e:
-        print(f"Error al conectar con Telegram: {e}")
-        return
+    data = None
+    
+    for intento in range(3):
+        try:
+            async with session.get(url, timeout=30) as res:
+                if res.status == 200:
+                    data = await res.json()
+                    break
+                else:
+                    return
+        except asyncio.TimeoutError:
+            print(f"⚠️ Telegram Timeout en getUpdates (Intento {intento + 1}/3)")
+            await asyncio.sleep(2)
+        except Exception as e:
+            print(f"Error al conectar con Telegram: {e}")
+            return
 
-    if not data.get("ok"):
+    if not data or not data.get("ok"):
         return
 
     updates = data.get("result", [])
@@ -96,7 +104,7 @@ async def procesar_mensajes_telegram(conn, session):
 
     ultimo_update_id = updates[-1]["update_id"]
     try:
-        await session.get(f"{url}?offset={ultimo_update_id + 1}")
+        await session.get(f"{url}?offset={ultimo_update_id + 1}", timeout=10)
     except Exception:
         pass
 
@@ -111,13 +119,20 @@ async def enviar_mensaje_telegram(session, chat_id, texto):
         "parse_mode": "HTML",
         "disable_web_page_preview": False
     }
-    try:
-        async with session.post(url, json=payload, timeout=10) as res:
-            if res.status != 200:
-                error_text = await res.text()
-                print(f"Telegram devolvió {res.status} para chat {chat_id}: {error_text}")
-    except Exception as e:
-        print(f"Error enviando mensaje a {chat_id}: {e}")
+    
+    for intento in range(3):
+        try:
+            async with session.post(url, json=payload, timeout=20) as res:
+                if res.status != 200:
+                    error_text = await res.text()
+                    print(f"Telegram devolvió {res.status} para chat {chat_id}: {error_text}")
+                break
+        except asyncio.TimeoutError:
+            print(f"⚠️ Telegram Timeout enviando mensaje a {chat_id} (Intento {intento + 1}/3)")
+            await asyncio.sleep(2)
+        except Exception as e:
+            print(f"Error enviando mensaje a {chat_id}: {e}")
+            break
 
 
 def obtener_usuarios_activos(conn):
