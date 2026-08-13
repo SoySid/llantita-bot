@@ -3,6 +3,7 @@ import os
 import time
 import psycopg2
 import requests
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 try:
     from dotenv import load_dotenv
@@ -134,9 +135,9 @@ def notificar_oferta_masiva(usuarios_activos, nombre, precio_anterior, precio_nu
         f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
     )
 
-    for chat_id in usuarios_activos:
-        enviar_mensaje_telegram(chat_id, mensaje)
-        time.sleep(0.05)
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for chat_id in usuarios_activos:
+            executor.submit(enviar_mensaje_telegram, chat_id, mensaje)
 
 
 def obtener_precios_anteriores(conn):
@@ -150,6 +151,7 @@ def procesar_y_guardar(conn, productos_actuales):
 
     ofertas = []
     nuevos_registros = []
+    historial_registros = []
 
     for prod in productos_actuales:
         p_id = str(prod["id"])
@@ -161,6 +163,7 @@ def procesar_y_guardar(conn, productos_actuales):
 
         if precio_viejo is not None and p_precio < precio_viejo:
             ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+            historial_registros.append((p_id, p_precio))
 
         if precio_viejo is None or p_precio != precio_viejo:
             nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
@@ -169,17 +172,24 @@ def procesar_y_guardar(conn, productos_actuales):
 
     with conn:
         with conn.cursor() as cur:
+            if historial_registros:
+                query_historial = """
+                    INSERT INTO historial_precios (producto_id, precio, fecha)
+                    VALUES %s;
+                """
+                execute_values(
+                    cur, 
+                    query_historial, 
+                    historial_registros, 
+                    template="(%s, %s, CURRENT_TIMESTAMP)"
+                )
+
             for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
                 print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
-                cur.execute("""
-                    INSERT INTO historial_precios (producto_id, precio, fecha)
-                    VALUES (%s, %s, CURRENT_TIMESTAMP);
-                """, (p_id, p_precio))
-                
                 notificar_oferta_masiva(usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
 
             if nuevos_registros:
-                query = """
+                query_productos = """
                     INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
                     VALUES %s
                     ON CONFLICT (id) DO UPDATE SET
@@ -190,7 +200,7 @@ def procesar_y_guardar(conn, productos_actuales):
                 """
                 execute_values(
                     cur,
-                    query,
+                    query_productos,
                     nuevos_registros,
                     template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
@@ -211,70 +221,67 @@ def extraer_catalogo():
     productos_dict = {}
     page = 1
     page_size = 50
+    max_workers = 10
 
-    print("🔎 Escaneando catálogo completo...")
+    print("🔎 Escaneando catálogo completo de forma concurrente...")
 
-    while True:
-        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={page}&count={page_size}&query=calzado"
-
-        exito = False
-        data = {}
-
+    def obtener_pagina(p):
+        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={p}&count={page_size}&query=calzado"
         for intento in range(3):
             try:
                 res = session.get(url, timeout=20)
                 if res.status_code == 200:
-                    data = res.json()
-                    exito = True
-                    break
+                    return p, res.json(), 200
+                elif res.status_code == 400:
+                    return p, None, 400
                 elif res.status_code == 429:
-                    espera = 5 * (intento + 1)
-                    print(f"⚠️ Rate limit 429 en pág {page}. Esperando {espera}s...")
-                    time.sleep(espera)
+                    time.sleep(5 * (intento + 1))
                 else:
-                    espera = 2 * (intento + 1)
-                    print(f"⚠️ Status {res.status_code} en pág {page}. Esperando {espera}s...")
-                    time.sleep(espera)
-            except Exception as e:
-                espera = 2 * (intento + 1)
-                print(f"⚠️ Error de red en pág {page} (Intento {intento + 1}): {e}")
-                time.sleep(espera)
+                    time.sleep(2 * (intento + 1))
+            except Exception:
+                time.sleep(2 * (intento + 1))
+        return p, None, 500
 
-        if not exito:
-            print(f"❌ Falló pág {page} tras 3 intentos. Saltando a la siguiente.")
-            page += 1
-            continue
+    terminar = False
 
-        items = data.get("products", [])
-        if not items:
-            break
+    while not terminar:
+        futures = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            for i in range(max_workers):
+                futures.append(executor.submit(obtener_pagina, page + i))
 
-        for item in items:
-            raw_id = item.get("productId")
-            p_id = str(raw_id) if raw_id is not None else None
-            p_nombre = item.get("productName")
+            for future in as_completed(futures):
+                p_num, data, status = future.result()
 
-            raw_link = item.get("linkText", "").strip("/")
-            p_link = f"https://www.sporting.com.ar/{raw_link}/p"
+                if status == 400 or not data or not data.get("products"):
+                    terminar = True
+                    continue
 
-            price = None
-            if item.get("items"):
-                sellers = item["items"][0].get("sellers", [])
-                if sellers:
-                    price = sellers[0].get("commertialOffer", {}).get("Price")
+                if status == 200 and data:
+                    for item in data.get("products", []):
+                        raw_id = item.get("productId")
+                        p_id = str(raw_id) if raw_id is not None else None
+                        
+                        if not p_id:
+                            continue
 
-            if p_id and p_precio_valido(price):
-                productos_dict[p_id] = {
-                    "id": p_id,
-                    "nombre": p_nombre,
-                    "url": p_link,
-                    "precio": price,
-                }
+                        price = None
+                        if item.get("items"):
+                            sellers = item["items"][0].get("sellers", [])
+                            if sellers:
+                                price = sellers[0].get("commertialOffer", {}).get("Price")
 
-        page += 1
-        time.sleep(0.2)
+                        if p_precio_valido(price):
+                            productos_dict[p_id] = {
+                                "id": p_id,
+                                "nombre": item.get("productName"),
+                                "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
+                                "precio": price,
+                            }
+        
+        page += max_workers
 
-    print(f"✅ Catálogo finalizado: {len(productos_dict)} productos en {page - 1} páginas.")
+    print(f"✅ Catálogo finalizado: {len(productos_dict)} productos extraídos.")
     return list(productos_dict.values())
 
 
@@ -285,20 +292,17 @@ def p_precio_valido(val):
 if __name__ == "__main__":
     inicio_total = time.time()
 
-    # 1. Conexión corta para inicio y usuarios[cite: 7]
     conn_inicial = obtener_conexion()
     try:
         print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
         inicializar_bd(conn_inicial)
         procesar_mensajes_telegram(conn_inicial)
     finally:
-        conn_inicial.close()  # Cerramos para no dejar la conexión idle en Neon mientras scrapeamos[cite: 7]
+        conn_inicial.close() 
 
-    # 2. Extracción secuencial única por HTTP[cite: 7]
     print("🚀 Iniciando extracción del catálogo...")
     datos = extraer_catalogo()
 
-    # 3. Conexión corta para guardado y alertas[cite: 7]
     if datos:
         conn_guardado = obtener_conexion()
         try:
