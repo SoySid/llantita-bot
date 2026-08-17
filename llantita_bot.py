@@ -28,6 +28,7 @@ def inicializar_bd(conn):
                     nombre VARCHAR(255),
                     url TEXT,
                     precio NUMERIC,
+                    talles TEXT,
                     ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
@@ -141,9 +142,12 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-async def notificar_oferta_masiva(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto):
+async def notificar_oferta_masiva(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles):
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
         return
+
+    # Si no hay talles válidos extraídos, mostramos un aviso.
+    talles_str = talles if talles else "No especificado / Consultar en web"
 
     mensaje = (
         f"🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨\n"
@@ -151,6 +155,7 @@ async def notificar_oferta_masiva(session, usuarios_activos, nombre, precio_ante
         f"👟 <b>{nombre}</b>\n\n"
         f"💸 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
         f"🔥 <b>AHORA: ${precio_nuevo:,.2f}</b> 🔥\n\n"
+        f"📏 <b>Talles Disp:</b> {talles_str}\n\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
     )
@@ -178,20 +183,21 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         p_nombre = prod["nombre"]
         p_url = prod["url"]
         p_precio = round(float(prod["precio"]), 2)
+        p_talles = prod.get("talles", "")
 
         precio_viejo = precios_anteriores.get(p_id)
 
         if precio_viejo is None:
             movimientos_log.append(f"✨ [NUEVO] {p_nombre} -> ${p_precio:,.2f}")
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
         elif p_precio != precio_viejo:
             if p_precio < precio_viejo:
                 movimientos_log.append(f"📉 [BAJA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+                ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles))
             else:
                 movimientos_log.append(f"📈 [ALZA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
             
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
             historial_registros.append((p_id, p_precio))
 
     # --- PROTECCIÓN PARA LA CONSOLA ---
@@ -224,8 +230,8 @@ async def procesar_y_guardar(conn, session, productos_actuales):
             # --- PROTECCIÓN PARA TELEGRAM ---
             if ofertas:
                 if len(ofertas) <= 5:
-                    for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
-                        await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
+                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles in ofertas:
+                        await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles)
                 else:
                     mensaje_global = (
                         f"🚨 <b>¡ALERTA DE BAJA MASIVA!</b> 🚨\n"
@@ -239,21 +245,23 @@ async def procesar_y_guardar(conn, session, productos_actuales):
 
             if nuevos_registros:
                 query_productos = """
-                    INSERT INTO productos (id, nombre, url, precio, ultima_actualizacion)
+                    INSERT INTO productos (id, nombre, url, precio, talles, ultima_actualizacion)
                     VALUES %s
                     ON CONFLICT (id) DO UPDATE SET
                         nombre = EXCLUDED.nombre,
                         url = EXCLUDED.url,
                         precio = EXCLUDED.precio,
+                        talles = EXCLUDED.talles,
                         ultima_actualizacion = CURRENT_TIMESTAMP;
                 """
                 execute_values(
                     cur,
                     query_productos,
                     nuevos_registros,
-                    template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
+                    template="(%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
                 print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
+
 
 async def obtener_pagina(sem, session, url_base, p):
     async with sem:
@@ -282,17 +290,34 @@ def procesar_productos(data, productos_dict):
             continue
 
         price = None
+        talles_disponibles = []
+        
         if item.get("items"):
-            sellers = item["items"][0].get("sellers", [])
-            if sellers:
-                price = sellers[0].get("commertialOffer", {}).get("Price")
+            # Recorremos todos los SKUs para extraer talles en stock
+            for sku in item["items"]:
+                sellers = sku.get("sellers", [])
+                if sellers:
+                    oferta = sellers[0].get("commertialOffer", {})
+                    cantidad_stock = oferta.get("AvailableQuantity", 0)
+                    
+                    if cantidad_stock > 0:
+                        talle = sku.get("name")
+                        if talle:
+                            talles_disponibles.append(talle)
+                            
+            # Tomamos el precio del primer SKU válido como referencia principal
+            primer_sku_sellers = item["items"][0].get("sellers", [])
+            if primer_sku_sellers:
+                price = primer_sku_sellers[0].get("commertialOffer", {}).get("Price")
 
         if p_precio_valido(price):
+            talles_str = ", ".join(talles_disponibles)
             productos_dict[p_id] = {
                 "id": p_id,
                 "nombre": item.get("productName"),
                 "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
                 "precio": price,
+                "talles": talles_str
             }
 
 
