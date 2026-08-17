@@ -171,6 +171,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
     ofertas = []
     nuevos_registros = []
     historial_registros = []
+    movimientos_log = []
 
     for prod in productos_actuales:
         p_id = str(prod["id"])
@@ -180,12 +181,29 @@ async def procesar_y_guardar(conn, session, productos_actuales):
 
         precio_viejo = precios_anteriores.get(p_id)
 
-        if precio_viejo is not None and p_precio < precio_viejo:
-            ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+        if precio_viejo is None:
+            movimientos_log.append(f"✨ [NUEVO] {p_nombre} -> ${p_precio:,.2f}")
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+        elif p_precio != precio_viejo:
+            if p_precio < precio_viejo:
+                movimientos_log.append(f"📉 [BAJA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
+                ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url))
+            else:
+                movimientos_log.append(f"📈 [ALZA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
+            
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
             historial_registros.append((p_id, p_precio))
 
-        if precio_viejo is None or p_precio != precio_viejo:
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio))
+    # --- PROTECCIÓN PARA LA CONSOLA ---
+    if movimientos_log:
+        total_movimientos = len(movimientos_log)
+        print(f"\n📊 Movimientos detectados ({total_movimientos} en total):")
+        for log in movimientos_log[:15]:
+            print(log)
+        if total_movimientos > 15:
+            print(f"... y {total_movimientos - 15} movimientos más ocultos para no saturar la consola.")
+    else:
+        print("\n✅ Ningún precio cambió. No hay movimientos nuevos.")
 
     usuarios_activos = obtener_usuarios_activos(conn) if ofertas else []
 
@@ -203,9 +221,21 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                     template="(%s, %s, CURRENT_TIMESTAMP)"
                 )
 
-            for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
-                print(f"🔥 ¡OFERTA! {p_nombre}: de ${precio_viejo} a ${p_precio}")
-                await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
+            # --- PROTECCIÓN PARA TELEGRAM ---
+            if ofertas:
+                if len(ofertas) <= 5:
+                    for p_id, p_nombre, precio_viejo, p_precio, p_url in ofertas:
+                        await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url)
+                else:
+                    mensaje_global = (
+                        f"🚨 <b>¡ALERTA DE BAJA MASIVA!</b> 🚨\n"
+                        f"━━━━━━━━━━━━━━━━━━\n\n"
+                        f"Detectamos bajas de precio en <b>{len(ofertas)}</b> productos.\n"
+                        f"¡Entrá a la tienda para revisar las ofertas!\n\n"
+                        f"👉 <a href='https://www.sporting.com.ar/calzado'>IR A SPORTING</a>"
+                    )
+                    tareas_masivas = [enviar_mensaje_telegram(session, chat_id, mensaje_global) for chat_id in usuarios_activos]
+                    await asyncio.gather(*tareas_masivas)
 
             if nuevos_registros:
                 query_productos = """
@@ -224,25 +254,16 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                     template="(%s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
                 print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
-            else:
-                print("✅ Ningún precio cambió. No se hicieron escrituras en Neon.")
 
-
-async def obtener_pagina(sem, session, p, estado):
-    if estado["terminar"]:
-        return p, None, 400
-
+async def obtener_pagina(sem, session, url_base, p):
     async with sem:
-        url = f"https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?page={p}&count=50&query=calzado"
+        url = f"{url_base}&page={p}"
         for intento in range(3):
             try:
                 async with session.get(url, timeout=20) as res:
                     if res.status == 200:
                         data = await res.json()
                         return p, data, 200
-                    elif res.status == 400:
-                        estado["terminar"] = True
-                        return p, None, 400
                     elif res.status == 429:
                         await asyncio.sleep(5 * (intento + 1))
                     else:
@@ -252,39 +273,65 @@ async def obtener_pagina(sem, session, p, estado):
         return p, None, 500
 
 
+def procesar_productos(data, productos_dict):
+    for item in data.get("products", []):
+        raw_id = item.get("productId")
+        p_id = str(raw_id) if raw_id is not None else None
+        
+        if not p_id:
+            continue
+
+        price = None
+        if item.get("items"):
+            sellers = item["items"][0].get("sellers", [])
+            if sellers:
+                price = sellers[0].get("commertialOffer", {}).get("Price")
+
+        if p_precio_valido(price):
+            productos_dict[p_id] = {
+                "id": p_id,
+                "nombre": item.get("productName"),
+                "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
+                "precio": price,
+            }
+
+
 async def extraer_catalogo(session):
     productos_dict = {}
     sem = asyncio.Semaphore(20)
-    estado = {"terminar": False}
     
-    tareas = [obtener_pagina(sem, session, p, estado) for p in range(1, 500)]
+    url_base = "https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?count=50&query=calzado"
+    
+    print("🔎 Extrayendo métricas de la página 1...")
+    
+    data_p1 = None
+    for intento in range(3):
+        try:
+            async with session.get(f"{url_base}&page=1", timeout=20) as res:
+                if res.status == 200:
+                    data_p1 = await res.json()
+                    break
+        except Exception:
+            pass
+            
+    if not data_p1:
+        print("❌ Error obteniendo el catálogo principal.")
+        return []
 
-    print("🔎 Escaneando catálogo completo de forma asíncrona continua...")
+    procesar_productos(data_p1, productos_dict)
+    
+    total_records = data_p1.get("recordsFiltered", 2500)
+    total_pages = min((total_records // 50) + (1 if total_records % 50 > 0 else 0), 50)
+    
+    print(f"✅ Total reportado en catálogo: {total_records}. Descargando las {total_pages - 1} páginas restantes...")
 
-    for tarea in asyncio.as_completed(tareas):
-        p_num, data, status = await tarea
-
-        if status == 200 and data:
-            for item in data.get("products", []):
-                raw_id = item.get("productId")
-                p_id = str(raw_id) if raw_id is not None else None
-                
-                if not p_id:
-                    continue
-
-                price = None
-                if item.get("items"):
-                    sellers = item["items"][0].get("sellers", [])
-                    if sellers:
-                        price = sellers[0].get("commertialOffer", {}).get("Price")
-
-                if p_precio_valido(price):
-                    productos_dict[p_id] = {
-                        "id": p_id,
-                        "nombre": item.get("productName"),
-                        "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
-                        "precio": price,
-                    }
+    if total_pages > 1:
+        tareas = [obtener_pagina(sem, session, url_base, p) for p in range(2, total_pages + 1)]
+        
+        for tarea in asyncio.as_completed(tareas):
+            p_num, data, status = await tarea
+            if status == 200 and data:
+                procesar_productos(data, productos_dict)
 
     print(f"✅ Catálogo finalizado: {len(productos_dict)} productos extraídos.")
     return list(productos_dict.values())
