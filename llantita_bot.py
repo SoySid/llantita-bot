@@ -142,19 +142,25 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-async def notificar_oferta_masiva(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles):
+async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles, tipo_cambio):
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
         return
 
-    # Si no hay talles válidos extraídos, mostramos un aviso.
     talles_str = talles if talles else "No especificado / Consultar en web"
 
+    if tipo_cambio == "BAJA":
+        encabezado = "🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨"
+        emoji = "🔥"
+    else:
+        encabezado = "📈 <b>¡ALERTA DE AUMENTO DE PRECIO!</b> 📈"
+        emoji = "💸"
+
     mensaje = (
-        f"🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨\n"
+        f"{encabezado}\n"
         f"━━━━━━━━━━━━━━━━━━\n\n"
         f"👟 <b>{nombre}</b>\n\n"
-        f"💸 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
-        f"🔥 <b>AHORA: ${precio_nuevo:,.2f}</b> 🔥\n\n"
+        f"📉 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
+        f"{emoji} <b>AHORA: ${precio_nuevo:,.2f}</b> {emoji}\n\n"
         f"📏 <b>Talles Disp:</b> {talles_str}\n\n"
         f"━━━━━━━━━━━━━━━━━━\n"
         f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
@@ -173,7 +179,7 @@ def obtener_precios_anteriores(conn):
 async def procesar_y_guardar(conn, session, productos_actuales):
     precios_anteriores = obtener_precios_anteriores(conn)
 
-    ofertas = []
+    cambios = []
     nuevos_registros = []
     historial_registros = []
     movimientos_log = []
@@ -193,9 +199,10 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         elif p_precio != precio_viejo:
             if p_precio < precio_viejo:
                 movimientos_log.append(f"📉 [BAJA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                ofertas.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles))
+                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, "BAJA"))
             else:
                 movimientos_log.append(f"📈 [ALZA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
+                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, "ALZA"))
             
             nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
             historial_registros.append((p_id, p_precio))
@@ -211,7 +218,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
     else:
         print("\n✅ Ningún precio cambió. No hay movimientos nuevos.")
 
-    usuarios_activos = obtener_usuarios_activos(conn) if ofertas else []
+    usuarios_activos = obtener_usuarios_activos(conn) if cambios else []
 
     with conn:
         with conn.cursor() as cur:
@@ -228,16 +235,20 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 )
 
             # --- PROTECCIÓN PARA TELEGRAM ---
-            if ofertas:
-                if len(ofertas) <= 5:
-                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles in ofertas:
-                        await notificar_oferta_masiva(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles)
+            if cambios:
+                if len(cambios) <= 5:
+                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, tipo_cambio in cambios:
+                        await notificar_cambio_precio(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles, tipo_cambio)
                 else:
+                    bajas = sum(1 for c in cambios if c[6] == "BAJA")
+                    alzas = sum(1 for c in cambios if c[6] == "ALZA")
                     mensaje_global = (
-                        f"🚨 <b>¡ALERTA DE BAJA MASIVA!</b> 🚨\n"
+                        f"🚨 <b>¡ALERTA DE CAMBIOS MASIVOS!</b> 🚨\n"
                         f"━━━━━━━━━━━━━━━━━━\n\n"
-                        f"Detectamos bajas de precio en <b>{len(ofertas)}</b> productos.\n"
-                        f"¡Entrá a la tienda para revisar las ofertas!\n\n"
+                        f"Detectamos cambios de precio en <b>{len(cambios)}</b> productos.\n"
+                        f"📉 Bajas: {bajas}\n"
+                        f"📈 Aumentos: {alzas}\n\n"
+                        f"¡Entrá a la tienda para revisar los movimientos!\n\n"
                         f"👉 <a href='https://www.sporting.com.ar/calzado'>IR A SPORTING</a>"
                     )
                     tareas_masivas = [enviar_mensaje_telegram(session, chat_id, mensaje_global) for chat_id in usuarios_activos]
@@ -260,7 +271,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                     nuevos_registros,
                     template="(%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
-                print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en Neon.")
+                print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en la base de datos.")
 
 
 async def obtener_pagina(sem, session, url_base, p):
@@ -293,7 +304,6 @@ def procesar_productos(data, productos_dict):
         talles_disponibles = []
         
         if item.get("items"):
-            # Recorremos todos los SKUs para extraer talles en stock
             for sku in item["items"]:
                 sellers = sku.get("sellers", [])
                 if sellers:
@@ -305,7 +315,6 @@ def procesar_productos(data, productos_dict):
                         if talle:
                             talles_disponibles.append(talle)
                             
-            # Tomamos el precio del primer SKU válido como referencia principal
             primer_sku_sellers = item["items"][0].get("sellers", [])
             if primer_sku_sellers:
                 price = primer_sku_sellers[0].get("commertialOffer", {}).get("Price")
@@ -391,7 +400,7 @@ async def main():
         if datos:
             conn_guardado = obtener_conexion()
             try:
-                print(f"💾 [BD] Procesando {len(datos)} productos en Neon...")
+                print(f"💾 [BD] Procesando {len(datos)} productos en la base de datos...")
                 await procesar_y_guardar(conn_guardado, session, datos)
             finally:
                 conn_guardado.close()
