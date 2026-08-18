@@ -29,9 +29,14 @@ def inicializar_bd(conn):
                     url TEXT,
                     precio NUMERIC,
                     talles TEXT,
+                    marca VARCHAR(255),
+                    categoria VARCHAR(255),
                     ultima_actualizacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
             """)
+            cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS marca VARCHAR(255);")
+            cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS categoria VARCHAR(255);")
+
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS historial_precios (
                     id SERIAL PRIMARY KEY,
@@ -142,11 +147,13 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles, tipo_cambio):
+async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles, marca, categoria, tipo_cambio):
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
         return
 
     talles_str = talles if talles else "No especificado / Consultar en web"
+    marca_str = marca if marca else "No especificada"
+    cat_str = categoria if categoria else "Calzado"
 
     if tipo_cambio == "BAJA":
         encabezado = "🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨"
@@ -158,7 +165,9 @@ async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_ante
     mensaje = (
         f"{encabezado}\n"
         f"━━━━━━━━━━━━━━━━━━\n\n"
-        f"🏷️ <b>{nombre}</b>\n\n"
+        f"👟 <b>{nombre}</b>\n\n"
+        f"🏢 <b>Marca:</b> {marca_str}\n"
+        f"📂 <b>Categoría:</b> {cat_str}\n"
         f"📉 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
         f"{emoji} <b>AHORA: ${precio_nuevo:,.2f}</b> {emoji}\n\n"
         f"📏 <b>Talles Disp:</b> {talles_str}\n\n"
@@ -190,21 +199,23 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         p_url = prod["url"]
         p_precio = round(float(prod["precio"]), 2)
         p_talles = prod.get("talles", "")
+        p_marca = prod.get("marca", "")
+        p_categoria = prod.get("categoria", "")
 
         precio_viejo = precios_anteriores.get(p_id)
 
         if precio_viejo is None:
-            movimientos_log.append(f"✨ [NUEVO] {p_nombre} -> ${p_precio:,.2f}")
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
+            movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} -> ${p_precio:,.2f}")
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
         elif p_precio != precio_viejo:
             if p_precio < precio_viejo:
-                movimientos_log.append(f"📉 [BAJA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, "BAJA"))
+                movimientos_log.append(f"📉 [BAJA] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
+                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_categoria, "BAJA"))
             else:
-                movimientos_log.append(f"📈 [ALZA] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, "ALZA"))
+                movimientos_log.append(f"📈 [ALZA] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
+                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_categoria, "ALZA"))
             
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
+            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
             historial_registros.append((p_id, p_precio))
 
     if movimientos_log:
@@ -235,68 +246,96 @@ async def procesar_y_guardar(conn, session, productos_actuales):
 
             if cambios:
                 if len(cambios) <= 5:
-                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, tipo_cambio in cambios:
-                        await notificar_cambio_precio(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles, tipo_cambio)
+                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio in cambios:
+                        await notificar_cambio_precio(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio)
                 else:
-                    bajas = sum(1 for c in cambios if c[6] == "BAJA")
-                    alzas = sum(1 for c in cambios if c[6] == "ALZA")
+                    bajas = sum(1 for c in cambios if c[8] == "BAJA")
+                    alzas = sum(1 for c in cambios if c[8] == "ALZA")
                     mensaje_global = (
-                        f"🚨 <b>¡ALERTA DE CAMBIOS MASIVOS!</b> 🚨\n"
+                        f"🚨 <b>¡ALERTA DE CAMBIOS MASIVOS EN CALZADO!</b> 🚨\n"
                         f"━━━━━━━━━━━━━━━━━━\n\n"
-                        f"Detectamos cambios de precio en <b>{len(cambios)}</b> productos.\n"
+                        f"Detectamos cambios de precio en <b>{len(cambios)}</b> zapatillas/calzados.\n"
                         f"📉 Bajas: {bajas}\n"
                         f"📈 Aumentos: {alzas}\n\n"
-                        f"¡Entrá a la tienda para revisar los movimientos!\n\n"
-                        f"👉 <a href='https://www.sporting.com.ar/'>IR A SPORTING</a>"
+                        f"¡Entrá a la tienda para revisar las ofertas!\n\n"
+                        f"👉 <a href='https://www.sporting.com.ar/sporting/calzado'>IR A SPORTING CALZADO</a>"
                     )
                     tareas_masivas = [enviar_mensaje_telegram(session, chat_id, mensaje_global) for chat_id in usuarios_activos]
                     await asyncio.gather(*tareas_masivas)
 
             if nuevos_registros:
                 query_productos = """
-                    INSERT INTO productos (id, nombre, url, precio, talles, ultima_actualizacion)
+                    INSERT INTO productos (id, nombre, url, precio, talles, marca, categoria, ultima_actualizacion)
                     VALUES %s
                     ON CONFLICT (id) DO UPDATE SET
                         nombre = EXCLUDED.nombre,
                         url = EXCLUDED.url,
                         precio = EXCLUDED.precio,
                         talles = EXCLUDED.talles,
+                        marca = EXCLUDED.marca,
+                        categoria = EXCLUDED.categoria,
                         ultima_actualizacion = CURRENT_TIMESTAMP;
                 """
                 execute_values(
                     cur,
                     query_productos,
                     nuevos_registros,
-                    template="(%s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
+                    template="(%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
                 print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en la base de datos.")
 
 
-async def obtener_pagina(sem, session, url_base, p):
+async def obtener_pagina(sem, session, categoria_fq, desde, hasta):
+    """
+    Pide una tanda de productos usando el catálogo CLÁSICO de VTEX
+    (fq=C:/{cadena_de_ids}/), no el buscador con IA. Esta API filtra por
+    categoría de forma literal: solo trae productos asignados exactamente a
+    esa categoría, sin "fuzzy"/"or" que rellene con productos parecidos.
+    categoria_fq debe ser la cadena completa de IDs (raíz -> ... -> hoja),
+    ej. "1/50/107/110", porque VTEX indexa por el path completo.
+    Devuelve máximo 50 productos por pedido (limitación de VTEX).
+    """
     async with sem:
-        url = f"{url_base}&page={p}"
+        url = (
+            f"https://www.sporting.com.ar/api/catalog_system/pub/products/search"
+            f"?fq=C:/{categoria_fq}/&_from={desde}&_to={hasta}"
+        )
         for intento in range(3):
             try:
                 async with session.get(url, timeout=20) as res:
-                    if res.status == 200:
+                    if res.status in (200, 206):
                         data = await res.json()
-                        return p, data, 200
+                        total = None
+                        rango = res.headers.get("resources")
+                        if rango and "/" in rango:
+                            try:
+                                total = int(rango.split("/")[-1])
+                            except ValueError:
+                                total = None
+                        return data, total, res.status
                     elif res.status == 429:
                         await asyncio.sleep(5 * (intento + 1))
                     else:
                         await asyncio.sleep(2 * (intento + 1))
             except Exception:
                 await asyncio.sleep(2 * (intento + 1))
-        return p, None, 500
+        return None, None, 500
 
 
-def procesar_productos(data, productos_dict):
-    for item in data.get("products", []):
+def procesar_productos(productos_lista, productos_dict):
+    for item in productos_lista:
         raw_id = item.get("productId")
         p_id = str(raw_id) if raw_id is not None else None
         
         if not p_id:
             continue
+
+        categorias_raw = item.get("categories", [])
+
+        # No hace falta filtrar por palabra clave: el endpoint clásico
+        # (fq=C:/{id}/) ya filtra por categoría de forma literal, así que
+        # todo lo que llega acá está realmente asignado a "Zapatillas" en
+        # el catálogo de VTEX.
 
         price = None
         talles_disponibles = []
@@ -319,54 +358,110 @@ def procesar_productos(data, productos_dict):
 
         if p_precio_valido(price):
             talles_str = ", ".join(talles_disponibles)
+            marca = item.get("brand", "")
+            
+            categoria = "Calzado"
+            if categorias_raw and isinstance(categorias_raw, list):
+                cat_parts = [c.strip() for c in categorias_raw[0].split("/") if c.strip()]
+                if cat_parts:
+                    categoria = cat_parts[-1]
+
             productos_dict[p_id] = {
                 "id": p_id,
                 "nombre": item.get("productName"),
                 "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
                 "precio": price,
-                "talles": talles_str
+                "talles": talles_str,
+                "marca": marca,
+                "categoria": categoria
             }
+
+
+async def obtener_cadena_categoria_zapatillas(session):
+    """
+    Busca en el árbol de categorías público de VTEX la cadena completa de
+    IDs (raíz -> ... -> "Zapatillas", hija de "Calzado"). El filtro fq=C:/
+    de VTEX necesita la cadena completa de ancestros, no solo el ID final.
+    """
+    url = "https://www.sporting.com.ar/api/catalog_system/pub/category/tree/3"
+    try:
+        async with session.get(url, timeout=20) as res:
+            if res.status != 200:
+                print(f"⚠️ No se pudo leer el árbol de categorías (status {res.status}).")
+                return None
+            arbol = await res.json()
+    except Exception as e:
+        print(f"⚠️ Error leyendo el árbol de categorías: {e}")
+        return None
+
+    def buscar(nodos, camino_ids, camino_nombres):
+        for nodo in nodos:
+            nombre = (nodo.get("name") or "").strip().lower()
+            nuevo_ids = camino_ids + [nodo.get("id")]
+            if nombre == "zapatillas" and camino_nombres and camino_nombres[-1] == "calzado":
+                return nuevo_ids
+            resultado = buscar(nodo.get("children", []), nuevo_ids, camino_nombres + [nombre])
+            if resultado:
+                return resultado
+        return None
+
+    cadena = buscar(arbol, [], [])
+    if cadena:
+        print(f"✅ Categoría 'Zapatillas' encontrada, cadena de IDs: {cadena}")
+    else:
+        print("⚠️ No se encontró la categoría 'Zapatillas' en el árbol.")
+    return cadena
 
 
 async def extraer_catalogo(session):
     productos_dict = {}
     sem = asyncio.Semaphore(20)
-    
-    # URL global para traer todo el catálogo sin filtros de categoría
-    url_base = "https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/?count=50&query="
-    
-    print("🔎 Extrayendo métricas de la página 1...")
-    
-    data_p1 = None
-    for intento in range(3):
-        try:
-            async with session.get(f"{url_base}&page=1", timeout=20) as res:
-                if res.status == 200:
-                    data_p1 = await res.json()
-                    break
-        except Exception:
-            pass
-            
-    if not data_p1:
-        print("❌ Error obteniendo el catálogo principal.")
+
+    # Buscamos la cadena completa de IDs de "Zapatillas" en el árbol de
+    # categorías (evita depender de slugs/mayúsculas frágiles en la URL).
+    cadena_ids = await obtener_cadena_categoria_zapatillas(session)
+    if not cadena_ids:
+        print("❌ No se pudo determinar la categoría de zapatillas. Cancelando extracción.")
+        return []
+
+    categoria_fq = "/".join(str(i) for i in cadena_ids)
+
+    print("🔎 Extrayendo métricas de la página 1 de zapatillas...")
+
+    data_p1, total_records, status = await obtener_pagina(sem, session, categoria_fq, 0, 49)
+
+    if status not in (200, 206) or data_p1 is None:
+        print("❌ Error obteniendo el catálogo de calzado.")
         return []
 
     procesar_productos(data_p1, productos_dict)
-    
-    total_records = data_p1.get("recordsFiltered", 2500)
-    total_pages = (total_records // 50) + (1 if total_records % 50 > 0 else 0)
-    
-    print(f"✅ Total reportado en catálogo: {total_records}. Descargando las {total_pages - 1} páginas restantes...")
 
-    if total_pages > 1:
-        tareas = [obtener_pagina(sem, session, url_base, p) for p in range(2, total_pages + 1)]
-        
+    if not total_records:
+        total_records = len(productos_dict)
+
+    # El catálogo clásico de VTEX tampoco deja paginar más allá de ~2500
+    # resultados por categoría. Avisamos en vez de truncar en silencio
+    # (la solución sería partir la consulta por "genero" o por subtipo,
+    # ej. Zapatillas Running, Zapatillas Training, etc.)
+    if total_records > 2500:
+        print(f"⚠️ La categoría tiene {total_records} productos, por encima del límite de paginación de VTEX (2500). "
+              f"Se van a perder productos al final del listado. Considerá dividir la consulta por género o subtipo.")
+        total_records = 2500
+
+    print(f"✅ Total a escanear: {total_records}.")
+
+    rangos_restantes = [(desde, min(desde + 49, total_records - 1)) for desde in range(50, total_records, 50)]
+
+    if rangos_restantes:
+        print(f"⬇️ Descargando {len(rangos_restantes)} tandas restantes...")
+        tareas = [obtener_pagina(sem, session, categoria_fq, desde, hasta) for desde, hasta in rangos_restantes]
+
         for tarea in asyncio.as_completed(tareas):
-            p_num, data, status = await tarea
-            if status == 200 and data:
+            data, _, status = await tarea
+            if status in (200, 206) and data:
                 procesar_productos(data, productos_dict)
 
-    print(f"✅ Catálogo finalizado: {len(productos_dict)} productos extraídos.")
+    print(f"✅ Catálogo de calzado finalizado: {len(productos_dict)} productos extraídos.")
     return list(productos_dict.values())
 
 
@@ -378,13 +473,16 @@ async def main():
     inicio_total = time.time()
     
     headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-            " (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
-        )
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36",
+        "Accept": "application/json"
+    }
+    
+    cookies = {
+        "vtex_segment": "eyJjYW1wYWlnbnMiOm51bGwsImNoYW5uZWwiOiIxIiwicHJpY2VUYWJsZXMiOm51bGwsInJlZ2lvbklkIjpudWxsLCJ1dG1fY2FtcGFpZ24iOm51bGwsInV0bV9zb3VyY2UiOm51bGwsInV0bWlfY2FtcGFpZ24iOm51bGwsImN1cnJlbmN5Q29kZSI6IkFSUyIsImN1cnJlbmN5U3ltYm9sIjoiJCIsImNvdW50cnlDb2RlIjoiQVJHIiwiY3VsdHVyZUluZm8iOiJlcy1BUiIsImNoYW5uZWxQcml2YWN5IjoicHVibGljIn0",
+        "vtex_binding_address": "sporting.myvtex.com/"
     }
 
-    async with aiohttp.ClientSession(headers=headers) as session:
+    async with aiohttp.ClientSession(headers=headers, cookies=cookies) as session:
         conn_inicial = obtener_conexion()
         try:
             print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
@@ -393,7 +491,7 @@ async def main():
         finally:
             conn_inicial.close() 
 
-        print("🚀 Iniciando extracción del catálogo...")
+        print("🚀 Iniciando extracción del catálogo de calzado...")
         datos = await extraer_catalogo(session)
 
         if datos:
