@@ -158,7 +158,7 @@ async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_ante
     mensaje = (
         f"{encabezado}\n"
         f"━━━━━━━━━━━━━━━━━━\n\n"
-        f"👟 <b>{nombre}</b>\n\n"
+        f"🏷️ <b>{nombre}</b>\n\n"
         f"📉 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
         f"{emoji} <b>AHORA: ${precio_nuevo:,.2f}</b> {emoji}\n\n"
         f"📏 <b>Talles Disp:</b> {talles_str}\n\n"
@@ -207,7 +207,6 @@ async def procesar_y_guardar(conn, session, productos_actuales):
             nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles))
             historial_registros.append((p_id, p_precio))
 
-    # --- PROTECCIÓN PARA LA CONSOLA ---
     if movimientos_log:
         total_movimientos = len(movimientos_log)
         print(f"\n📊 Movimientos detectados ({total_movimientos} en total):")
@@ -234,7 +233,6 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                     template="(%s, %s, CURRENT_TIMESTAMP)"
                 )
 
-            # --- PROTECCIÓN PARA TELEGRAM ---
             if cambios:
                 if len(cambios) <= 5:
                     for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, tipo_cambio in cambios:
@@ -249,7 +247,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                         f"📉 Bajas: {bajas}\n"
                         f"📈 Aumentos: {alzas}\n\n"
                         f"¡Entrá a la tienda para revisar los movimientos!\n\n"
-                        f"👉 <a href='https://www.sporting.com.ar/calzado'>IR A SPORTING</a>"
+                        f"👉 <a href='https://www.sporting.com.ar/'>IR A SPORTING</a>"
                     )
                     tareas_masivas = [enviar_mensaje_telegram(session, chat_id, mensaje_global) for chat_id in usuarios_activos]
                     await asyncio.gather(*tareas_masivas)
@@ -334,7 +332,8 @@ async def extraer_catalogo(session):
     productos_dict = {}
     sem = asyncio.Semaphore(20)
     
-    url_base = "https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/calzado?count=50&query=calzado"
+    # URL global para traer todo el catálogo sin filtros de categoría
+    url_base = "https://www.sporting.com.ar/api/io/_v/api/intelligent-search/product_search/?count=50&query="
     
     print("🔎 Extrayendo métricas de la página 1...")
     
@@ -355,7 +354,7 @@ async def extraer_catalogo(session):
     procesar_productos(data_p1, productos_dict)
     
     total_records = data_p1.get("recordsFiltered", 2500)
-    total_pages = min((total_records // 50) + (1 if total_records % 50 > 0 else 0), 50)
+    total_pages = (total_records // 50) + (1 if total_records % 50 > 0 else 0)
     
     print(f"✅ Total reportado en catálogo: {total_records}. Descargando las {total_pages - 1} páginas restantes...")
 
