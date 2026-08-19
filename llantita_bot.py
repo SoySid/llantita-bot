@@ -126,19 +126,40 @@ async def enviar_mensaje_telegram(session, chat_id, texto):
         "disable_web_page_preview": False
     }
     
-    for intento in range(3):
+    for intento in range(5):
         try:
             async with session.post(url, json=payload, timeout=20) as res:
-                if res.status != 200:
-                    error_text = await res.text()
+                if res.status == 200:
+                    return
+
+                error_text = await res.text()
+
+                # 429 (rate limit) y 5xx (errores transitorios del lado de
+                # Telegram, ej. 502 Bad Gateway) se reintentan. El resto de
+                # errores (400, 403 chat bloqueado, etc.) son permanentes:
+                # reintentar no sirve de nada.
+                if res.status == 429 or res.status >= 500:
+                    print(f"⚠️ Telegram devolvió {res.status} para chat {chat_id} (Intento {intento + 1}/5): {error_text}")
+                    espera = 3 * (intento + 1)
+                    if res.status == 429:
+                        try:
+                            import json as _json
+                            espera = _json.loads(error_text).get("parameters", {}).get("retry_after", espera)
+                        except Exception:
+                            pass
+                    await asyncio.sleep(espera)
+                    continue
+                else:
                     print(f"Telegram devolvió {res.status} para chat {chat_id}: {error_text}")
-                break
+                    return
         except asyncio.TimeoutError:
-            print(f"⚠️ Telegram Timeout enviando mensaje a {chat_id} (Intento {intento + 1}/3)")
-            await asyncio.sleep(2)
+            print(f"⚠️ Telegram Timeout enviando mensaje a {chat_id} (Intento {intento + 1}/5)")
+            await asyncio.sleep(3 * (intento + 1))
         except Exception as e:
             print(f"Error enviando mensaje a {chat_id}: {e}")
-            break
+            return
+
+    print(f"❌ No se pudo enviar el mensaje a {chat_id} tras 5 intentos.")
 
 
 def obtener_usuarios_activos(conn):
