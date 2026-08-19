@@ -147,36 +147,85 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-async def notificar_cambio_precio(session, usuarios_activos, nombre, precio_anterior, precio_nuevo, url_producto, talles, marca, categoria, tipo_cambio):
-    if not TELEGRAM_BOT_TOKEN or not usuarios_activos:
-        return
-
+def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, talles, marca, categoria, tipo_cambio):
     talles_str = talles if talles else "No especificado / Consultar en web"
     marca_str = marca if marca else "No especificada"
     cat_str = categoria if categoria else "Calzado"
+    emoji = "🔥" if tipo_cambio == "BAJA" else "💸"
 
-    if tipo_cambio == "BAJA":
-        encabezado = "🚨 <b>¡ALERTA DE BAJA DE PRECIO!</b> 🚨"
-        emoji = "🔥"
-    else:
-        encabezado = "📈 <b>¡ALERTA DE AUMENTO DE PRECIO!</b> 📈"
-        emoji = "💸"
-
-    mensaje = (
-        f"{encabezado}\n"
-        f"━━━━━━━━━━━━━━━━━━\n\n"
-        f"👟 <b>{nombre}</b>\n\n"
-        f"🏢 <b>Marca:</b> {marca_str}\n"
-        f"📂 <b>Categoría:</b> {cat_str}\n"
-        f"📉 <i>Antes:</i> <s>${precio_anterior:,.2f}</s>\n"
-        f"{emoji} <b>AHORA: ${precio_nuevo:,.2f}</b> {emoji}\n\n"
-        f"📏 <b>Talles Disp:</b> {talles_str}\n\n"
-        f"━━━━━━━━━━━━━━━━━━\n"
-        f"👉 <a href='{url_producto}'>TOCÁ ACÁ PARA IR A LA TIENDA</a>"
+    return (
+        f"👟 <b>{nombre}</b>\n"
+        f"🏢 Marca: {marca_str} | 📂 {cat_str}\n"
+        f"📉 Antes: <s>${precio_anterior:,.2f}</s>\n"
+        f"{emoji} AHORA: <b>${precio_nuevo:,.2f}</b> {emoji}\n"
+        f"📏 Talles: {talles_str}"
     )
 
-    tareas = [enviar_mensaje_telegram(session, chat_id, mensaje) for chat_id in usuarios_activos]
-    await asyncio.gather(*tareas)
+
+async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
+    """
+    Junta varios productos con cambio de precio en un mismo mensaje de
+    Telegram, en vez de mandar un mensaje por producto. Si son muchos,
+    los reparte en varios mensajes (respetando el límite de Telegram y
+    un tope de productos por mensaje para que no quede eterno).
+    """
+    if not TELEGRAM_BOT_TOKEN or not usuarios_activos or not cambios:
+        return
+
+    bajas = sum(1 for c in cambios if c[8] == "BAJA")
+    alzas = sum(1 for c in cambios if c[8] == "ALZA")
+
+    LIMITE_TELEGRAM = 4096
+    MAX_PRODUCTOS_POR_MENSAJE = 12
+    URL_TIENDA = "https://www.sporting.com.ar/sporting/calzado"
+
+    def encabezado(indice, total_partes):
+        parte_str = f" (parte {indice}/{total_partes})" if total_partes > 1 else ""
+        return (
+            f"🚨 <b>¡CAMBIOS DE PRECIO DETECTADOS!</b> 🚨{parte_str}\n"
+            f"📉 Bajas: {bajas}  📈 Aumentos: {alzas}\n"
+            f"━━━━━━━━━━━━━━━━━━\n\n"
+        )
+
+    pie = (
+        f"\n━━━━━━━━━━━━━━━━━━\n"
+        f"👉 <a href='{URL_TIENDA}'>IR A SPORTING CALZADO</a>"
+    )
+
+    bloques = [
+        formatear_bloque_producto(p_nombre, precio_viejo, p_precio, p_talles, p_marca, p_cat, tipo_cambio)
+        for (p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio) in cambios
+    ]
+
+    # Primero agrupamos bloques en tandas (por cantidad y por longitud),
+    # sin encabezado todavía, porque el encabezado necesita saber el
+    # total de partes final.
+    tandas = []
+    actual = []
+    largo_actual = 0
+    margen = len(pie) + 300  # margen de sobra para el encabezado más largo
+
+    for bloque in bloques:
+        bloque_largo = len(bloque) + 2  # + separador "\n\n"
+        if actual and (len(actual) >= MAX_PRODUCTOS_POR_MENSAJE or largo_actual + bloque_largo + margen > LIMITE_TELEGRAM):
+            tandas.append(actual)
+            actual = []
+            largo_actual = 0
+        actual.append(bloque)
+        largo_actual += bloque_largo
+
+    if actual:
+        tandas.append(actual)
+
+    total_partes = len(tandas)
+    mensajes = [
+        encabezado(i + 1, total_partes) + "\n\n".join(tanda) + pie
+        for i, tanda in enumerate(tandas)
+    ]
+
+    for mensaje in mensajes:
+        tareas = [enviar_mensaje_telegram(session, chat_id, mensaje) for chat_id in usuarios_activos]
+        await asyncio.gather(*tareas)
 
 
 def obtener_precios_anteriores(conn):
@@ -245,23 +294,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 )
 
             if cambios:
-                if len(cambios) <= 5:
-                    for p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio in cambios:
-                        await notificar_cambio_precio(session, usuarios_activos, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio)
-                else:
-                    bajas = sum(1 for c in cambios if c[8] == "BAJA")
-                    alzas = sum(1 for c in cambios if c[8] == "ALZA")
-                    mensaje_global = (
-                        f"🚨 <b>¡ALERTA DE CAMBIOS MASIVOS EN CALZADO!</b> 🚨\n"
-                        f"━━━━━━━━━━━━━━━━━━\n\n"
-                        f"Detectamos cambios de precio en <b>{len(cambios)}</b> zapatillas/calzados.\n"
-                        f"📉 Bajas: {bajas}\n"
-                        f"📈 Aumentos: {alzas}\n\n"
-                        f"¡Entrá a la tienda para revisar las ofertas!\n\n"
-                        f"👉 <a href='https://www.sporting.com.ar/sporting/calzado'>IR A SPORTING CALZADO</a>"
-                    )
-                    tareas_masivas = [enviar_mensaje_telegram(session, chat_id, mensaje_global) for chat_id in usuarios_activos]
-                    await asyncio.gather(*tareas_masivas)
+                await notificar_cambios_agrupados(session, usuarios_activos, cambios)
 
             if nuevos_registros:
                 query_productos = """
