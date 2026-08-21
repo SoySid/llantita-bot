@@ -168,18 +168,15 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, talles, marca, categoria, tipo_cambio):
-    talles_str = talles if talles else "No especificado / Consultar en web"
-    marca_str = marca if marca else "No especificada"
+def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca, categoria, tipo_cambio):
+    marca_str = marca if marca else "Sin marca"
     cat_str = categoria if categoria else "Calzado"
     emoji = "🔥" if tipo_cambio == "BAJA" else "💸"
 
     return (
-        f"👟 <b>{nombre}</b>\n"
-        f"🏢 Marca: {marca_str} | 📂 {cat_str}\n"
-        f"📉 Antes: <s>${precio_anterior:,.2f}</s>\n"
-        f"{emoji} AHORA: <b>${precio_nuevo:,.2f}</b> {emoji}\n"
-        f"📏 Talles: {talles_str}"
+        f"👟 <b>{nombre}</b> · {marca_str} / {cat_str}\n"
+        f"<s>${precio_anterior:,.2f}</s> → {emoji} <b>${precio_nuevo:,.2f}</b>\n"
+        f"🔗 <a href='{url}'>Comprar</a>"
     )
 
 
@@ -197,7 +194,7 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     alzas = sum(1 for c in cambios if c[8] == "ALZA")
 
     LIMITE_TELEGRAM = 4096
-    MAX_PRODUCTOS_POR_MENSAJE = 12
+    MAX_PRODUCTOS_POR_MENSAJE = 25  # los bloques son más cortos ahora (sin talles), entran más por mensaje
     URL_TIENDA = "https://www.sporting.com.ar/sporting/calzado"
 
     def encabezado(indice, total_partes):
@@ -214,7 +211,7 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     )
 
     bloques = [
-        formatear_bloque_producto(p_nombre, precio_viejo, p_precio, p_talles, p_marca, p_cat, tipo_cambio)
+        formatear_bloque_producto(p_nombre, precio_viejo, p_precio, p_url, p_marca, p_cat, tipo_cambio)
         for (p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio) in cambios
     ]
 
@@ -393,22 +390,37 @@ def procesar_productos(productos_lista, productos_dict):
 
         price = None
         talles_disponibles = []
-        
+        precios_disponibles = []
+
         if item.get("items"):
             for sku in item["items"]:
                 sellers = sku.get("sellers", [])
                 if sellers:
                     oferta = sellers[0].get("commertialOffer", {})
                     cantidad_stock = oferta.get("AvailableQuantity", 0)
-                    
+
                     if cantidad_stock > 0:
                         talle = sku.get("name")
                         if talle:
                             talles_disponibles.append(talle)
-                            
-            primer_sku_sellers = item["items"][0].get("sellers", [])
-            if primer_sku_sellers:
-                price = primer_sku_sellers[0].get("commertialOffer", {}).get("Price")
+
+                        precio_sku = oferta.get("Price")
+                        if p_precio_valido(precio_sku):
+                            precios_disponibles.append(precio_sku)
+
+            # OJO: VTEX no garantiza el orden del array "items" entre una
+            # consulta y otra (puede cambiar de una corrida a la siguiente).
+            # Antes se tomaba el precio del primer SKU sin más, lo cual
+            # provocaba que el bot detectara "bajas" y "alzas" falsas cuando
+            # en realidad el precio real no había cambiado, solo el orden en
+            # que VTEX devolvía los talles. Además, si ese primer SKU no
+            # tenía stock, el precio podía no coincidir con el que ve un
+            # usuario navegando la web. Por eso ahora se ignoran los SKUs
+            # sin stock y se toma el mínimo entre los disponibles: es
+            # determinístico y coincide con el precio que efectivamente se
+            # puede comprar.
+            if precios_disponibles:
+                price = min(precios_disponibles)
 
         if p_precio_valido(price):
             talles_str = ", ".join(talles_disponibles)
