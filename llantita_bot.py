@@ -168,10 +168,10 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
-def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca, categoria, tipo_cambio):
+def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca, categoria):
     marca_str = marca if marca else "Sin marca"
     cat_str = categoria if categoria else "Calzado"
-    emoji = "🔥" if tipo_cambio == "BAJA" else "💸"
+    emoji = "🔥"
 
     return (
         f"👟 <b>{nombre}</b> · {marca_str} / {cat_str}\n"
@@ -182,16 +182,17 @@ def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca,
 
 async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     """
-    Junta varios productos con cambio de precio en un mismo mensaje de
+    Junta varios productos con BAJA de precio en un mismo mensaje de
     Telegram, en vez de mandar un mensaje por producto. Si son muchos,
     los reparte en varios mensajes (respetando el límite de Telegram y
     un tope de productos por mensaje para que no quede eterno).
+    Solo se llama con bajas: las alzas se actualizan en silencio en la
+    BD y no generan aviso.
     """
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos or not cambios:
         return
 
-    bajas = sum(1 for c in cambios if c[8] == "BAJA")
-    alzas = sum(1 for c in cambios if c[8] == "ALZA")
+    bajas = len(cambios)
 
     LIMITE_TELEGRAM = 4096
     MAX_PRODUCTOS_POR_MENSAJE = 25  # los bloques son más cortos ahora (sin talles), entran más por mensaje
@@ -200,8 +201,8 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     def encabezado(indice, total_partes):
         parte_str = f" (parte {indice}/{total_partes})" if total_partes > 1 else ""
         return (
-            f"🚨 <b>¡CAMBIOS DE PRECIO DETECTADOS!</b> 🚨{parte_str}\n"
-            f"📉 Bajas: {bajas}  📈 Aumentos: {alzas}\n"
+            f"🔥 <b>¡BAJAS DE PRECIO DETECTADAS!</b> 🔥{parte_str}\n"
+            f"📉 Bajas: {bajas}\n"
             f"━━━━━━━━━━━━━━━━━━\n\n"
         )
 
@@ -211,7 +212,7 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     )
 
     bloques = [
-        formatear_bloque_producto(p_nombre, precio_viejo, p_precio, p_url, p_marca, p_cat, tipo_cambio)
+        formatear_bloque_producto(p_nombre, precio_viejo, p_precio, p_url, p_marca, p_cat)
         for (p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_cat, tipo_cambio) in cambios
     ]
 
@@ -275,12 +276,14 @@ async def procesar_y_guardar(conn, session, productos_actuales):
             movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} -> ${p_precio:,.2f}")
             nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
         elif p_precio != precio_viejo:
+            # Solo las BAJAS generan aviso en Telegram. Las ALZAS se
+            # actualizan en silencio en BD + historial para no quedar
+            # desfasados, pero no entran en `cambios` (cola de notificación).
             if p_precio < precio_viejo:
                 movimientos_log.append(f"📉 [BAJA] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
                 cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_categoria, "BAJA"))
             else:
-                movimientos_log.append(f"📈 [ALZA] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_categoria, "ALZA"))
+                movimientos_log.append(f"📈 [ALZA sin aviso] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
             
             nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
             historial_registros.append((p_id, p_precio))
