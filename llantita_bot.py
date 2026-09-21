@@ -1,5 +1,6 @@
 from psycopg2.extras import execute_values
 import os
+import re
 import time
 import psycopg2
 import asyncio
@@ -168,14 +169,38 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
+def tiene_talle_43(talles_str):
+    """Devuelve True si hay un SKU con talle 43 exacto y con stock."""
+    if not talles_str:
+        return False
+    for parte in str(talles_str).split(","):
+        p = parte.strip()
+        if not p:
+            continue
+        if p == "43":
+            return True
+        # Formatos alternativos ("Talle 43", "UK 9 - 43", etc.):
+        # 43 aislado pero no seguido de decimal (43.5 / 43,5).
+        if re.search(r"(?<!\d)43(?!\d)", p) and not re.search(r"43\s*[.,]\s*\d", p):
+            return True
+    return False
+
+
 def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca, categoria):
     marca_str = marca if marca else "Sin marca"
     cat_str = categoria if categoria else "Calzado"
     emoji = "🔥"
 
+    try:
+        descuento = ((precio_anterior - precio_nuevo) / precio_anterior * 100) if precio_anterior else 0
+    except (TypeError, ZeroDivisionError):
+        descuento = 0
+    descuento_str = f" (-{descuento:.0f}%)" if descuento > 0 else ""
+
     return (
         f"👟 <b>{nombre}</b> · {marca_str} / {cat_str}\n"
-        f"<s>${precio_anterior:,.2f}</s> → {emoji} <b>${precio_nuevo:,.2f}</b>\n"
+        f"📏 Talle 43 disponible\n"
+        f"<s>${precio_anterior:,.2f}</s> → {emoji} <b>${precio_nuevo:,.2f}</b>{descuento_str}\n"
         f"🔗 <a href='{url}'>Comprar</a>"
     )
 
@@ -188,8 +213,15 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     un tope de productos por mensaje para que no quede eterno).
     Solo se llama con bajas: las alzas se actualizan en silencio en la
     BD y no generan aviso.
+    Solo notifica productos con talle 43 disponible (con stock).
     """
     if not TELEGRAM_BOT_TOKEN or not usuarios_activos or not cambios:
+        return
+
+    # Filtrar: solo zapatillas con talle 43 disponible.
+    cambios = [c for c in cambios if tiene_talle_43(c[5])]
+    if not cambios:
+        print("ℹ️ Bajas detectadas pero ninguna con talle 43 disponible. No se notifica.")
         return
 
     bajas = len(cambios)
@@ -201,8 +233,8 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
     def encabezado(indice, total_partes):
         parte_str = f" (parte {indice}/{total_partes})" if total_partes > 1 else ""
         return (
-            f"🔥 <b>¡BAJAS DE PRECIO DETECTADAS!</b> 🔥{parte_str}\n"
-            f"📉 Bajas: {bajas}\n"
+            f"🔥 <b>¡BAJAS DE PRECIO DETECTADAS! (Talle 43)</b> 🔥{parte_str}\n"
+            f"📉 Bajas en talle 43: {bajas}\n"
             f"━━━━━━━━━━━━━━━━━━\n\n"
         )
 
