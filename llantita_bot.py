@@ -434,26 +434,27 @@ def procesar_productos(productos_lista, productos_dict):
                     oferta = sellers[0].get("commertialOffer", {})
                     cantidad_stock = oferta.get("AvailableQuantity", 0)
 
+                    # Registramos el talle como disponible si tiene stock
                     if cantidad_stock > 0:
                         talle = sku.get("name")
                         if talle:
                             talles_disponibles.append(talle)
 
-                        precio_sku = oferta.get("Price")
-                        if p_precio_valido(precio_sku):
-                            precios_disponibles.append(precio_sku)
+                    # Obtenemos TODOS los precios (tengan stock o no) para
+                    # evitar fluctuaciones irreales cuando un talle (barato)
+                    # se queda sin stock y el precio salta al siguiente talle.
+                    precio_sku = oferta.get("Price")
+                    if p_precio_valido(precio_sku):
+                        precios_disponibles.append(precio_sku)
 
             # OJO: VTEX no garantiza el orden del array "items" entre una
             # consulta y otra (puede cambiar de una corrida a la siguiente).
             # Antes se tomaba el precio del primer SKU sin más, lo cual
             # provocaba que el bot detectara "bajas" y "alzas" falsas cuando
-            # en realidad el precio real no había cambiado, solo el orden en
-            # que VTEX devolvía los talles. Además, si ese primer SKU no
-            # tenía stock, el precio podía no coincidir con el que ve un
-            # usuario navegando la web. Por eso ahora se ignoran los SKUs
-            # sin stock y se toma el mínimo entre los disponibles: es
-            # determinístico y coincide con el precio que efectivamente se
-            # puede comprar.
+            # en realidad el precio real no había cambiado.
+            # Ahora consideramos TODOS los precios disponibles en los SKUs
+            # (con o sin stock) y siempre informamos el menor. Esto
+            # da un precio base estable al producto.
             if precios_disponibles:
                 price = min(precios_disponibles)
 
