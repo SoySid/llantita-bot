@@ -1,10 +1,16 @@
-from psycopg2.extras import execute_values
+import sys
 import os
 import re
 import time
 import psycopg2
+from psycopg2.extras import execute_values
 import asyncio
 import aiohttp
+
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 
 try:
     from dotenv import load_dotenv
@@ -37,6 +43,7 @@ def inicializar_bd(conn):
             """)
             cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS marca VARCHAR(255);")
             cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS categoria VARCHAR(255);")
+            cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS precio_talle_43 NUMERIC;")
 
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS historial_precios (
@@ -169,19 +176,51 @@ def obtener_usuarios_activos(conn):
         return [row[0] for row in cur.fetchall()]
 
 
+def es_talle_43_exacto(texto):
+    """
+    Determina si un valor de texto representa exactamente el talle 43,
+    descartando talles con decimales o fracciones (ej. 43.5, 43,5, 43 1/3, 43 1/2)
+    o números que contengan 43 como subcadena (ej. 143, 430).
+    """
+    if not texto:
+        return False
+    t = str(texto).strip()
+    if t == "43" or t == "43.0":
+        return True
+    # Rechazar si después de 43 hay decimal o fracción: ej. 43.5, 43,5, 43/5, 43 1/3, 43 1/2
+    if re.search(r"43\s*([.,/]\s*\d|\s+\d+/\d+)", t):
+        return False
+    # Chequear si 43 está como número aislado
+    if re.search(r"(?<!\d)43(?!\d)", t):
+        return True
+    return False
+
+
+def es_sku_talle_43(sku):
+    """
+    Devuelve True si el SKU corresponde al talle 43 exacto según su especificación 'Talle'
+    o su nombre de SKU.
+    """
+    talles = sku.get("Talle")
+    if talles and isinstance(talles, list):
+        for t in talles:
+            if es_talle_43_exacto(t):
+                return True
+
+    name = sku.get("name", "")
+    if name and es_talle_43_exacto(name):
+        return True
+
+    return False
+
+
 def tiene_talle_43(talles_str):
-    """Devuelve True si hay un SKU con talle 43 exacto y con stock."""
+    """Devuelve True si la cadena de talles contiene talle 43 exacto y con stock."""
     if not talles_str:
         return False
     for parte in str(talles_str).split(","):
         p = parte.strip()
-        if not p:
-            continue
-        if p == "43":
-            return True
-        # Formatos alternativos ("Talle 43", "UK 9 - 43", etc.):
-        # 43 aislado pero no seguido de decimal (43.5 / 43,5).
-        if re.search(r"(?<!\d)43(?!\d)", p) and not re.search(r"43\s*[.,]\s*\d", p):
+        if es_talle_43_exacto(p):
             return True
     return False
 
@@ -279,17 +318,23 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
         await asyncio.gather(*tareas)
 
 
-def obtener_precios_anteriores(conn):
+def obtener_estado_anterior(conn):
     with conn.cursor() as cur:
-        cur.execute("SELECT id, precio FROM productos;")
-        return {str(row[0]): round(float(row[1]), 2) for row in cur.fetchall()}
+        cur.execute("SELECT id, precio_talle_43, talles FROM productos;")
+        res = {}
+        for row in cur.fetchall():
+            p_id = str(row[0])
+            precio_43 = round(float(row[1]), 2) if row[1] is not None else None
+            talles = row[2] or ""
+            res[p_id] = {"precio_43": precio_43, "talles": talles}
+        return res
 
 
 async def procesar_y_guardar(conn, session, productos_actuales):
-    precios_anteriores = obtener_precios_anteriores(conn)
+    estado_anterior = obtener_estado_anterior(conn)
 
     cambios = []
-    nuevos_registros = []
+    registros_a_guardar = []
     historial_registros = []
     movimientos_log = []
 
@@ -298,27 +343,51 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         p_nombre = prod["nombre"]
         p_url = prod["url"]
         p_precio = round(float(prod["precio"]), 2)
+        p_precio_43 = round(float(prod["precio_talle_43"]), 2) if prod["precio_talle_43"] is not None else None
+        tiene_43 = prod["tiene_43"]
         p_talles = prod.get("talles", "")
         p_marca = prod.get("marca", "")
         p_categoria = prod.get("categoria", "")
 
-        precio_viejo = precios_anteriores.get(p_id)
+        prev = estado_anterior.get(p_id)
 
-        if precio_viejo is None:
-            movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} -> ${p_precio:,.2f}")
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
-        elif p_precio != precio_viejo:
-            # Solo las BAJAS generan aviso en Telegram. Las ALZAS se
-            # actualizan en silencio en BD + historial para no quedar
-            # desfasados, pero no entran en `cambios` (cola de notificación).
-            if p_precio < precio_viejo:
-                movimientos_log.append(f"📉 [BAJA] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-                cambios.append((p_id, p_nombre, precio_viejo, p_precio, p_url, p_talles, p_marca, p_categoria, "BAJA"))
+        if prev is None:
+            # Producto nuevo no registrado antes en la base de datos
+            if tiene_43 and p_precio_43 is not None:
+                movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} (Talle 43: ${p_precio_43:,.2f})")
             else:
-                movimientos_log.append(f"📈 [ALZA sin aviso] [{p_marca}] {p_nombre}: ${precio_viejo:,.2f} -> ${p_precio:,.2f}")
-            
-            nuevos_registros.append((p_id, p_nombre, p_url, p_precio, p_talles, p_marca, p_categoria))
-            historial_registros.append((p_id, p_precio))
+                movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} (Sin Talle 43)")
+            registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+        else:
+            precio_43_viejo = prev["precio_43"]
+            talles_viejos = prev["talles"]
+
+            # Solo evaluamos ofertas/cambios si el producto TIENE talle 43 en stock
+            if tiene_43 and p_precio_43 is not None:
+                if precio_43_viejo is None:
+                    # Entró por primera vez en stock de talle 43
+                    movimientos_log.append(f"✨ [TALLE 43 EN STOCK] [{p_marca}] {p_nombre} -> ${p_precio_43:,.2f}")
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+                elif p_precio_43 != precio_43_viejo:
+                    # Cambio real de precio en talle 43
+                    if p_precio_43 < precio_43_viejo:
+                        movimientos_log.append(
+                            f"📉 [BAJA TALLE 43] [{p_marca}] {p_nombre}: ${precio_43_viejo:,.2f} -> ${p_precio_43:,.2f}"
+                        )
+                        cambios.append((p_id, p_nombre, precio_43_viejo, p_precio_43, p_url, p_talles, p_marca, p_categoria, "BAJA"))
+                    else:
+                        movimientos_log.append(
+                            f"📈 [ALZA TALLE 43 sin aviso] [{p_marca}] {p_nombre}: ${precio_43_viejo:,.2f} -> ${p_precio_43:,.2f}"
+                        )
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+                    historial_registros.append((p_id, p_precio_43))
+                elif p_talles != talles_viejos:
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+            else:
+                # Actualmente sin talle 43 en stock
+                if p_talles != talles_viejos:
+                    # Si cambiaron los talles generales, actualizamos talles preservando precio_talle_43 previo si existía
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, None, p_talles, p_marca, p_categoria))
 
     if movimientos_log:
         total_movimientos = len(movimientos_log)
@@ -328,7 +397,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         if total_movimientos > 15:
             print(f"... y {total_movimientos - 15} movimientos más ocultos para no saturar la consola.")
     else:
-        print("\n✅ Ningún precio cambió. No hay movimientos nuevos.")
+        print("\n✅ Ningún precio en talle 43 cambió. No hay movimientos nuevos.")
 
     usuarios_activos = obtener_usuarios_activos(conn) if cambios else []
 
@@ -349,14 +418,15 @@ async def procesar_y_guardar(conn, session, productos_actuales):
             if cambios:
                 await notificar_cambios_agrupados(session, usuarios_activos, cambios)
 
-            if nuevos_registros:
+            if registros_a_guardar:
                 query_productos = """
-                    INSERT INTO productos (id, nombre, url, precio, talles, marca, categoria, ultima_actualizacion)
+                    INSERT INTO productos (id, nombre, url, precio, precio_talle_43, talles, marca, categoria, ultima_actualizacion)
                     VALUES %s
                     ON CONFLICT (id) DO UPDATE SET
                         nombre = EXCLUDED.nombre,
                         url = EXCLUDED.url,
                         precio = EXCLUDED.precio,
+                        precio_talle_43 = COALESCE(EXCLUDED.precio_talle_43, productos.precio_talle_43),
                         talles = EXCLUDED.talles,
                         marca = EXCLUDED.marca,
                         categoria = EXCLUDED.categoria,
@@ -365,10 +435,10 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 execute_values(
                     cur,
                     query_productos,
-                    nuevos_registros,
-                    template="(%s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
+                    registros_a_guardar,
+                    template="(%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
-                print(f"✅ Se actualizaron/insertaron {len(nuevos_registros)} productos en la base de datos.")
+                print(f"✅ Se actualizaron/insertaron {len(registros_a_guardar)} productos en la base de datos.")
 
 
 async def obtener_pagina(sem, session, categoria_fq, desde, hasta):
@@ -423,9 +493,9 @@ def procesar_productos(productos_lista, productos_dict):
         # todo lo que llega acá está realmente asignado a "Zapatillas" en
         # el catálogo de VTEX.
 
-        price = None
         talles_disponibles = []
-        precios_disponibles = []
+        precios_43_con_stock = []
+        precios_todos = []
 
         if item.get("items"):
             for sku in item["items"]:
@@ -433,6 +503,7 @@ def procesar_productos(productos_lista, productos_dict):
                 if sellers:
                     oferta = sellers[0].get("commertialOffer", {})
                     cantidad_stock = oferta.get("AvailableQuantity", 0)
+                    precio_sku = oferta.get("Price")
 
                     # Registramos el talle como disponible si tiene stock
                     if cantidad_stock > 0:
@@ -440,25 +511,23 @@ def procesar_productos(productos_lista, productos_dict):
                         if talle:
                             talles_disponibles.append(talle)
 
-                    # Obtenemos TODOS los precios (tengan stock o no) para
-                    # evitar fluctuaciones irreales cuando un talle (barato)
-                    # se queda sin stock y el precio salta al siguiente talle.
-                    precio_sku = oferta.get("Price")
+                        # Si este SKU con stock corresponde al talle 43 exacto
+                        if es_sku_talle_43(sku) and p_precio_valido(precio_sku):
+                            precios_43_con_stock.append(precio_sku)
+
                     if p_precio_valido(precio_sku):
-                        precios_disponibles.append(precio_sku)
+                        precios_todos.append(precio_sku)
 
-            # OJO: VTEX no garantiza el orden del array "items" entre una
-            # consulta y otra (puede cambiar de una corrida a la siguiente).
-            # Antes se tomaba el precio del primer SKU sin más, lo cual
-            # provocaba que el bot detectara "bajas" y "alzas" falsas cuando
-            # en realidad el precio real no había cambiado.
-            # Ahora consideramos TODOS los precios disponibles en los SKUs
-            # (con o sin stock) y siempre informamos el menor. Esto
-            # da un precio base estable al producto.
-            if precios_disponibles:
-                price = min(precios_disponibles)
+        # Precio específico de talle 43 disponible con stock para compra
+        precio_43 = min(precios_43_con_stock) if precios_43_con_stock else None
 
-        if p_precio_valido(price):
+        # Precio general de referencia del producto
+        precio_general = min(precios_todos) if precios_todos else None
+
+        # El precio a registrar: prioriza el precio real de talle 43 con stock
+        precio_final = precio_43 if precio_43 is not None else precio_general
+
+        if p_precio_valido(precio_final):
             talles_str = ", ".join(talles_disponibles)
             marca = item.get("brand", "")
             
@@ -472,7 +541,9 @@ def procesar_productos(productos_lista, productos_dict):
                 "id": p_id,
                 "nombre": item.get("productName"),
                 "url": f"https://www.sporting.com.ar/{item.get('linkText', '').strip('/')}/p",
-                "precio": price,
+                "precio": precio_final,
+                "precio_talle_43": precio_43,
+                "tiene_43": precio_43 is not None,
                 "talles": talles_str,
                 "marca": marca,
                 "categoria": categoria
