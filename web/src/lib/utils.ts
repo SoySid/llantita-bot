@@ -37,13 +37,25 @@ export function formatTimeAgo(dateInput: string | Date | null | undefined): stri
 
 export function parseTalles(tallesStr: string | null | undefined): string[] {
   if (!tallesStr) return [];
-  // Extraer números de talle limpios (ej: 40, 41, 42.5, 43)
   return tallesStr
     .split(',')
     .map((t) => {
-      const match = t.match(/\b\d+(\.\d+)?\b/);
-      return match ? match[0] : t.trim();
+      const trimmed = t.trim();
+      const matchTalle = trimmed.match(/talle[:\s]+([0-9]+(?:\.[0-9]+)?)/i);
+      if (matchTalle) return matchTalle[1];
+
+      const matchUk = trimmed.match(/^([0-9]+(?:\.[0-9]+)?)\s*\(/);
+      if (matchUk) return matchUk[1];
+
+      const match = trimmed.match(/\b\d+(\.\d+)?\b/);
+      return match ? match[0] : trimmed;
     })
-    .filter((v, idx, arr) => v && arr.indexOf(v) === idx)
+    .filter((v, idx, arr) => Boolean(v) && arr.indexOf(v) === idx)
+    .sort((a, b) => {
+      const numA = parseFloat(a);
+      const numB = parseFloat(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    })
     .slice(0, 10);
 }

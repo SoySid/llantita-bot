@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatCurrency, formatTimeAgo } from '@/lib/utils';
 import { DealProduct } from './FeaturedDeals';
+import { PriceChart } from './PriceChart';
 import { X, ExternalLink, Calendar, CheckCircle2, TrendingDown, AlertCircle } from 'lucide-react';
 
 interface HistoryItem {
@@ -110,6 +111,15 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
               <strong>Precio más bajo histórico:</strong> Este producto se encuentra en el valor más bajo registrado por Llantita Bot.
             </span>
           </div>
+        )}
+
+        {/* Gráfico de evolución de precios */}
+        {!loading && (
+          <PriceChart
+            history={history}
+            currentPrice={product.precio}
+            lastUpdated={product.ultima_actualizacion}
+          />
         )}
 
         {/* Línea de tiempo de variaciones */}

@@ -196,16 +196,44 @@ def es_talle_43_exacto(texto):
     return False
 
 
+def extraer_talle_sku(sku):
+    """
+    Extrae el talle AR/EUR de calzado limpio de un SKU de VTEX.
+    Prioriza las especificaciones 'Talle' del SKU, luego 'Talles' o 'Tamaño',
+    y finalmente limpia el nombre del SKU ('Color: ... - Talle: XX' o '40 (UK 8)').
+    """
+    for campo in ("Talle", "talle", "Talles", "talles", "Tamaño", "tamano"):
+        val = sku.get(campo)
+        if val and isinstance(val, list) and len(val) > 0:
+            t = str(val[0]).strip()
+            if t:
+                return t
+        elif val and isinstance(val, str) and val.strip():
+            return val.strip()
+
+    name = str(sku.get("name", "")).strip()
+    if not name:
+        return ""
+
+    match_talle = re.search(r"talle[:\s]+([0-9]+(?:\.[0-9]+)?)", name, re.IGNORECASE)
+    if match_talle:
+        return match_talle.group(1)
+
+    match_uk = re.match(r"^([0-9]+(?:\.[0-9]+)?)\s*\(", name)
+    if match_uk:
+        return match_uk.group(1)
+
+    return name
+
+
 def es_sku_talle_43(sku):
     """
     Devuelve True si el SKU corresponde al talle 43 exacto según su especificación 'Talle'
     o su nombre de SKU.
     """
-    talles = sku.get("Talle")
-    if talles and isinstance(talles, list):
-        for t in talles:
-            if es_talle_43_exacto(t):
-                return True
+    t = extraer_talle_sku(sku)
+    if es_talle_43_exacto(t):
+        return True
 
     name = sku.get("name", "")
     if name and es_talle_43_exacto(name):
@@ -507,8 +535,8 @@ def procesar_productos(productos_lista, productos_dict):
 
                     # Registramos el talle como disponible si tiene stock
                     if cantidad_stock > 0:
-                        talle = sku.get("name")
-                        if talle:
+                        talle = extraer_talle_sku(sku)
+                        if talle and talle not in talles_disponibles:
                             talles_disponibles.append(talle)
 
                         # Si este SKU con stock corresponde al talle 43 exacto
@@ -528,6 +556,13 @@ def procesar_productos(productos_lista, productos_dict):
         precio_final = precio_43 if precio_43 is not None else precio_general
 
         if p_precio_valido(precio_final):
+            def clave_orden_talle(val):
+                try:
+                    return (0, float(val))
+                except ValueError:
+                    return (1, val)
+
+            talles_disponibles.sort(key=clave_orden_talle)
             talles_str = ", ".join(talles_disponibles)
             marca = item.get("brand", "")
             
