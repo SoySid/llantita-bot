@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 60; // 1 minuto de cache
 
 export async function GET() {
   try {
