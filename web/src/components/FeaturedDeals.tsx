@@ -15,6 +15,7 @@ export interface DealProduct {
   talles: string;
   categoria?: string;
   ultima_actualizacion?: string;
+  activo?: boolean;
 }
 
 interface FeaturedDealsProps {

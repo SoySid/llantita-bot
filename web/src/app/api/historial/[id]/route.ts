@@ -23,7 +23,8 @@ export async function GET(
         url, 
         talles, 
         categoria, 
-        ultima_actualizacion
+        ultima_actualizacion,
+        COALESCE(activo, TRUE) as activo
       FROM productos 
       WHERE id = ${id}
       LIMIT 1;

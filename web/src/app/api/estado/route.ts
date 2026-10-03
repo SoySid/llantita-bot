@@ -5,27 +5,28 @@ export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // 1. Obtener última actualización y conteo total
+    // 1. Obtener última actualización y conteo total de activos
     const statsResult = await sql`
       SELECT 
         MAX(ultima_actualizacion) as ultima_actualizacion,
         COUNT(*)::int as total_productos
-      FROM productos;
+      FROM productos
+      WHERE activo = TRUE AND talles IS NOT NULL AND talles != '';
     `;
 
-    // 2. Marcas principales con conteo
+    // 2. Marcas principales con conteo (solo activos con stock)
     const marcasResult = await sql`
       SELECT 
         marca, 
         COUNT(*)::int as cantidad
       FROM productos 
-      WHERE marca IS NOT NULL AND marca != ''
+      WHERE marca IS NOT NULL AND marca != '' AND activo = TRUE AND talles IS NOT NULL AND talles != ''
       GROUP BY marca 
       ORDER BY cantidad DESC 
       LIMIT 16;
     `;
 
-    // 3. Top rebajas destacadas (productos con descuento calculado contra su precio máximo en historial)
+    // 3. Top rebajas destacadas (solo productos activos en catálogo y con stock para comprar)
     const destacadosResult = await sql`
       SELECT 
         p.id, 
@@ -44,7 +45,7 @@ export async function GET() {
         FROM historial_precios
         GROUP BY producto_id
       ) h ON p.id = h.producto_id
-      WHERE h.precio_max > p.precio
+      WHERE h.precio_max > p.precio AND p.activo = TRUE AND p.talles IS NOT NULL AND p.talles != ''
       ORDER BY descuento_pct DESC, p.precio ASC
       LIMIT 10;
     `;

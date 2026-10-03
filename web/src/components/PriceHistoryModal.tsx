@@ -104,11 +104,21 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
         </div>
 
         {/* Badge Mínimo Histórico */}
-        {isAllTimeLow && (
+        {isAllTimeLow && product.activo !== false && (
           <div className="mb-4 flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-2 text-xs text-emerald-300">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-400" />
             <span>
               <strong>Precio más bajo histórico:</strong> Este producto se encuentra en el valor más bajo registrado por Llantita Bot.
+            </span>
+          </div>
+        )}
+
+        {/* Aviso de producto sin stock o descontinuado */}
+        {product.activo === false && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3.5 py-2 text-xs text-amber-300">
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-400" />
+            <span>
+              <strong>Producto agotado:</strong> Este modelo ya no figura en el catálogo activo de Sporting.
             </span>
           </div>
         )}
@@ -182,15 +192,21 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
           <span className="text-xs text-slate-500">
             Fuente directa: Sporting.com.ar
           </span>
-          <a
-            href={product.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-4 py-2.5 transition-all shadow-md shadow-emerald-600/20"
-          >
-            <span>Ver producto en Sporting</span>
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+          {product.activo === false ? (
+            <span className="inline-flex items-center gap-2 rounded-xl bg-slate-800 text-slate-400 font-semibold text-xs px-4 py-2.5 cursor-not-allowed">
+              <span>Sin stock en Sporting</span>
+            </span>
+          ) : (
+            <a
+              href={product.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs px-4 py-2.5 transition-all shadow-md shadow-emerald-600/20"
+            >
+              <span>Ver producto en Sporting</span>
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
         </div>
       </div>
     </div>

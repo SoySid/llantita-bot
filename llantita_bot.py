@@ -44,6 +44,8 @@ def inicializar_bd(conn):
             cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS marca VARCHAR(255);")
             cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS categoria VARCHAR(255);")
             cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS precio_talle_43 NUMERIC;")
+            cur.execute("ALTER TABLE productos ADD COLUMN IF NOT EXISTS activo BOOLEAN DEFAULT TRUE;")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_productos_activo ON productos (activo);")
 
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS historial_precios (
@@ -377,6 +379,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
         p_marca = prod.get("marca", "")
         p_categoria = prod.get("categoria", "")
 
+        p_activo = prod.get("activo", True)
         prev = estado_anterior.get(p_id)
 
         if prev is None:
@@ -385,7 +388,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} (Talle 43: ${p_precio_43:,.2f})")
             else:
                 movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} (Sin Talle 43)")
-            registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+            registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_activo))
         else:
             precio_43_viejo = prev["precio_43"]
             talles_viejos = prev["talles"]
@@ -395,7 +398,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 if precio_43_viejo is None:
                     # Entró por primera vez en stock de talle 43
                     movimientos_log.append(f"✨ [TALLE 43 EN STOCK] [{p_marca}] {p_nombre} -> ${p_precio_43:,.2f}")
-                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_activo))
                 elif p_precio_43 != precio_43_viejo:
                     # Cambio real de precio en talle 43
                     if p_precio_43 < precio_43_viejo:
@@ -407,15 +410,15 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                         movimientos_log.append(
                             f"📈 [ALZA TALLE 43 sin aviso] [{p_marca}] {p_nombre}: ${precio_43_viejo:,.2f} -> ${p_precio_43:,.2f}"
                         )
-                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_activo))
                     historial_registros.append((p_id, p_precio_43))
                 elif p_talles != talles_viejos:
-                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria))
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_activo))
             else:
                 # Actualmente sin talle 43 en stock
                 if p_talles != talles_viejos:
                     # Si cambiaron los talles generales, actualizamos talles preservando precio_talle_43 previo si existía
-                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, None, p_talles, p_marca, p_categoria))
+                    registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, None, p_talles, p_marca, p_categoria, p_activo))
 
     if movimientos_log:
         total_movimientos = len(movimientos_log)
@@ -448,7 +451,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
 
             if registros_a_guardar:
                 query_productos = """
-                    INSERT INTO productos (id, nombre, url, precio, precio_talle_43, talles, marca, categoria, ultima_actualizacion)
+                    INSERT INTO productos (id, nombre, url, precio, precio_talle_43, talles, marca, categoria, activo, ultima_actualizacion)
                     VALUES %s
                     ON CONFLICT (id) DO UPDATE SET
                         nombre = EXCLUDED.nombre,
@@ -458,15 +461,31 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                         talles = EXCLUDED.talles,
                         marca = EXCLUDED.marca,
                         categoria = EXCLUDED.categoria,
+                        activo = EXCLUDED.activo,
                         ultima_actualizacion = CURRENT_TIMESTAMP;
                 """
                 execute_values(
                     cur,
                     query_productos,
                     registros_a_guardar,
-                    template="(%s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
+                    template="(%s, %s, %s, %s, %s, %s, %s, %s, %s, CURRENT_TIMESTAMP)"
                 )
                 print(f"✅ Se actualizaron/insertaron {len(registros_a_guardar)} productos en la base de datos.")
+
+            # Desactivar productos que ya no figuran en el catálogo en vivo de Sporting
+            ids_activos_ahora = [p["id"] for p in productos_actuales if p.get("activo")]
+            if len(ids_activos_ahora) >= 500:
+                cur.execute(
+                    """
+                    UPDATE productos 
+                    SET activo = FALSE 
+                    WHERE id NOT IN %s AND activo = TRUE;
+                    """,
+                    (tuple(ids_activos_ahora),)
+                )
+                desactivados = cur.rowcount
+                if desactivados > 0:
+                    print(f"📦 Se marcaron como inactivos {desactivados} productos que ya no figuran en Sporting.")
 
 
 async def obtener_pagina(sem, session, categoria_fq, desde, hasta):
@@ -581,7 +600,8 @@ def procesar_productos(productos_lista, productos_dict):
                 "tiene_43": precio_43 is not None,
                 "talles": talles_str,
                 "marca": marca,
-                "categoria": categoria
+                "categoria": categoria,
+                "activo": len(talles_disponibles) > 0
             }
 
 

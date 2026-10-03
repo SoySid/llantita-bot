@@ -15,8 +15,8 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(60, Math.max(12, parseInt(searchParams.get('limit') || '24', 10)));
     const offset = (page - 1) * limit;
 
-    // Construcción de condiciones WHERE seguras
-    const conditions: string[] = ['1=1'];
+    // Construcción de condiciones WHERE seguras (solo productos activos y con stock)
+    const conditions: string[] = ['p.activo = TRUE', "p.talles IS NOT NULL AND p.talles != ''"];
     const values: (string | number)[] = [];
     let idx = 1;
 
