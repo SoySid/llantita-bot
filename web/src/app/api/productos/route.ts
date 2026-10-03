@@ -81,6 +81,7 @@ export async function GET(request: NextRequest) {
         p.talles, 
         p.categoria,
         p.ultima_actualizacion,
+        p.imagen_url,
         h.precio_max::float as precio_anterior,
         CASE 
           WHEN h.precio_max > p.precio THEN ROUND(((h.precio_max - p.precio) / h.precio_max) * 100)::int

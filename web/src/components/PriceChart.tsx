@@ -151,12 +151,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
   if (dataSeries.length <= 1) {
     return (
-      <div className="rounded-xl bg-slate-900/60 border border-slate-800 p-4 mb-4 text-center">
-        <div className="flex items-center justify-center gap-2 text-slate-400 text-xs mb-1">
+      <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 mb-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs mb-1">
           <Minus className="h-4 w-4 text-emerald-400" />
           <span>Sin variaciones de precio detectadas aún</span>
         </div>
-        <p className="text-sm font-semibold text-slate-300">
+        <p className="text-sm font-semibold text-zinc-300">
           Precio único registrado: <span className="text-emerald-400 font-bold">{formatCurrency(currentPrice)}</span>
         </p>
       </div>
@@ -164,11 +164,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   }
 
   return (
-    <div className="rounded-xl bg-slate-900/80 border border-slate-800 p-3 mb-4 select-none">
+    <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-3 mb-4 select-none">
       {/* Barra superior interactiva del gráfico */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-800/60 text-xs">
+      <div className="flex items-center justify-between pb-2 border-b border-zinc-800/60 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-slate-300">
+          <span className="font-semibold text-zinc-300 font-mono">
             {formatTooltipDate(activePoint.fecha)}
           </span>
           {diffFromPrev !== null && diffFromPrev !== 0 && (
@@ -184,7 +184,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             </span>
           )}
         </div>
-        <div className="font-mono font-bold text-emerald-400 text-sm">
+        <div className="font-mono font-black text-emerald-400 text-sm">
           {formatCurrency(activePoint.precio)}
         </div>
       </div>
@@ -197,7 +197,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         >
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.32" />
+              <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
               <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
             </linearGradient>
           </defs>
@@ -210,16 +210,15 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 y1={gl.y}
                 x2={padLeft + chartWidth}
                 y2={gl.y}
-                stroke="#334155"
+                stroke="#27272a"
                 strokeDasharray="4 4"
-                strokeOpacity="0.5"
                 strokeWidth="1"
               />
               <text
                 x={padLeft - 6}
                 y={gl.y + 3.5}
                 textAnchor="end"
-                className="fill-slate-500 text-[10px] font-mono"
+                className="fill-zinc-500 text-[10px] font-mono"
               >
                 ${Math.round(gl.valor / 1000)}k
               </text>
@@ -274,7 +273,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                   cy={p.y}
                   r={isActive ? '5' : '3.5'}
                   fill={isActive ? '#34d399' : '#10b981'}
-                  stroke="#0f172a"
+                  stroke="#09090b"
                   strokeWidth={isActive ? '2.5' : '1.5'}
                   className="transition-all duration-150 pointer-events-none"
                 />
@@ -287,7 +286,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft}
             y={height - 8}
             textAnchor="start"
-            className="fill-slate-400 text-[10px] font-mono"
+            className="fill-zinc-400 text-[10px] font-mono"
           >
             {formatDateLabel(points[0].fecha)}
           </text>
@@ -297,7 +296,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               x={padLeft + chartWidth / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-slate-500 text-[10px] font-mono"
+              className="fill-zinc-500 text-[10px] font-mono"
             >
               {formatDateLabel(points[Math.floor(points.length / 2)].fecha)}
             </text>
@@ -307,7 +306,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft + chartWidth}
             y={height - 8}
             textAnchor="end"
-            className="fill-slate-400 text-[10px] font-mono"
+            className="fill-zinc-400 text-[10px] font-mono"
           >
             {formatDateLabel(points[points.length - 1].fecha)}
           </text>

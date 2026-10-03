@@ -23,7 +23,7 @@ export async function GET() {
       WHERE marca IS NOT NULL AND marca != '' AND activo = TRUE AND talles IS NOT NULL AND talles != ''
       GROUP BY marca 
       ORDER BY cantidad DESC 
-      LIMIT 16;
+      LIMIT 50;
     `;
 
     // 3. Top rebajas destacadas (solo productos activos en catálogo y con stock para comprar)
@@ -37,6 +37,7 @@ export async function GET() {
         p.talles, 
         p.categoria,
         p.ultima_actualizacion,
+        p.imagen_url,
         h.precio_max::float as precio_anterior,
         ROUND(((h.precio_max - p.precio) / h.precio_max) * 100)::int AS descuento_pct
       FROM productos p

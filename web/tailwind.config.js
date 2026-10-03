@@ -13,11 +13,11 @@ module.exports = {
         "surface-card": "#161f30",
         "surface-border": "#1f293d",
         brand: {
-          primary: "#10b981", // Emerald accent
+          primary: "#10b981",
           hover: "#059669",
           badge: "#064e3b",
         },
-        discount: "#f43f5e", // Rose for deals
+        discount: "#f43f5e",
       },
       fontFamily: {
         sans: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],

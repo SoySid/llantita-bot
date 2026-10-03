@@ -111,7 +111,7 @@ export default function HomePage() {
   };
 
   return (
-    <div ref={topRef} className="min-h-screen flex flex-col bg-[#0b0f17] text-slate-100">
+    <div ref={topRef} className="min-h-screen flex flex-col bg-[#09090b] text-zinc-100">
       {/* 1. Header con indicador de tiempo */}
       <Navbar
         ultimaActualizacion={ultimaActualizacion}
