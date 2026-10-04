@@ -2,31 +2,30 @@
 
 Monitor de precios, alertas por Telegram y catálogo web para calzado en Sporting Argentina.
 
-El proyecto rastrea periódicamente el catálogo de zapatillas de la tienda, registra variaciones de precios y disponibilidad de talles en una base de datos PostgreSQL, envía notificaciones automáticas ante bajas de precio y expone una plataforma web para explorar las ofertas y el historial de precios.
+El sistema consulta el catálogo de zapatillas de la tienda cada 30 minutos, almacena el historial de precios y los talles en una base de datos PostgreSQL, notifica bajas de precio por Telegram y ofrece un catálogo web para revisar ofertas y evolución histórica.
 
-## Componentes del sistema
+## Componentes
 
-### 1. Scraper y Bot de Telegram (`llantita_bot.py`)
-- Consulta la API VTEX de Sporting Argentina recorriendo el catálogo de calzado.
-- Guarda y actualiza productos, talles en stock, enlaces a imágenes del CDN oficial y registro histórico de precios.
-- Evalúa bajas de precio con stock disponible y envía alertas por Telegram a los usuarios suscritos en `@llantita_bot`.
-- Ejecución periódica automatizada mediante GitHub Actions cada 30 minutos.
+### Scraper y notificaciones (`llantita_bot.py`)
+- Consulta la API VTEX de Sporting Argentina y recorre el catálogo de calzado.
+- Guarda productos, talles con stock, imágenes del CDN oficial y precios históricos.
+- Detecta bajas de precio en talle 43 con stock y envía mensajes a los usuarios suscritos en `@llantita_bot`.
+- Corre de forma programada en GitHub Actions cada media hora.
 
-### 2. Plataforma Web (`web/`)
-- Construida con Next.js 15 (App Router), React 19 y Tailwind CSS.
-- Conexión serverless a Neon PostgreSQL para consultas directas del catálogo y variaciones de precio.
-- Búsqueda en tiempo real y filtrado por marcas (Nike, Adidas, Puma, Under Armour, Jordan, New Balance, Asics, Topper, entre otras).
-- Filtros por rango de precio, ordenamiento por precio o porcentaje de descuento.
-- Carrusel de ofertas destacadas y grilla responsive de productos con talles disponibles.
-- Modal con historial de precios por talle y gráfico de evolución temporal en SVG.
+### Catálogo web (`web/`)
+- Desarrollado con Next.js 15 (App Router), React 19 y Tailwind CSS.
+- Consulta Neon PostgreSQL mediante `@neondatabase/serverless` para listar productos y variaciones de precio.
+- Incluye búsqueda por texto y filtros por marcas (Nike, Adidas, Puma, Under Armour, Jordan, New Balance, Asics, Topper, entre otras).
+- Filtra por rango de precio y permite ordenar por precio o porcentaje de descuento.
+- Presenta carrusel de ofertas, grilla con talles disponibles y modal con gráfico SVG del historial de precios.
 
-## Stack tecnológico
+## Tecnologías
 
-- **Backend / Scraper:** Python 3.11, `requests`, `psycopg2-binary`.
-- **Base de datos:** PostgreSQL en Neon (Serverless).
-- **Frontend:** Next.js 15, TypeScript, Tailwind CSS, `@neondatabase/serverless`, Lucide Icons.
-- **Automatización:** GitHub Actions.
-- **Notificaciones:** Telegram Bot API.
+- Python 3.11 con `requests` y `psycopg2-binary` para el scraper
+- Next.js 15, TypeScript y Tailwind CSS para la interfaz web
+- Neon PostgreSQL como base de datos compartida
+- GitHub Actions para la ejecución periódica
+- Telegram Bot API para el canal de alertas
 
 ## Estructura del proyecto
 
@@ -34,51 +33,46 @@ El proyecto rastrea periódicamente el catálogo de zapatillas de la tienda, reg
 llantita-bot/
 ├── .github/
 │   └── workflows/
-│       └── scraper.yml       # Tarea programada en GitHub Actions
-├── web/                      # Aplicación web Next.js
+│       └── scraper.yml
+├── web/
 │   ├── src/
-│   │   ├── app/              # Rutas y páginas (App Router)
-│   │   ├── components/       # Componentes de UI (filtros, cards, modal, footer)
-│   │   └── lib/              # Cliente de base de datos y consultas
+│   │   ├── app/
+│   │   ├── components/
+│   │   └── lib/
 │   ├── package.json
 │   └── tailwind.config.ts
-├── llantita_bot.py           # Scraper del catálogo y notificador de Telegram
-├── requirements.txt          # Dependencias de Python
+├── llantita_bot.py
+├── requirements.txt
 └── README.md
 ```
 
-## Configuración y ejecución local
+## Configuración local
 
-### Requisitos previos
-- Python 3.11+
-- Node.js 18+ y npm
-- Instancia de PostgreSQL (Neon o local)
-- Token de bot de Telegram (mediante `@BotFather`)
+### Requisitos
+- Python 3.11 o superior
+- Node.js 18 o superior con npm
+- Base de datos PostgreSQL en Neon o local
+- Token de Telegram obtenido en `@BotFather`
 
 ### Variables de entorno
 
-Crea un archivo `.env` en la raíz (para el script en Python) y `.env.local` dentro de `web/` (para la app web):
+Crear un archivo `.env` en la raíz para el script de Python y `.env.local` dentro de `web/` para la app:
 
 ```env
 DATABASE_URL=postgres://usuario:password@host/database?sslmode=require
 TELEGRAM_BOT_TOKEN=tu_token_aqui
 ```
 
-### Ejecutar el scraper / bot
+### Ejecución del scraper
 
 ```bash
-# Crear y activar entorno virtual
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
-
-# Instalar dependencias
 pip install -r requirements.txt
-
-# Ejecutar el scraper
 python llantita_bot.py
 ```
 
-### Ejecutar la aplicación web
+### Ejecución de la aplicación web
 
 ```bash
 cd web
@@ -86,14 +80,14 @@ npm install
 npm run dev
 ```
 
-La aplicación quedará disponible en `http://localhost:3000`.
+La aplicación queda disponible en `http://localhost:3000`.
 
-## Comandos de Telegram
+## Comandos del bot
 
-El bot público `@llantita_bot` admite los siguientes comandos:
+El bot `@llantita_bot` en Telegram responde a:
 
-- `/start`: Activa la suscripción para recibir alertas de bajas de precio.
-- `/stop` o `/desuscribir`: Pausa las notificaciones para el usuario.
+- `/start`: activa la suscripción para recibir alertas cuando baja un precio.
+- `/stop` o `/desuscribir`: pausa el envío de alertas.
 
 ## Créditos
 
