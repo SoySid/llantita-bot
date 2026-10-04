@@ -1,15 +1,14 @@
 'use client';
 
 import React from 'react';
-import { formatTimeAgo } from '@/lib/utils';
 import { Send } from 'lucide-react';
 
 interface NavbarProps {
-  ultimaActualizacion: string | null;
+  ultimaActualizacion?: string | null;
   totalProductos: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProductos }) => {
+export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#09090b]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
@@ -37,16 +36,12 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
         {/* Datos de sincronización y Botón */}
         <div className="flex items-center gap-3 sm:gap-4">
           
-          {/* Indicador tipográfico sobrio estilo agregador */}
-          <div className="hidden md:flex items-center gap-2.5 text-xs text-zinc-400 border border-zinc-800 bg-zinc-900/60 px-3.5 py-1.5 rounded-lg font-mono">
-            {totalProductos > 0 && (
-              <>
-                <span className="text-zinc-200 font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
-                <span className="text-zinc-600">/</span>
-              </>
-            )}
-            <span>{ultimaActualizacion ? `Actualizado ${formatTimeAgo(ultimaActualizacion)}` : 'Sincronizando'}</span>
-          </div>
+          {/* Indicador de modelos en catálogo */}
+          {totalProductos > 0 && (
+            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-400 border border-zinc-800 bg-zinc-900/60 px-3.5 py-1.5 rounded-lg font-mono">
+              <span className="text-zinc-200 font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
+            </div>
+          )}
 
           {/* Botón de GitHub */}
           <a

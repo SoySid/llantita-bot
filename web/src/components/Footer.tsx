@@ -73,9 +73,7 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
         {/* Línea inferior limpia */}
         <div className="mt-6 pt-5 border-t border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500 font-mono">
           <p>© {new Date().getFullYear()} Llantita. Precios tomados del catálogo público.</p>
-          <span>
-            {ultimaActualizacion ? `Última sincronización: ${new Date(ultimaActualizacion).toLocaleTimeString('es-AR')}` : 'En línea'}
-          </span>
+          <span>Monitoreo automático cada 1 hora</span>
         </div>
 
       </div>

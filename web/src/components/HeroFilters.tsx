@@ -74,24 +74,21 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             {/* Opción Todas las marcas */}
             <button
               onClick={() => onMarcaChange('')}
-              className={`shrink-0 snap-start w-[84px] sm:w-auto p-2 sm:p-3.5 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1 sm:gap-1.5 transition-all text-center group cursor-pointer min-h-[76px] sm:min-h-[88px] ${
+              className={`shrink-0 snap-start w-[84px] sm:w-auto p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all text-center group cursor-pointer min-h-[70px] sm:min-h-[82px] ${
                 !selectedMarca
                   ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
                   : 'bg-zinc-900/70 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white'
               }`}
             >
-              <div className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center">
-                <svg className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <div className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center">
+                <svg className="h-6 w-6 sm:h-7 sm:w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <rect x="3" y="3" width="7" height="7" rx="1.5" />
                   <rect x="14" y="3" width="7" height="7" rx="1.5" />
                   <rect x="3" y="14" width="7" height="7" rx="1.5" />
                   <rect x="14" y="14" width="7" height="7" rx="1.5" />
                 </svg>
               </div>
-              <span className="text-[11px] sm:text-xs font-black uppercase tracking-tight">Todas</span>
-              <span className={`text-[9px] sm:text-[10px] font-mono ${!selectedMarca ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
-                Catálogo
-              </span>
+              <span className="text-xs sm:text-sm font-black uppercase tracking-tight">Todas</span>
             </button>
 
             {/* Tarjetas de Marcas con tipografía auténtica */}
@@ -101,22 +98,19 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <button
                   key={m.marca}
                   onClick={() => onMarcaChange(isSelected ? '' : m.marca)}
-                  className={`shrink-0 snap-start w-[84px] sm:w-auto p-2 sm:p-3.5 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1 sm:gap-1.5 transition-all text-center group cursor-pointer min-h-[76px] sm:min-h-[88px] ${
+                  className={`shrink-0 snap-start w-[84px] sm:w-auto p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all text-center group cursor-pointer min-h-[70px] sm:min-h-[82px] ${
                     isSelected
                       ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
                       : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white'
                   }`}
                 >
-                  <div className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center">
+                  <div className="h-7 w-7 sm:h-8 sm:w-8 flex items-center justify-center">
                     <BrandIcon
                       marca={m.marca}
-                      className={isSelected ? 'text-zinc-950' : 'text-zinc-300 group-hover:text-white'}
+                      className={`h-6 w-6 sm:h-7 sm:w-7 ${isSelected ? 'text-zinc-950' : 'text-zinc-300 group-hover:text-white'}`}
                     />
                   </div>
                   <BrandWordmark marca={m.marca} isSelected={isSelected} />
-                  <span className={`text-[9px] sm:text-[10px] font-mono ${isSelected ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
-                    {m.cantidad} pares
-                  </span>
                 </button>
               );
             })}
