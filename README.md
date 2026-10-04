@@ -1,95 +1,76 @@
-# Llantita
+<div align="center">
 
-Monitor de precios, alertas por Telegram y catálogo web para calzado en Sporting Argentina.
+  <img src="logo.jpg" alt="Michi Llantita" width="130" height="130" style="border-radius: 50%;" />
 
-El sistema consulta el catálogo de zapatillas de la tienda cada 30 minutos, almacena el historial de precios y los talles en una base de datos PostgreSQL, notifica bajas de precio por Telegram y ofrece un catálogo web para revisar ofertas y evolución histórica.
+  # 🐾 Llantita
 
-## Componentes
+  **Monitor de precios, alertas por Telegram y catálogo web en vivo**
 
-### Scraper y notificaciones (`llantita_bot.py`)
-- Consulta la API VTEX de Sporting Argentina y recorre el catálogo de calzado.
-- Guarda productos, talles con stock, imágenes del CDN oficial y precios históricos.
-- Detecta bajas de precio en talle 43 con stock y envía mensajes a los usuarios suscritos en `@llantita_bot`.
-- Corre de forma programada en GitHub Actions cada media hora.
+  [![Sitio Web](https://img.shields.io/badge/🌐_Web_en_Producción-llantita--bot.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://llantita-bot.vercel.app/)
+  [![Telegram Bot](https://img.shields.io/badge/📱_Bot_Telegram-@llantita__bot-229ED9?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/llantita_bot)
+  [![GitHub Repo](https://img.shields.io/badge/Código-GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/SoySid/llantita-bot)
 
-### Catálogo web (`web/`)
-- Desarrollado con Next.js 15 (App Router), React 19 y Tailwind CSS.
-- Consulta Neon PostgreSQL mediante `@neondatabase/serverless` para listar productos y variaciones de precio.
-- Incluye búsqueda por texto y filtros por marcas (Nike, Adidas, Puma, Under Armour, Jordan, New Balance, Asics, Topper, entre otras).
-- Filtra por rango de precio y permite ordenar por precio o porcentaje de descuento.
-- Presenta carrusel de ofertas, grilla con talles disponibles y modal con gráfico SVG del historial de precios.
+  <br />
 
-## Tecnologías
+  ```text
+       /\_/\  
+      ( o.o )  👟 🐾 "¡Che, mirá que bajó de precio!"
+       > ^ <
+  ```
 
-- Python 3.11 con `requests` y `psycopg2-binary` para el scraper
-- Next.js 15, TypeScript y Tailwind CSS para la interfaz web
-- Neon PostgreSQL como base de datos compartida
-- GitHub Actions para la ejecución periódica
-- Telegram Bot API para el canal de alertas
+</div>
 
-## Estructura del proyecto
+---
 
-```text
-llantita-bot/
-├── .github/
-│   └── workflows/
-│       └── scraper.yml
-├── web/
-│   ├── src/
-│   │   ├── app/
-│   │   ├── components/
-│   │   └── lib/
-│   ├── package.json
-│   └── tailwind.config.ts
-├── llantita_bot.py
-├── requirements.txt
-└── README.md
-```
+## 🌐 Plataforma web
 
-## Configuración local
+Puedes consultar el catálogo en tiempo real, filtrar marcas y ver las variaciones históricas de precio directamente en la web:
 
-### Requisitos
-- Python 3.11 o superior
-- Node.js 18 o superior con npm
-- Base de datos PostgreSQL en Neon o local
-- Token de Telegram obtenido en `@BotFather`
+👉 **[https://llantita-bot.vercel.app/](https://llantita-bot.vercel.app/)**
 
-### Variables de entorno
+---
 
-Crear un archivo `.env` en la raíz para el script de Python y `.env.local` dentro de `web/` para la app:
+## 🔄 Flujo del sistema
 
-```env
-DATABASE_URL=postgres://usuario:password@host/database?sslmode=require
-TELEGRAM_BOT_TOKEN=tu_token_aqui
-```
+<p align="center">
+  <img src="assets/michi-banner.svg" alt="Diagrama de flujo del sistema Llantita" width="100%" />
+</p>
 
-### Ejecución del scraper
+1. **Scraper VTEX (`llantita_bot.py`):** consulta periódicamente el catálogo de zapatillas en Sporting Argentina cada 30 minutos a través de GitHub Actions.
+2. **Base de datos (Neon PostgreSQL):** guarda productos, talles con stock, fotos oficiales del CDN y el historial de precios.
+3. **Alertas automáticas en Telegram:** si detecta una baja de precio con stock en talle 43, envía una notificación inmediata a los usuarios de [@llantita_bot](https://t.me/llantita_bot).
+4. **Catálogo web en Vercel:** interfaz interactiva construida con Next.js 15 para explorar todo el calzado registrado.
 
-```bash
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-pip install -r requirements.txt
-python llantita_bot.py
-```
+---
 
-### Ejecución de la aplicación web
+## 👟 Características de la web
 
-```bash
-cd web
-npm install
-npm run dev
-```
+- **Filtros por marca:** selector rápido para Nike, Adidas, Jordan, Puma, Under Armour, New Balance, Asics, Topper, Vans, Fila, entre otras.
+- **Buscador en tiempo real:** filtrado por modelo o palabra clave sin recargar la página.
+- **Rango de precios y ordenamiento:** permite ordenar por menor/mayor precio y por porcentaje de descuento.
+- **Historial de precios:** modal interactivo con gráfico SVG temporal para ver la evolución del precio de cada zapatilla según su talle.
+- **Enlaces directos:** acceso a la publicación oficial de Sporting para comprar al precio de oferta.
 
-La aplicación queda disponible en `http://localhost:3000`.
+---
 
-## Comandos del bot
+## 🤖 Comandos en Telegram
 
-El bot `@llantita_bot` en Telegram responde a:
+Cualquier persona puede interactuar con el bot público [@llantita_bot](https://t.me/llantita_bot):
 
-- `/start`: activa la suscripción para recibir alertas cuando baja un precio.
-- `/stop` o `/desuscribir`: pausa el envío de alertas.
+- `/start` — Activar la suscripción para recibir alertas de bajas de precio.
+- `/stop` o `/desuscribir` — Pausar las alertas de ofertas.
 
-## Créditos
+---
 
-Desarrollado por [Sid](https://github.com/SoySid).  
-Repositorio: [https://github.com/SoySid/llantita-bot](https://github.com/SoySid/llantita-bot)
+## 🛠️ Tecnologías
+
+- **Scraper & Bot:** Python 3.11, `requests`, `psycopg2-binary`
+- **Frontend Web:** Next.js 15, React 19, TypeScript, Tailwind CSS, `@neondatabase/serverless`
+- **Base de datos:** Neon PostgreSQL
+- **Infraestructura:** Vercel (Web) + GitHub Actions (Automatización periódica)
+
+---
+
+<div align="center">
+  Desarrollado por <strong><a href="https://github.com/SoySid">Sid</a></strong> · <a href="https://github.com/SoySid/llantita-bot">github.com/SoySid/llantita-bot</a>
+</div>
