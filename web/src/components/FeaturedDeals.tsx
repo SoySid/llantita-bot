@@ -90,7 +90,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 href={item.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="snap-start shrink-0 w-[280px] sm:w-[310px] rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 p-4 shadow-lg flex flex-col justify-between transition-all duration-200 group block relative"
+                className="snap-start shrink-0 w-[260px] sm:w-[310px] rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 p-4 shadow-lg flex flex-col justify-between transition-all duration-200 group block relative"
               >
                 <div>
                   {/* Top Bar: Brand Badge (Logo + Wordmark oficial) + Discount Pill */}

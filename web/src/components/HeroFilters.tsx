@@ -70,26 +70,26 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2.5">
+          <div className="flex sm:grid sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-2.5 overflow-x-auto sm:overflow-visible no-scrollbar pb-1 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
             {/* Opción Todas las marcas */}
             <button
               onClick={() => onMarcaChange('')}
-              className={`p-3 sm:p-3.5 rounded-2xl border flex flex-col items-center justify-center gap-1.5 transition-all text-center group cursor-pointer min-h-[88px] ${
+              className={`shrink-0 snap-start w-[84px] sm:w-auto p-2 sm:p-3.5 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1 sm:gap-1.5 transition-all text-center group cursor-pointer min-h-[76px] sm:min-h-[88px] ${
                 !selectedMarca
                   ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
                   : 'bg-zinc-900/70 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white'
               }`}
             >
-              <div className="h-7 w-7 flex items-center justify-center">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+              <div className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center">
+                <svg className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
                   <rect x="3" y="3" width="7" height="7" rx="1.5" />
                   <rect x="14" y="3" width="7" height="7" rx="1.5" />
                   <rect x="3" y="14" width="7" height="7" rx="1.5" />
                   <rect x="14" y="14" width="7" height="7" rx="1.5" />
                 </svg>
               </div>
-              <span className="text-xs font-black uppercase tracking-tight">Todas</span>
-              <span className={`text-[10px] font-mono ${!selectedMarca ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
+              <span className="text-[11px] sm:text-xs font-black uppercase tracking-tight">Todas</span>
+              <span className={`text-[9px] sm:text-[10px] font-mono ${!selectedMarca ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
                 Catálogo
               </span>
             </button>
@@ -101,20 +101,20 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <button
                   key={m.marca}
                   onClick={() => onMarcaChange(isSelected ? '' : m.marca)}
-                  className={`p-3 sm:p-3.5 rounded-2xl border flex flex-col items-center justify-center gap-1.5 transition-all text-center group cursor-pointer min-h-[88px] ${
+                  className={`shrink-0 snap-start w-[84px] sm:w-auto p-2 sm:p-3.5 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1 sm:gap-1.5 transition-all text-center group cursor-pointer min-h-[76px] sm:min-h-[88px] ${
                     isSelected
                       ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
                       : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white'
                   }`}
                 >
-                  <div className="h-7 w-7 flex items-center justify-center">
+                  <div className="h-6 w-6 sm:h-7 sm:w-7 flex items-center justify-center">
                     <BrandIcon
                       marca={m.marca}
                       className={isSelected ? 'text-zinc-950' : 'text-zinc-300 group-hover:text-white'}
                     />
                   </div>
                   <BrandWordmark marca={m.marca} isSelected={isSelected} />
-                  <span className={`text-[10px] font-mono ${isSelected ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
+                  <span className={`text-[9px] sm:text-[10px] font-mono ${isSelected ? 'text-zinc-600 font-bold' : 'text-zinc-500'}`}>
                     {m.cantidad} pares
                   </span>
                 </button>
@@ -154,12 +154,12 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             </div>
 
             {/* Derecha: Botón de Oferta Potente y Dropdown Oscuro con Iconos */}
-            <div className="flex items-center gap-2.5 shrink-0 self-end xl:self-center">
+            <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 w-full xl:w-auto">
               {/* Botón Destacado: Solo Rebajas con llama SVG */}
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(!soloOfertas)}
-                className={`h-10 sm:h-11 px-4 rounded-xl text-xs sm:text-sm font-black transition-all border flex items-center gap-2 select-none group shrink-0 ${
+                className={`flex-1 sm:flex-initial justify-center sm:justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-black transition-all border flex items-center gap-2 select-none group shrink-0 ${
                   soloOfertas
                     ? 'bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-950/60 ring-2 ring-rose-500/25'
                     : 'bg-zinc-900/90 text-zinc-300 border-zinc-800 hover:border-rose-500/50 hover:text-rose-400'
@@ -170,15 +170,17 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               </button>
 
               {/* Dropdown Oscuro Personalizado con Iconos (Sin menú nativo de Windows) */}
-              <div className="relative shrink-0">
+              <div className="relative flex-1 sm:flex-initial shrink-0">
                 <button
                   type="button"
                   onClick={() => setIsSortOpen(!isSortOpen)}
-                  className="h-10 sm:h-11 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-zinc-900/90 text-zinc-200 border border-zinc-800 hover:border-zinc-700 focus:outline-none flex items-center gap-2 transition-all select-none"
+                  className="w-full sm:w-auto justify-between sm:justify-start h-10 sm:h-11 px-3 sm:px-4 rounded-xl text-xs sm:text-sm font-bold bg-zinc-900/90 text-zinc-200 border border-zinc-800 hover:border-zinc-700 focus:outline-none flex items-center gap-2 transition-all select-none"
                 >
-                  <CurrentSortIcon className={`h-4 w-4 ${currentSort.iconColor}`} />
-                  <span>{currentSort.label}</span>
-                  <ChevronDown className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
+                  <div className="flex items-center gap-1.5 sm:gap-2 truncate">
+                    <CurrentSortIcon className={`h-4 w-4 shrink-0 ${currentSort.iconColor}`} />
+                    <span className="truncate">{currentSort.label}</span>
+                  </div>
+                  <ChevronDown className={`h-3.5 w-3.5 text-zinc-400 shrink-0 transition-transform duration-200 ${isSortOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 {isSortOpen && (

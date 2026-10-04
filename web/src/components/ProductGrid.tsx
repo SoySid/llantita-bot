@@ -70,8 +70,8 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             </button>
           </div>
         ) : (
-          /* Grilla de productos */
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          /* Grilla de productos (2 columnas en móvil estilo app nativa, 4 en PC) */
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {productos.map((prod) => (
               <ProductCard
                 key={prod.id}

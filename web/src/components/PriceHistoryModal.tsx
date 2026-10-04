@@ -60,13 +60,16 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl rounded-2xl bg-zinc-900 border border-zinc-800 shadow-2xl p-5 sm:p-6 overflow-hidden max-h-[90vh] flex flex-col"
+        className="relative w-full max-w-xl rounded-t-3xl sm:rounded-2xl bg-zinc-900 border-t sm:border border-zinc-800 shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Indicador táctil en móvil */}
+        <div className="w-10 h-1 bg-zinc-700 rounded-full mx-auto mb-3 sm:hidden shrink-0" />
+
         {/* Header Modal con Thumbnail y BrandBadge */}
         <div className="flex items-start justify-between gap-3 pb-4 border-b border-zinc-800">
           <div className="flex items-center gap-3.5 min-w-0">
