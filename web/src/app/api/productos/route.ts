@@ -7,8 +7,24 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get('q')?.trim() || '';
-    const marca = searchParams.get('marca')?.trim() || '';
-    const talle = searchParams.get('talle')?.trim() || '';
+    const marcasRaw = [
+      ...searchParams.getAll('marca'),
+      ...searchParams.getAll('marcas'),
+    ];
+    const marcas = marcasRaw
+      .flatMap((m) => m.split(','))
+      .map((m) => m.trim())
+      .filter((m) => m.length > 0);
+
+    const tallesRaw = [
+      ...searchParams.getAll('talle'),
+      ...searchParams.getAll('talles'),
+    ];
+    const talles = tallesRaw
+      .flatMap((t) => t.split(','))
+      .map((t) => t.trim())
+      .filter((t) => t.length > 0);
+
     const soloOfertas = searchParams.get('solo_ofertas') === 'true';
     const orden = searchParams.get('orden') || 'descuento';
     const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
@@ -26,18 +42,20 @@ export async function GET(request: NextRequest) {
       idx++;
     }
 
-    if (marca) {
-      conditions.push(`p.marca ILIKE $${idx}`);
-      values.push(marca);
-      idx++;
+    if (marcas.length > 0) {
+      const orClauses = marcas.map((m) => {
+        values.push(m);
+        return `p.marca ILIKE $${idx++}`;
+      });
+      conditions.push(`(${orClauses.join(' OR ')})`);
     }
 
-    if (talle) {
-      // Buscar el talle aislado dentro del string de talles
-      // Puede venir como '43', 'Talle: 43', '43 (UK 9)'
-      conditions.push(`p.talles ~* $${idx}`);
-      values.push(`(?<![0-9.])${talle}(?![0-9.])`);
-      idx++;
+    if (talles.length > 0) {
+      const orClauses = talles.map((t) => {
+        values.push(`(?<![0-9.])${t}(?![0-9.])`);
+        return `p.talles ~* $${idx++}`;
+      });
+      conditions.push(`(${orClauses.join(' OR ')})`);
     }
 
     if (soloOfertas) {

@@ -2,9 +2,11 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Navbar } from '@/components/Navbar';
+import { AboutSection } from '@/components/AboutSection';
 import { HeroFilters } from '@/components/HeroFilters';
 import { FeaturedDeals, DealProduct } from '@/components/FeaturedDeals';
 import { ProductGrid } from '@/components/ProductGrid';
+import { HowItWorksSection } from '@/components/HowItWorksSection';
 import { PriceHistoryModal } from '@/components/PriceHistoryModal';
 import { StickyActionBar } from '@/components/StickyActionBar';
 import { Footer } from '@/components/Footer';
@@ -19,8 +21,8 @@ export default function HomePage() {
   // Filtros del catálogo
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
-  const [selectedTalle, setSelectedTalle] = useState('');
-  const [selectedMarca, setSelectedMarca] = useState('');
+  const [selectedTalles, setSelectedTalles] = useState<string[]>([]);
+  const [selectedMarcas, setSelectedMarcas] = useState<string[]>([]);
   const [selectedOrden, setSelectedOrden] = useState('descuento');
   const [soloOfertas, setSoloOfertas] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -35,6 +37,7 @@ export default function HomePage() {
   const [selectedProductForHistory, setSelectedProductForHistory] = useState<DealProduct | null>(null);
 
   const topRef = useRef<HTMLDivElement>(null);
+  const catalogRef = useRef<HTMLDivElement>(null);
 
   // 1. Debounce para la búsqueda de texto
   useEffect(() => {
@@ -71,8 +74,8 @@ export default function HomePage() {
     try {
       const params = new URLSearchParams();
       if (debouncedQuery) params.set('q', debouncedQuery);
-      if (selectedTalle) params.set('talle', selectedTalle);
-      if (selectedMarca) params.set('marca', selectedMarca);
+      if (selectedTalles.length > 0) params.set('talles', selectedTalles.join(','));
+      if (selectedMarcas.length > 0) params.set('marcas', selectedMarcas.join(','));
       if (selectedOrden) params.set('orden', selectedOrden);
       if (soloOfertas) params.set('solo_ofertas', 'true');
       params.set('page', currentPage.toString());
@@ -90,7 +93,7 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
-  }, [debouncedQuery, selectedTalle, selectedMarca, selectedOrden, soloOfertas, currentPage]);
+  }, [debouncedQuery, selectedTalles, selectedMarcas, selectedOrden, soloOfertas, currentPage]);
 
   useEffect(() => {
     fetchProductos();
@@ -99,8 +102,8 @@ export default function HomePage() {
   const handleResetFilters = () => {
     setSearchQuery('');
     setDebouncedQuery('');
-    setSelectedTalle('');
-    setSelectedMarca('');
+    setSelectedTalles([]);
+    setSelectedMarcas([]);
     setSelectedOrden('descuento');
     setSoloOfertas(false);
     setCurrentPage(1);
@@ -108,6 +111,10 @@ export default function HomePage() {
 
   const handleScrollToTop = () => {
     topRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleScrollToCatalog = () => {
+    catalogRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
@@ -118,44 +125,49 @@ export default function HomePage() {
         totalProductos={totalProductos}
       />
 
-      {/* 2. Hero con buscador y filtros */}
-      <HeroFilters
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedTalle={selectedTalle}
-        onTalleChange={(talle) => {
-          setSelectedTalle(talle);
-          setCurrentPage(1);
-        }}
-        selectedMarca={selectedMarca}
-        onMarcaChange={(marca) => {
-          setSelectedMarca(marca);
-          setCurrentPage(1);
-        }}
-        marcasDisponibles={marcasDisponibles}
-        selectedOrden={selectedOrden}
-        onOrdenChange={(orden) => {
-          setSelectedOrden(orden);
-          setCurrentPage(1);
-        }}
-        soloOfertas={soloOfertas}
-        onSoloOfertasChange={(val) => {
-          setSoloOfertas(val);
-          setCurrentPage(1);
-        }}
-        onReset={handleResetFilters}
-      />
+      {/* 2. Sección explicativa de bienvenida */}
+      <AboutSection onExploreClick={handleScrollToCatalog} />
+
+      {/* 3. Hero con buscador y filtros */}
+      <div ref={catalogRef}>
+        <HeroFilters
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedTalles={selectedTalles}
+          onTallesChange={(talles) => {
+            setSelectedTalles(talles);
+            setCurrentPage(1);
+          }}
+          selectedMarcas={selectedMarcas}
+          onMarcasChange={(marcas) => {
+            setSelectedMarcas(marcas);
+            setCurrentPage(1);
+          }}
+          marcasDisponibles={marcasDisponibles}
+          selectedOrden={selectedOrden}
+          onOrdenChange={(orden) => {
+            setSelectedOrden(orden);
+            setCurrentPage(1);
+          }}
+          soloOfertas={soloOfertas}
+          onSoloOfertasChange={(val) => {
+            setSoloOfertas(val);
+            setCurrentPage(1);
+          }}
+          onReset={handleResetFilters}
+        />
+      </div>
 
       <main className="flex-1 pb-16 sm:pb-0">
-        {/* 3. Carrusel de Bajas Destacadas (si no hay búsqueda activa) */}
-        {!searchQuery && !selectedTalle && !selectedMarca && (
+        {/* 4. Carrusel de Bajas Destacadas (si no hay filtros activos) */}
+        {!searchQuery && selectedTalles.length === 0 && selectedMarcas.length === 0 && (
           <FeaturedDeals
             deals={featuredDeals}
             onSelectProduct={setSelectedProductForHistory}
           />
         )}
 
-        {/* 4. Grilla de Productos */}
+        {/* 5. Grilla de Productos */}
         <ProductGrid
           productos={productos}
           loading={loading}
@@ -164,27 +176,31 @@ export default function HomePage() {
           totalPages={totalPages}
           onPageChange={(page) => {
             setCurrentPage(page);
-            topRef.current?.scrollIntoView({ behavior: 'smooth' });
+            catalogRef.current?.scrollIntoView({ behavior: 'smooth' });
           }}
           onOpenHistory={setSelectedProductForHistory}
-          selectedTalle={selectedTalle}
+          selectedTalles={selectedTalles}
           onResetFilters={handleResetFilters}
         />
+
+        {/* 6. Preguntas frecuentes / Cómo funciona */}
+        <HowItWorksSection />
       </main>
 
-      {/* 5. Modal de Historial de Precios */}
+      {/* 7. Modal de Historial de Precios */}
       <PriceHistoryModal
         product={selectedProductForHistory}
         onClose={() => setSelectedProductForHistory(null)}
       />
 
-      {/* 6. Barra fija inferior en móvil */}
+      {/* 8. Barra fija inferior en móvil */}
       <StickyActionBar
         onScrollToTop={handleScrollToTop}
-        selectedTalle={selectedTalle}
+        selectedTalles={selectedTalles}
+        selectedMarcas={selectedMarcas}
       />
 
-      {/* 7. Footer técnico */}
+      {/* 9. Footer técnico */}
       <Footer ultimaActualizacion={ultimaActualizacion} />
     </div>
   );

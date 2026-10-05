@@ -13,7 +13,7 @@ interface ProductGridProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   onOpenHistory: (product: DealProduct) => void;
-  selectedTalle?: string;
+  selectedTalles?: string[];
   onResetFilters: () => void;
 }
 
@@ -25,7 +25,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   totalPages,
   onPageChange,
   onOpenHistory,
-  selectedTalle,
+  selectedTalles,
   onResetFilters,
 }) => {
   return (
@@ -77,7 +77,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
                 key={prod.id}
                 product={prod}
                 onOpenHistory={onOpenHistory}
-                selectedTalle={selectedTalle}
+                selectedTalles={selectedTalles}
               />
             ))}
           </div>

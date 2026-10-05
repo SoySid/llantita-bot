@@ -6,10 +6,10 @@ import { Flame, Percent, TrendingDown, TrendingUp, Clock, Check, ChevronDown, X 
 interface HeroFiltersProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  selectedTalle: string;
-  onTalleChange: (talle: string) => void;
-  selectedMarca: string;
-  onMarcaChange: (marca: string) => void;
+  selectedTalles: string[];
+  onTallesChange: (talles: string[]) => void;
+  selectedMarcas: string[];
+  onMarcasChange: (marcas: string[]) => void;
   marcasDisponibles: Array<{ marca: string; cantidad: number }>;
   selectedOrden: string;
   onOrdenChange: (orden: string) => void;
@@ -26,10 +26,10 @@ import { BrandIcon, BrandWordmark } from './BrandBadge';
 export const HeroFilters: React.FC<HeroFiltersProps> = ({
   searchQuery,
   onSearchChange,
-  selectedTalle,
-  onTalleChange,
-  selectedMarca,
-  onMarcaChange,
+  selectedTalles,
+  onTallesChange,
+  selectedMarcas,
+  onMarcasChange,
   marcasDisponibles,
   selectedOrden,
   onOrdenChange,
@@ -38,7 +38,24 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   onReset,
 }) => {
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const hasActiveFilters = searchQuery || selectedTalle || selectedMarca || soloOfertas;
+  const hasActiveFilters = searchQuery || selectedTalles.length > 0 || selectedMarcas.length > 0 || soloOfertas;
+
+  const toggleMarca = (marca: string) => {
+    const exists = selectedMarcas.some((m) => m.toLowerCase() === marca.toLowerCase());
+    if (exists) {
+      onMarcasChange(selectedMarcas.filter((m) => m.toLowerCase() !== marca.toLowerCase()));
+    } else {
+      onMarcasChange([...selectedMarcas, marca]);
+    }
+  };
+
+  const toggleTalle = (talle: string) => {
+    if (selectedTalles.includes(talle)) {
+      onTallesChange(selectedTalles.filter((t) => t !== talle));
+    } else {
+      onTallesChange([...selectedTalles, talle]);
+    }
+  };
 
   const SORT_OPTIONS = [
     { id: 'descuento', label: 'Mayor rebaja', icon: Percent, iconColor: 'text-rose-400' },
@@ -60,12 +77,12 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">
               Seleccionar Marca ({marcasDisponibles.length} disponibles)
             </span>
-            {selectedMarca && (
+            {selectedMarcas.length > 0 && (
               <button
-                onClick={() => onMarcaChange('')}
+                onClick={() => onMarcasChange([])}
                 className="text-xs font-semibold text-zinc-400 hover:text-white transition-colors"
               >
-                ✕ Limpiar marca ({selectedMarca})
+                ✕ Limpiar marcas ({selectedMarcas.length})
               </button>
             )}
           </div>
@@ -73,9 +90,9 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
           <div className="flex sm:grid sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-2.5 overflow-x-auto sm:overflow-visible no-scrollbar pb-1 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
             {/* Opción Todas las marcas */}
             <button
-              onClick={() => onMarcaChange('')}
+              onClick={() => onMarcasChange([])}
               className={`shrink-0 snap-start w-[84px] sm:w-auto p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all text-center group cursor-pointer min-h-[70px] sm:min-h-[82px] ${
-                !selectedMarca
+                selectedMarcas.length === 0
                   ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
                   : 'bg-zinc-900/70 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:bg-zinc-900 hover:text-white'
               }`}
@@ -93,11 +110,11 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
 
             {/* Tarjetas de Marcas con tipografía auténtica */}
             {marcasDisponibles.map((m) => {
-              const isSelected = selectedMarca.toLowerCase() === m.marca.toLowerCase();
+              const isSelected = selectedMarcas.some((sm) => sm.toLowerCase() === m.marca.toLowerCase());
               return (
                 <button
                   key={m.marca}
-                  onClick={() => onMarcaChange(isSelected ? '' : m.marca)}
+                  onClick={() => toggleMarca(m.marca)}
                   className={`shrink-0 snap-start w-[84px] sm:w-auto p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border flex flex-col items-center justify-center gap-1.5 sm:gap-2 transition-all text-center group cursor-pointer min-h-[70px] sm:min-h-[82px] ${
                     isSelected
                       ? 'bg-zinc-100 text-zinc-950 border-zinc-100 shadow-md ring-2 ring-white/20'
@@ -127,12 +144,18 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 TALLES:
               </span>
               {TALLES_COMUNES.map((talle) => {
-                const isSelected = talle === 'Todos' ? !selectedTalle : selectedTalle === talle;
                 const isTodos = talle === 'Todos';
+                const isSelected = isTodos ? selectedTalles.length === 0 : selectedTalles.includes(talle);
                 return (
                   <button
                     key={talle}
-                    onClick={() => onTalleChange(isTodos ? '' : talle)}
+                    onClick={() => {
+                      if (isTodos) {
+                        onTallesChange([]);
+                      } else {
+                        toggleTalle(talle);
+                      }
+                    }}
                     className={`h-10 sm:h-11 rounded-xl font-black transition-all border shrink-0 flex items-center justify-center select-none ${
                       isTodos ? 'px-4 text-xs sm:text-sm uppercase tracking-wider' : 'w-11 sm:w-12 text-sm sm:text-base'
                     } ${
@@ -239,24 +262,35 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 mr-1 font-mono">
                 ACTIVOS:
               </span>
-              {selectedMarca && (
+              {searchQuery && (
                 <button
-                  onClick={() => onMarcaChange('')}
+                  onClick={() => onSearchChange('')}
                   className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors text-[11px] font-semibold"
                 >
-                  <span>{selectedMarca}</span>
+                  <span>"{searchQuery}"</span>
                   <X className="h-2.5 w-2.5 text-zinc-400" />
                 </button>
               )}
-              {selectedTalle && (
+              {selectedMarcas.map((marca) => (
                 <button
-                  onClick={() => onTalleChange('')}
+                  key={marca}
+                  onClick={() => toggleMarca(marca)}
                   className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors text-[11px] font-semibold"
                 >
-                  <span>Talle {selectedTalle}</span>
+                  <span>{marca}</span>
                   <X className="h-2.5 w-2.5 text-zinc-400" />
                 </button>
-              )}
+              ))}
+              {selectedTalles.map((talle) => (
+                <button
+                  key={talle}
+                  onClick={() => toggleTalle(talle)}
+                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-zinc-800 text-zinc-200 hover:bg-zinc-700 hover:text-white transition-colors text-[11px] font-semibold"
+                >
+                  <span>Talle {talle}</span>
+                  <X className="h-2.5 w-2.5 text-zinc-400" />
+                </button>
+              ))}
               {soloOfertas && (
                 <button
                   onClick={() => onSoloOfertasChange(false)}

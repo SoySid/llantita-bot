@@ -9,13 +9,13 @@ import { BrandBadge } from './BrandBadge';
 interface ProductCardProps {
   product: DealProduct;
   onOpenHistory: (product: DealProduct) => void;
-  selectedTalle?: string;
+  selectedTalles?: string[];
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onOpenHistory,
-  selectedTalle,
+  selectedTalles,
 }) => {
   const tallesList = parseTalles(product.talles);
   const hasDiscount = product.descuento_pct > 0 && product.precio_anterior;
@@ -89,7 +89,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </span>
             <div className="flex flex-wrap gap-1">
               {tallesList.slice(0, 4).map((t, idx) => {
-                const isMatchingSelected = selectedTalle && t.includes(selectedTalle);
+                const isMatchingSelected =
+                  selectedTalles && selectedTalles.length > 0 && selectedTalles.some((st) => t.includes(st));
                 return (
                   <span
                     key={idx}
