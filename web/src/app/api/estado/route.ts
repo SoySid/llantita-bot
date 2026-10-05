@@ -17,11 +17,14 @@ export async function GET() {
     // 2. Marcas principales con conteo (solo activos con stock)
     const marcasResult = await sql`
       SELECT 
-        marca, 
+        CASE 
+          WHEN UPPER(TRIM(marca)) LIKE 'ADIDAS%' THEN 'ADIDAS'
+          ELSE UPPER(TRIM(marca))
+        END as marca, 
         COUNT(*)::int as cantidad
       FROM productos 
-      WHERE marca IS NOT NULL AND marca != '' AND activo = TRUE AND talles IS NOT NULL AND talles != ''
-      GROUP BY marca 
+      WHERE marca IS NOT NULL AND TRIM(marca) != '' AND activo = TRUE AND talles IS NOT NULL AND talles != ''
+      GROUP BY 1 
       ORDER BY cantidad DESC 
       LIMIT 50;
     `;
