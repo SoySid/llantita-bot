@@ -1,14 +1,11 @@
 'use client';
 
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useRef, useMemo } from 'react';
 import {
-  Flame,
   Percent,
   TrendingDown,
   TrendingUp,
   Clock,
-  Check,
-  ChevronDown,
   X,
   RotateCcw,
 } from 'lucide-react';
@@ -45,7 +42,6 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   onSoloOfertasChange,
   onReset,
 }) => {
-  const [isSortOpen, setIsSortOpen] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Normalizar marcas únicas para asegurar que no haya duplicados
@@ -98,14 +94,11 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   };
 
   const SORT_OPTIONS = [
-    { id: 'descuento', label: 'Mayor rebaja', icon: Percent, iconColor: 'text-rose-400' },
-    { id: 'precio_asc', label: 'Menor precio', icon: TrendingDown, iconColor: 'text-emerald-400' },
-    { id: 'precio_desc', label: 'Mayor precio', icon: TrendingUp, iconColor: 'text-zinc-400' },
-    { id: 'recientes', label: 'Más recientes', icon: Clock, iconColor: 'text-sky-400' },
+    { id: 'descuento', label: '% Rebaja', icon: Percent, iconColor: 'text-rose-400' },
+    { id: 'precio_asc', label: '$ Menor', icon: TrendingDown, iconColor: 'text-emerald-400' },
+    { id: 'precio_desc', label: '$ Mayor', icon: TrendingUp, iconColor: 'text-zinc-400' },
+    { id: 'recientes', label: 'Novedades', icon: Clock, iconColor: 'text-sky-400' },
   ];
-
-  const currentSort = SORT_OPTIONS.find((s) => s.id === selectedOrden) || SORT_OPTIONS[0];
-  const CurrentSortIcon = currentSort.icon;
 
   return (
     <div className="w-full bg-[#09090b] border-b border-zinc-800/80 py-4 sm:py-5">
@@ -235,7 +228,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
         </div>
 
         {/* 2. Dock de Talles y Filtros Rápidos */}
-        <div className="rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-2.5 sm:p-3 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xl shadow-black/20">
+        <div className="rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-2.5 sm:p-3 backdrop-blur-md flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-xl shadow-black/20">
           
           {/* Selector de Talles interactivo */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0">
@@ -275,82 +268,59 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
           </div>
 
           {/* Acciones de Rebajas, Ordenamiento y Limpieza */}
-          <div className="flex items-center gap-2 shrink-0 self-end md:self-auto w-full md:w-auto">
+          <div className="flex items-center gap-2.5 shrink-0 self-start xl:self-auto overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0 w-full xl:w-auto">
             
-            {/* Solo Rebajas con efecto dinámico */}
+            {/* Toggle Háptico de Rebajas con Switch Deslizable */}
             <button
               type="button"
               onClick={() => onSoloOfertasChange(!soloOfertas)}
-              className={`flex-1 md:flex-initial h-8 sm:h-9 px-3.5 rounded-xl text-xs font-bold transition-all duration-200 border flex items-center justify-center gap-1.5 select-none cursor-pointer transform active:scale-95 ${
+              className={`group shrink-0 h-8 sm:h-9 px-3 rounded-xl border flex items-center gap-2.5 transition-all duration-200 select-none cursor-pointer transform active:scale-95 ${
                 soloOfertas
-                  ? 'bg-gradient-to-r from-rose-500 via-rose-600 to-amber-500 text-white border-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.45)] ring-1 ring-rose-400/40 scale-[1.02]'
-                  : 'bg-zinc-900/90 text-zinc-300 border-zinc-800 hover:border-rose-500/50 hover:text-rose-400 hover:bg-zinc-850 hover:shadow-lg hover:shadow-rose-950/20'
+                  ? 'bg-rose-500/15 border-rose-500/50 text-rose-300 shadow-[0_0_16px_rgba(244,63,94,0.25)] ring-1 ring-rose-500/30'
+                  : 'bg-zinc-900/90 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850'
               }`}
+              title={soloOfertas ? 'Desactivar filtro de rebajas' : 'Filtrar exclusivamente zapatillas rebajadas'}
             >
-              <Flame
-                className={`h-3.5 w-3.5 ${
-                  soloOfertas ? 'text-white fill-white animate-flame-pulse' : 'text-rose-500'
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider">
+                Solo rebajas
+              </span>
+              <div
+                className={`w-7 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${
+                  soloOfertas ? 'bg-rose-500' : 'bg-zinc-800 border border-zinc-700/60'
                 }`}
-              />
-              <span>Solo rebajas</span>
-            </button>
-
-            {/* Dropdown Ordenar por animado */}
-            <div className="relative flex-1 md:flex-initial">
-              <button
-                type="button"
-                onClick={() => setIsSortOpen(!isSortOpen)}
-                className="w-full md:w-auto h-8 sm:h-9 px-3 rounded-xl text-xs font-bold bg-zinc-900/90 text-zinc-200 border border-zinc-800 hover:border-zinc-700 focus:outline-none flex items-center justify-between md:justify-start gap-2 transition-all duration-150 select-none cursor-pointer active:scale-95"
               >
-                <div className="flex items-center gap-1.5 truncate">
-                  <CurrentSortIcon className={`h-3.5 w-3.5 shrink-0 ${currentSort.iconColor}`} />
-                  <span className="truncate">{currentSort.label}</span>
-                </div>
-                <ChevronDown
-                  className={`h-3.5 w-3.5 text-zinc-400 shrink-0 transition-transform duration-200 ${
-                    isSortOpen ? 'rotate-180' : ''
+                <div
+                  className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                    soloOfertas ? 'translate-x-3' : 'translate-x-0'
                   }`}
                 />
-              </button>
+              </div>
+            </button>
 
-              {isSortOpen && (
-                <>
-                  <div
-                    className="fixed inset-0 z-40"
-                    onClick={() => setIsSortOpen(false)}
-                  />
-                  <div className="absolute right-0 mt-1.5 w-48 rounded-2xl bg-zinc-900/95 border border-zinc-700/80 shadow-2xl backdrop-blur-xl p-1.5 z-50 animate-menu-dropdown">
-                    <div className="px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-                      Ordenar por
-                    </div>
-                    {SORT_OPTIONS.map((opt) => {
-                      const isSelected = selectedOrden === opt.id;
-                      const OptIcon = opt.icon;
-                      return (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => {
-                            onOrdenChange(opt.id);
-                            setIsSortOpen(false);
-                          }}
-                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
-                            isSelected
-                              ? 'bg-zinc-800 text-white font-semibold'
-                              : 'text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <OptIcon className={`h-3.5 w-3.5 ${opt.iconColor}`} />
-                            <span>{opt.label}</span>
-                          </div>
-                          {isSelected && <Check className="h-3.5 w-3.5 text-white" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </>
-              )}
+            {/* Segmented Control de Ordenamiento Directo */}
+            <div className="flex items-center p-1 rounded-xl bg-zinc-950/80 border border-zinc-800/80 gap-0.5 shrink-0">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 px-1.5 hidden lg:inline">
+                ORDEN:
+              </span>
+              {SORT_OPTIONS.map((opt) => {
+                const isSelected = selectedOrden === opt.id;
+                const OptIcon = opt.icon;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onOrdenChange(opt.id)}
+                    className={`shrink-0 h-6 sm:h-7 px-2 sm:px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all duration-150 cursor-pointer select-none active:scale-95 ${
+                      isSelected
+                        ? 'bg-zinc-100 text-zinc-950 shadow-sm scale-100 font-extrabold'
+                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/80'
+                    }`}
+                  >
+                    <OptIcon className={`h-3 w-3 ${isSelected ? 'text-zinc-950' : opt.iconColor}`} />
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Botón Limpiar filtros cuando hay activos */}
