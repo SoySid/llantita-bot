@@ -28,28 +28,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       href={product.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex flex-col justify-between rounded-xl sm:rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-300 shadow-sm hover:shadow-xl group block relative overflow-hidden"
+      className="flex flex-col justify-between rounded-xl sm:rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-300 p-3 sm:p-4 shadow-sm hover:shadow-xl group block relative"
     >
       <div>
-        {/* Vitrina Superior Integrada (Edge-to-Edge Showcase) */}
-        <div className="relative w-full aspect-[4/3] bg-white overflow-hidden flex items-center justify-center border-b border-zinc-800/80">
+        {/* Showcase de Producto Proporcional 1:1 */}
+        <div className="relative w-full aspect-square rounded-xl bg-white p-2 sm:p-3 mb-3 overflow-hidden flex items-center justify-center border border-zinc-200/70 group-hover:border-zinc-300 transition-colors">
           {/* Badges Flotantes sobre la vitrina */}
-          <div className="absolute top-2 sm:top-2.5 left-2 sm:left-2.5 z-10">
+          <div className="absolute top-2 left-2 z-10">
             <BrandBadge marca={product.marca} />
           </div>
           {hasDiscount && (
-            <span className="absolute top-2 sm:top-2.5 right-2 sm:right-2.5 z-10 inline-flex items-center rounded-md sm:rounded-lg bg-rose-500 text-white px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black font-mono shadow-md">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center rounded-md sm:rounded-lg bg-rose-500 text-white px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black font-mono shadow-xs">
               -{product.descuento_pct}%
             </span>
           )}
 
-          {/* Foto del Calzado con escala heroica para llenar el marco */}
+          {/* Foto del Calzado sin sombras artificiales de contorno */}
           {product.imagen_url ? (
             <img
               src={product.imagen_url}
               alt={product.nombre}
               loading="lazy"
-              className="h-full w-full object-contain scale-115 group-hover:scale-125 transition-transform duration-300 ease-out filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
+              className="h-full w-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-300 ease-out"
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-zinc-400">
@@ -59,7 +59,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         {/* Cuerpo de la Tarjeta */}
-        <div className="p-2.5 sm:p-4">
+        <div>
           {/* Nombre del modelo */}
           <h3 className="text-xs sm:text-sm font-bold text-zinc-100 line-clamp-2 leading-tight sm:leading-snug group-hover:text-white transition-colors min-h-[32px] sm:min-h-[40px]">
             {product.nombre}
