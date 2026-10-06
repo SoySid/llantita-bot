@@ -28,27 +28,28 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       href={product.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex flex-col justify-between rounded-xl sm:rounded-2xl bg-zinc-900/60 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-200 p-2.5 sm:p-5 shadow-sm hover:shadow-xl group block relative"
+      className="flex flex-col justify-between rounded-xl sm:rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900 transition-all duration-300 shadow-sm hover:shadow-xl group block relative overflow-hidden"
     >
       <div>
-        {/* Encabezado: Brand Badge (Logo + Wordmark oficial) y Descuento */}
-        <div className="flex items-center justify-between gap-1 sm:gap-2 mb-2 sm:mb-3">
-          <BrandBadge marca={product.marca} />
+        {/* Vitrina Superior Integrada (Edge-to-Edge Showcase) */}
+        <div className="relative w-full aspect-[4/3] bg-white overflow-hidden flex items-center justify-center border-b border-zinc-800/80">
+          {/* Badges Flotantes sobre la vitrina */}
+          <div className="absolute top-2 sm:top-2.5 left-2 sm:left-2.5 z-10">
+            <BrandBadge marca={product.marca} />
+          </div>
           {hasDiscount && (
-            <span className="inline-flex items-center rounded-md bg-rose-500 text-white px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black font-mono shadow-xs shrink-0">
+            <span className="absolute top-2 sm:top-2.5 right-2 sm:right-2.5 z-10 inline-flex items-center rounded-md sm:rounded-lg bg-rose-500 text-white px-1.5 sm:px-2 py-0.5 text-[10px] sm:text-[11px] font-black font-mono shadow-md">
               -{product.descuento_pct}%
             </span>
           )}
-        </div>
 
-        {/* Foto del Calzado - Studio White Container */}
-        <div className="relative w-full aspect-square sm:aspect-[4/3] rounded-lg sm:rounded-xl bg-white p-2 sm:p-3 mb-2 sm:mb-3.5 overflow-hidden flex items-center justify-center border border-zinc-800/40 group-hover:border-zinc-600 transition-colors shadow-inner">
+          {/* Foto del Calzado con escala heroica para llenar el marco */}
           {product.imagen_url ? (
             <img
               src={product.imagen_url}
               alt={product.nombre}
               loading="lazy"
-              className="h-full w-full object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)] group-hover:scale-108 transition-transform duration-300 ease-out"
+              className="h-full w-full object-contain scale-115 group-hover:scale-125 transition-transform duration-300 ease-out filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.12)]"
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-zinc-400">
@@ -57,65 +58,68 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Nombre del modelo */}
-        <h3 className="text-xs sm:text-sm font-bold text-zinc-100 line-clamp-2 leading-tight sm:leading-snug group-hover:text-white transition-colors min-h-[32px] sm:min-h-[40px]">
-          {product.nombre}
-        </h3>
+        {/* Cuerpo de la Tarjeta */}
+        <div className="p-2.5 sm:p-4">
+          {/* Nombre del modelo */}
+          <h3 className="text-xs sm:text-sm font-bold text-zinc-100 line-clamp-2 leading-tight sm:leading-snug group-hover:text-white transition-colors min-h-[32px] sm:min-h-[40px]">
+            {product.nombre}
+          </h3>
 
-        {/* Precios con cálculo de ahorro real */}
-        <div className="mt-2.5 sm:mt-3.5 pt-2 sm:pt-3 border-t border-zinc-800/60">
-          <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1.5 sm:gap-2">
-            <span className="text-base sm:text-2xl font-black text-white tracking-tight">
-              {formatCurrency(product.precio)}
-            </span>
-            {hasDiscount && product.precio_anterior && (
-              <span className="text-[10px] sm:text-xs text-zinc-500 line-through font-mono">
-                {formatCurrency(product.precio_anterior)}
+          {/* Precios con cálculo de ahorro real */}
+          <div className="mt-2.5 sm:mt-3.5 pt-2 sm:pt-3 border-t border-zinc-800/60">
+            <div className="flex flex-wrap sm:flex-nowrap items-baseline gap-1.5 sm:gap-2">
+              <span className="text-base sm:text-2xl font-black text-white tracking-tight">
+                {formatCurrency(product.precio)}
               </span>
-            )}
-          </div>
-          {ahorro > 0 && (
-            <span className="text-[10px] sm:text-[11px] font-bold text-emerald-400 font-mono mt-0.5 block truncate">
-              Ahorrás {formatCurrency(ahorro)}
-            </span>
-          )}
-        </div>
-
-        {/* Talles en stock */}
-        {tallesList.length > 0 && (
-          <div className="mt-2 sm:mt-3">
-            <span className="text-[9px] sm:text-[10px] uppercase font-bold text-zinc-500 block mb-1 font-mono">
-              Talles:
-            </span>
-            <div className="flex flex-wrap gap-1">
-              {tallesList.slice(0, 4).map((t, idx) => {
-                const isMatchingSelected =
-                  selectedTalles && selectedTalles.length > 0 && selectedTalles.some((st) => t.includes(st));
-                return (
-                  <span
-                    key={idx}
-                    className={`rounded-md px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-mono border transition-colors ${
-                      isMatchingSelected
-                        ? 'bg-zinc-100 text-zinc-950 border-zinc-100 font-black shadow-xs'
-                        : 'bg-zinc-950 border-zinc-800 text-zinc-300'
-                    }`}
-                  >
-                    {t}
-                  </span>
-                );
-              })}
-              {tallesList.length > 4 && (
-                <span className="text-[9px] sm:text-[10px] text-zinc-500 self-center font-mono">
-                  +{tallesList.length - 4}
+              {hasDiscount && product.precio_anterior && (
+                <span className="text-[10px] sm:text-xs text-zinc-500 line-through font-mono">
+                  {formatCurrency(product.precio_anterior)}
                 </span>
               )}
             </div>
+            {ahorro > 0 && (
+              <span className="text-[10px] sm:text-[11px] font-bold text-emerald-400 font-mono mt-0.5 block truncate">
+                Ahorrás {formatCurrency(ahorro)}
+              </span>
+            )}
           </div>
-        )}
+
+          {/* Talles en stock */}
+          {tallesList.length > 0 && (
+            <div className="mt-2 sm:mt-3">
+              <span className="text-[9px] sm:text-[10px] uppercase font-bold text-zinc-500 block mb-1 font-mono">
+                Talles:
+              </span>
+              <div className="flex flex-wrap gap-1">
+                {tallesList.slice(0, 4).map((t, idx) => {
+                  const isMatchingSelected =
+                    selectedTalles && selectedTalles.length > 0 && selectedTalles.some((st) => t.includes(st));
+                  return (
+                    <span
+                      key={idx}
+                      className={`rounded-md px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-mono border transition-colors ${
+                        isMatchingSelected
+                          ? 'bg-zinc-100 text-zinc-950 border-zinc-100 font-black shadow-xs'
+                          : 'bg-zinc-950 border-zinc-800 text-zinc-300'
+                      }`}
+                    >
+                      {t}
+                    </span>
+                  );
+                })}
+                {tallesList.length > 4 && (
+                  <span className="text-[9px] sm:text-[10px] text-zinc-500 self-center font-mono">
+                    +{tallesList.length - 4}
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Footer limpio: Historial y link a Sporting sin botones toscos */}
-      <div className="mt-2.5 sm:mt-4 pt-2 sm:pt-3.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] sm:text-[11px]">
+      {/* Footer limpio: Historial y link a Sporting */}
+      <div className="px-2.5 pb-2.5 sm:px-4 sm:pb-3.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] sm:text-[11px]">
         <button
           type="button"
           onClick={(e) => {
@@ -123,7 +127,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             e.stopPropagation();
             onOpenHistory(product);
           }}
-          className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors py-1 group/btn"
+          className="inline-flex items-center gap-1 text-zinc-400 hover:text-white transition-colors py-1 group/btn cursor-pointer"
         >
           <LineChart className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-zinc-500 group-hover/btn:text-rose-400 transition-colors" />
           <span className="font-mono">Historial</span>
