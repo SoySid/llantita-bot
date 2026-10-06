@@ -22,55 +22,58 @@
 
 ---
 
-## 🌐 Plataforma web
+## Plataforma web
 
-Puedes consultar el catálogo en tiempo real, filtrar marcas y ver las variaciones históricas de precio directamente en la web:
+El catálogo se puede consultar en tiempo real, con filtros por marca y variaciones históricas de precio:
 
-👉 **[https://llantita-bot.vercel.app/](https://llantita-bot.vercel.app/)**
+[llantita-bot.vercel.app](https://llantita-bot.vercel.app/)
 
 ---
 
-## 🔄 Flujo del sistema
+## Flujo del sistema
 
 <p align="center">
   <img src="assets/michi-banner.svg" alt="Diagrama de flujo del sistema Llantita" width="100%" />
 </p>
 
-1. **Scraper VTEX (`llantita_bot.py`):** consulta periódicamente el catálogo de zapatillas en Sporting Argentina cada 30 minutos a través de GitHub Actions.
-2. **Base de datos (Neon PostgreSQL):** guarda productos, talles con stock, fotos oficiales del CDN y el historial de precios.
-3. **Alertas automáticas en Telegram:** si detecta una baja de precio con stock en talle 43, envía una notificación inmediata a los usuarios de [@llantita_bot](https://t.me/llantita_bot).
-4. **Catálogo web en Vercel:** interfaz interactiva construida con Next.js 15 para explorar todo el calzado registrado.
+1. **Scraper VTEX (`llantita_bot.py`):** consulta periódicamente el catálogo de zapatillas en Sporting Argentina mediante GitHub Actions.
+2. **Base de datos (Neon PostgreSQL):** almacena catálogo, talles con stock disponible, imágenes del CDN e historial de precios.
+3. **Alertas en Telegram:** notifica a los usuarios suscritos en [@llantita_bot](https://t.me/llantita_bot) ante bajas de precio con stock activo.
+4. **Catálogo web en Vercel:** interfaz interactiva desarrollada en Next.js 15 para consultar todo el inventario registrado.
 
 ---
 
-## 👟 Características de la web
+## Características de la web
 
-- **Filtros por marca:** selector rápido para Nike, Adidas, Jordan, Puma, Under Armour, New Balance, Asics, Topper, Vans, Fila, entre otras.
-- **Buscador en tiempo real:** filtrado por modelo o palabra clave sin recargar la página.
-- **Rango de precios y ordenamiento:** permite ordenar por menor/mayor precio y por porcentaje de descuento.
-- **Historial de precios:** modal interactivo con gráfico SVG temporal para ver la evolución del precio de cada zapatilla según su talle.
-- **Enlaces directos:** acceso a la publicación oficial de Sporting para comprar al precio de oferta.
-
----
-
-## 🤖 Comandos en Telegram
-
-Cualquier persona puede interactuar con el bot público [@llantita_bot](https://t.me/llantita_bot):
-
-- `/start` — Activar la suscripción para recibir alertas de bajas de precio.
-- `/stop` o `/desuscribir` — Pausar las alertas de ofertas.
+- Vitrina y carrusel de calzado: visualización destacada de ofertas con encuadre proporcional y estilo deportivo.
+- Filtro unificado de marcas: selector en carril horizontal con marcas principales (Nike, Adidas, Jordan, Puma, New Balance, Asics, Vans, Fila, Under Armour, Topper).
+- Búsqueda en tiempo real: filtrado instantáneo por modelo o término clave.
+- Control segmentado de rebajas: ordenamiento por mayor descuento, menor precio o mayor precio.
+- Selector de talles con stock: discriminación de modelos con stock confirmado.
+- Historial de precios: ventana modal con gráfico SVG que muestra las variaciones de precio en el tiempo según cada talle.
+- Modo móvil adaptado: barra de acción inferior fija para facilitar la navegación y filtros al alcance del pulgar.
+- Enlace directo a tienda: acceso directo a la publicación oficial en Sporting para concretar la compra.
 
 ---
 
-## 🛠️ Tecnologías
+## Comandos en Telegram
 
-- **Scraper & Bot:** Python 3.11, `requests`, `psycopg2-binary`
-- **Frontend Web:** Next.js 15, React 19, TypeScript, Tailwind CSS, `@neondatabase/serverless`
-- **Base de datos:** Neon PostgreSQL
-- **Infraestructura:** Vercel (Web) + GitHub Actions (Automatización periódica)
+Interacción con el bot [@llantita_bot](https://t.me/llantita_bot):
+
+- `/start`: Activa la suscripción para recibir notificaciones automáticas cuando baja un precio con stock disponible.
+- `/stop` o `/desuscribir`: Pausa el envío de alertas.
+
+---
+
+## Tecnologías
+
+- Scraper y Bot: Python 3.11, `aiohttp`, `requests`, `psycopg2`
+- Frontend Web: Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS, Lucide Icons, `@neondatabase/serverless`
+- Base de datos: Neon PostgreSQL
+- Despliegue e infraestructura: Vercel (plataforma web) y GitHub Actions (ejecución periódica programada)
 
 ---
 
 <div align="center">
-  Desarrollado por <strong><a href="https://github.com/SoySid">Sid</a></strong> · <a href="https://github.com/SoySid/llantita-bot">github.com/SoySid/llantita-bot</a>
+  Desarrollado por <strong><a href="https://github.com/SoySid">Alfredo López (@SoySid)</a></strong> · <a href="https://github.com/SoySid/llantita-bot">github.com/SoySid/llantita-bot</a>
 </div>

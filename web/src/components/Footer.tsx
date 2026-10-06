@@ -25,7 +25,7 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
                 </span>
                 <span className="text-zinc-600">·</span>
                 <span className="text-xs text-zinc-400">
-                  Desarrollado por <strong className="text-white font-bold">Sid</strong>
+                  Desarrollado por <strong className="text-white font-bold">Alfredo López (@SoySid)</strong>
                 </span>
               </div>
               <p className="text-[11px] text-zinc-500 mt-0.5">
