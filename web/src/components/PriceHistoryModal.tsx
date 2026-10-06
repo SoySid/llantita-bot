@@ -79,7 +79,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
                 <img
                   src={product.imagen_url}
                   alt={product.nombre}
-                  className="h-full w-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.15)]"
+                  className="h-full w-full object-contain mix-blend-multiply"
                 />
               ) : (
                 <span className="text-[10px] text-zinc-400 font-mono">Sin foto</span>

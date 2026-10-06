@@ -251,9 +251,9 @@ export const BrandWordmark: React.FC<{ marca?: string | null; isSelected?: boole
 
 export const BrandBadge: React.FC<BrandProps> = ({ marca, className = '' }) => {
   return (
-    <div className={`inline-flex items-center gap-1.5 ${className}`}>
-      <BrandIcon marca={marca} className="h-3.5 w-3.5 shrink-0 text-zinc-400 group-hover:text-white transition-colors" />
-      <BrandWordmark marca={marca} className="text-zinc-300 group-hover:text-white transition-colors" />
+    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/85 backdrop-blur-xs border border-zinc-800/90 text-zinc-100 shadow-xs ${className}`}>
+      <BrandIcon marca={marca} className="h-3.5 w-3.5 shrink-0 text-zinc-300" />
+      <BrandWordmark marca={marca} className="text-zinc-100" />
     </div>
   );
 };

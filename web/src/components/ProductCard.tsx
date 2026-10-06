@@ -82,6 +82,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 Ahorrás {formatCurrency(ahorro)}
               </span>
             )}
+            <span className="text-[10px] sm:text-[11px] font-mono text-zinc-400 mt-0.5 block font-medium">
+              3 cuotas sin interés de {formatCurrency(Math.round(product.precio / 3))}
+            </span>
           </div>
 
           {/* Talles en stock */}

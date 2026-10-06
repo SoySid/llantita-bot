@@ -32,8 +32,14 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
-      const offset = direction === 'left' ? -330 : 330;
+      const offset = direction === 'left' ? -340 : 340;
       scrollRef.current.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  };
+
+  const handleWheelScroll = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (e.deltaY !== 0 && !e.shiftKey && scrollRef.current) {
+      scrollRef.current.scrollLeft += e.deltaY;
     }
   };
 
@@ -49,40 +55,55 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
               alt="Michi"
               className="h-8 w-8 rounded-full object-cover border border-zinc-700 shadow-xs"
             />
-            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-              Ofertas increíbles
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg sm:text-xl font-black text-white tracking-tight uppercase font-mono">
+                Bajas destacadas
+              </h2>
+              <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                Oportunidades hoy
+              </span>
+            </div>
           </div>
 
-          {/* Flechas de navegación del carrusel */}
-          <div className="hidden sm:flex items-center gap-1.5">
-            <button
-              onClick={() => scroll('left')}
-              className="h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-colors"
-              aria-label="Anterior"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => scroll('right')}
-              className="h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 flex items-center justify-center transition-colors"
-              aria-label="Siguiente"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+          <span className="text-xs font-mono text-zinc-500 hidden sm:inline">
+            Desliza para explorar ({deals.length} rebajas)
+          </span>
         </div>
 
-        {/* Carrusel horizontal con Snap */}
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0"
-        >
+        {/* Carrusel con controles laterales flotantes al estilo retail */}
+        <div className="relative group/track">
+          {/* Flecha flotante izquierda */}
+          <button
+            type="button"
+            onClick={() => scroll('left')}
+            className="hidden md:flex absolute -left-3.5 top-[38%] -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-zinc-950/85 backdrop-blur-md border border-zinc-700/80 text-white shadow-2xl items-center justify-center opacity-0 group-hover/track:opacity-100 transition-all duration-200 hover:scale-110 hover:bg-zinc-900 cursor-pointer"
+            aria-label="Ver productos anteriores"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+
+          {/* Flecha flotante derecha */}
+          <button
+            type="button"
+            onClick={() => scroll('right')}
+            className="hidden md:flex absolute -right-3.5 top-[38%] -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-zinc-950/85 backdrop-blur-md border border-zinc-700/80 text-white shadow-2xl items-center justify-center opacity-0 group-hover/track:opacity-100 transition-all duration-200 hover:scale-110 hover:bg-zinc-900 cursor-pointer"
+            aria-label="Ver siguientes productos"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Carrusel horizontal con Snap */}
+          <div
+            ref={scrollRef}
+            onWheel={handleWheelScroll}
+            className="flex gap-4 overflow-x-auto pb-4 pt-1 snap-x snap-mandatory no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0 scroll-smooth"
+          >
           {deals.map((item) => {
             const tallesList = parseTalles(item.talles);
             const ahorro = item.precio_anterior && item.precio_anterior > item.precio
               ? item.precio_anterior - item.precio
               : 0;
+            const valorCuota = Math.round(item.precio / 3);
 
             return (
               <a
@@ -127,7 +148,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                       {item.nombre}
                     </h3>
 
-                    {/* Precios con cálculo de ahorro real */}
+                    {/* Precios con cálculo de ahorro real y cuotas */}
                     <div className="mt-3 pt-3 border-t border-zinc-800/60">
                       <div className="flex items-baseline gap-2">
                         <span className="text-xl sm:text-2xl font-black text-white tracking-tight">
@@ -139,6 +160,9 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                           </span>
                         )}
                       </div>
+                      <span className="text-[11px] font-mono text-zinc-400 mt-0.5 block font-medium">
+                        3 cuotas sin interés de {formatCurrency(valorCuota)}
+                      </span>
                       {ahorro > 0 && (
                         <span className="text-[11px] font-bold text-emerald-400 font-mono mt-0.5 block">
                           Ahorrás {formatCurrency(ahorro)}
@@ -194,8 +218,9 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
             );
           })}
         </div>
-
       </div>
-    </section>
+
+    </div>
+  </section>
   );
 };
