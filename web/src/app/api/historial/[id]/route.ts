@@ -13,42 +13,55 @@ export async function GET(
       return NextResponse.json({ error: 'ID de producto requerido' }, { status: 400 });
     }
 
-    // 1. Obtener producto
-    const productoResult = await sql`
+    // Consulta única que obtiene el producto y su historial en un solo roundtrip
+    const rows = await sql`
       SELECT 
-        id, 
-        nombre, 
-        marca, 
-        precio::float, 
-        url, 
-        talles, 
-        categoria, 
-        ultima_actualizacion,
-        COALESCE(activo, TRUE) as activo
-      FROM productos 
-      WHERE id = ${id}
+        p.id, 
+        p.nombre, 
+        p.marca, 
+        p.precio::float, 
+        p.url, 
+        p.talles, 
+        p.categoria, 
+        p.ultima_actualizacion,
+        COALESCE(p.activo, TRUE) as activo,
+        COALESCE(
+          (
+            SELECT json_agg(
+              json_build_object(
+                'id', h.id, 
+                'precio', h.precio::float, 
+                'fecha', h.fecha
+              )
+              ORDER BY h.fecha ASC
+            )
+            FROM historial_precios h 
+            WHERE h.producto_id = p.id
+          ),
+          '[]'::json
+        ) as historial
+      FROM productos p 
+      WHERE p.id = ${id}
       LIMIT 1;
     `;
 
-    if (!productoResult.length) {
+    if (!rows.length) {
       return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
     }
 
-    // 2. Obtener historial cronológico de precios
-    const historialResult = await sql`
-      SELECT 
-        id, 
-        precio::float, 
-        fecha 
-      FROM historial_precios 
-      WHERE producto_id = ${id}
-      ORDER BY fecha ASC;
-    `;
+    const { historial, ...producto } = rows[0];
 
-    return NextResponse.json({
-      producto: productoResult[0],
-      historial: historialResult,
-    });
+    return NextResponse.json(
+      {
+        producto,
+        historial: historial || [],
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error al obtener historial:', error);
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });

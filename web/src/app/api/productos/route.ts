@@ -76,17 +76,23 @@ export async function GET(request: NextRequest) {
 
     const whereString = conditions.join(' AND ');
 
-    // Conteo total para paginación
-    const countQuery = `
-      SELECT COUNT(*)::int as total
-      FROM productos p
-      LEFT JOIN (
-        SELECT producto_id, MAX(precio) AS precio_max
-        FROM historial_precios
-        GROUP BY producto_id
-      ) h ON p.id = h.producto_id
-      WHERE ${whereString};
-    `;
+    // Conteo total para paginación (evita escanear historial si no se filtra por ofertas)
+    const countQuery = soloOfertas
+      ? `
+        SELECT COUNT(*)::int as total
+        FROM productos p
+        INNER JOIN (
+          SELECT producto_id, MAX(precio) AS precio_max
+          FROM historial_precios
+          GROUP BY producto_id
+        ) h ON p.id = h.producto_id
+        WHERE ${whereString};
+      `
+      : `
+        SELECT COUNT(*)::int as total
+        FROM productos p
+        WHERE ${whereString};
+      `;
 
     // Query principal de productos
     const selectQuery = `
@@ -116,20 +122,29 @@ export async function GET(request: NextRequest) {
       LIMIT $${idx} OFFSET $${idx + 1};
     `;
 
-    const countResult = await sql(countQuery, values);
+    const [countResult, productosResult] = await Promise.all([
+      sql(countQuery, values),
+      sql(selectQuery, [...values, limit, offset]),
+    ]);
+
     const total = countResult[0]?.total || 0;
 
-    const productosResult = await sql(selectQuery, [...values, limit, offset]);
-
-    return NextResponse.json({
-      productos: productosResult,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+    return NextResponse.json(
+      {
+        productos: productosResult,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
-    });
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=120',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error al buscar productos:', error);
     return NextResponse.json(
