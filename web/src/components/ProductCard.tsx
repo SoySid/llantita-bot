@@ -4,7 +4,6 @@ import React from 'react';
 import { formatCurrency, parseTalles } from '@/lib/utils';
 import { ArrowUpRight, LineChart } from 'lucide-react';
 import { DealProduct } from './FeaturedDeals';
-import { BrandBadge } from './BrandBadge';
 
 interface ProductCardProps {
   product: DealProduct;
@@ -24,20 +23,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     : 0;
 
   return (
-    <div className="flex flex-col justify-between rounded-xl bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition-colors p-3 sm:p-4 group relative">
+    <div className="flex flex-col justify-between rounded-xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 transition-colors p-3 group relative">
       <div>
-        {/* Vitrina de Producto */}
+        {/* Vitrina de Producto con fondo neutro de alta fidelidad */}
         <a
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative w-full aspect-square rounded-lg bg-white p-3 mb-3 overflow-hidden flex items-center justify-center border border-zinc-200/60 block cursor-pointer"
+          className="relative w-full aspect-square rounded-lg bg-[#f4f4f5] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer"
         >
-          <div className="absolute top-2 left-2 z-10">
-            <BrandBadge marca={product.marca} />
-          </div>
           {hasDiscount && (
-            <span className="absolute top-2 right-2 z-10 inline-flex items-center rounded bg-zinc-950 text-white px-1.5 py-0.5 text-[11px] font-black font-mono">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-950 text-white text-[11px] font-bold font-mono">
               -{product.descuento_pct}%
             </span>
           )}
@@ -56,8 +52,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </a>
 
-        {/* Detalles del Producto */}
-        <div>
+        {/* Marca y Nombre */}
+        <div className="space-y-1">
+          <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+            {product.marca || 'Calzado'}
+          </span>
+
           <a
             href={product.url}
             target="_blank"
@@ -66,71 +66,64 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             {product.nombre}
           </a>
+        </div>
 
-          {/* Precios */}
-          <div className="mt-3 pt-2.5 border-t border-zinc-800/60">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg sm:text-2xl font-black text-white tracking-tight">
-                {formatCurrency(product.precio)}
+        {/* Precios */}
+        <div className="mt-2.5 space-y-0.5">
+          <div className="flex items-baseline gap-2">
+            <span className="text-lg sm:text-xl font-black text-white tracking-tight">
+              {formatCurrency(product.precio)}
+            </span>
+            {hasDiscount && product.precio_anterior && (
+              <span className="text-xs text-zinc-400 line-through font-mono">
+                {formatCurrency(product.precio_anterior)}
               </span>
-              {hasDiscount && product.precio_anterior && (
-                <span className="text-xs text-zinc-400 line-through font-mono">
-                  {formatCurrency(product.precio_anterior)}
+            )}
+          </div>
+          <p className="text-[11px] text-zinc-400">
+            3 cuotas de {formatCurrency(Math.round(product.precio / 3))}
+          </p>
+        </div>
+
+        {/* Talles disponibles */}
+        {tallesList.length > 0 && (
+          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] text-zinc-400">Talles:</span>
+            <div className="flex flex-wrap gap-1">
+              {tallesList.slice(0, 5).map((t, idx) => {
+                const isMatchingSelected =
+                  selectedTalles && selectedTalles.length > 0 && selectedTalles.some((st) => t.includes(st));
+                return (
+                  <span
+                    key={idx}
+                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-colors ${
+                      isMatchingSelected
+                        ? 'bg-white text-zinc-950 font-bold'
+                        : 'bg-zinc-950 text-zinc-300 border border-zinc-800'
+                    }`}
+                  >
+                    {t}
+                  </span>
+                );
+              })}
+              {tallesList.length > 5 && (
+                <span className="text-[10px] text-zinc-400 self-center font-mono">
+                  +{tallesList.length - 5}
                 </span>
               )}
             </div>
-            {ahorro > 0 && (
-              <span className="text-[11px] font-semibold text-emerald-400 font-mono mt-0.5 block">
-                Ahorrás {formatCurrency(ahorro)}
-              </span>
-            )}
-            <span className="text-[11px] font-mono text-zinc-400 mt-0.5 block">
-              3 cuotas sin interés de {formatCurrency(Math.round(product.precio / 3))}
-            </span>
           </div>
-
-          {/* Talles */}
-          {tallesList.length > 0 && (
-            <div className="mt-3">
-              <span className="text-[10px] uppercase font-bold text-zinc-400 block mb-1 font-mono">
-                Talles disponibles:
-              </span>
-              <div className="flex flex-wrap gap-1">
-                {tallesList.slice(0, 5).map((t, idx) => {
-                  const isMatchingSelected =
-                    selectedTalles && selectedTalles.length > 0 && selectedTalles.some((st) => t.includes(st));
-                  return (
-                    <span
-                      key={idx}
-                      className={`rounded px-1.5 py-0.5 text-[10px] font-mono border transition-colors ${
-                        isMatchingSelected
-                          ? 'bg-white text-zinc-950 border-white font-bold'
-                          : 'bg-zinc-950 border-zinc-800 text-zinc-300'
-                      }`}
-                    >
-                      {t}
-                    </span>
-                  );
-                })}
-                {tallesList.length > 5 && (
-                  <span className="text-[10px] text-zinc-400 self-center font-mono">
-                    +{tallesList.length - 5}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* Footer de Acciones */}
-      <div className="pt-3 mt-3 border-t border-zinc-800/60 flex items-center justify-between text-xs">
+      {/* Acciones al pie */}
+      <div className="pt-3 mt-3 flex items-center justify-between text-xs">
         <button
           type="button"
           onClick={() => onOpenHistory(product)}
-          className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 transition-colors py-1 cursor-pointer font-mono text-[11px]"
+          className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs"
         >
-          <LineChart className="h-3.5 w-3.5 text-zinc-400" />
+          <LineChart className="h-3.5 w-3.5" />
           <span>Historial</span>
         </button>
 
@@ -138,7 +131,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           href={product.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 font-bold text-white hover:text-zinc-300 transition-colors text-xs"
+          className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-white transition-colors text-xs"
         >
           <span>Sporting</span>
           <ArrowUpRight className="h-3.5 w-3.5" />
