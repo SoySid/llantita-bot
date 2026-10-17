@@ -33,13 +33,13 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Encabezado del catálogo */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-baseline gap-2.5">
-            <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">
-              Todas las zapatillas
+            <h2 className="text-base sm:text-lg font-black text-white tracking-tight uppercase font-mono">
+              Catálogo completo
             </h2>
             {total > 0 && (
-              <span className="text-xs text-zinc-500 font-mono">
+              <span className="text-xs text-zinc-400 font-mono">
                 ({total.toLocaleString('es-AR')} modelos)
               </span>
             )}
@@ -49,29 +49,29 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         {/* Estado de carga */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-            <Loader2 className="h-8 w-8 animate-spin text-zinc-200 mb-3" />
-            <p className="text-sm font-medium">Consultando ofertas en tiempo real...</p>
+            <Loader2 className="h-6 w-6 animate-spin text-zinc-200 mb-3" />
+            <p className="text-xs font-mono">Cargando catálogo...</p>
           </div>
         ) : productos.length === 0 ? (
-          /* Estado vacío si no hay resultados */
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl bg-zinc-900/40 border border-dashed border-zinc-800">
-            <div className="h-12 w-12 rounded-xl bg-zinc-800/80 flex items-center justify-center text-zinc-400 mb-3">
-              <SearchX className="h-6 w-6" />
+          /* Estado vacío */
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-xl bg-zinc-900/40 border border-zinc-800">
+            <div className="h-10 w-10 rounded-lg bg-zinc-800 flex items-center justify-center text-zinc-400 mb-3">
+              <SearchX className="h-5 w-5" />
             </div>
             <h3 className="text-sm font-bold text-zinc-200">No se encontraron zapatillas</h3>
             <p className="text-xs text-zinc-400 max-w-sm mt-1 mb-4">
-              Probá cambiando los filtros de talle o marca para ver más modelos disponibles.
+              Probá cambiando los filtros de talle, marca o término de búsqueda.
             </p>
             <button
               onClick={onResetFilters}
-              className="rounded-xl bg-zinc-100 text-zinc-950 text-xs font-black px-4 py-2 hover:bg-white transition-colors shadow-sm"
+              className="rounded-lg bg-white text-zinc-950 text-xs font-bold px-4 py-2 hover:bg-zinc-200 transition-colors cursor-pointer"
             >
               Restablecer filtros
             </button>
           </div>
         ) : (
-          /* Grilla de productos (2 columnas en móvil estilo app nativa, 4 en PC) */
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
+          /* Grilla de productos */
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {productos.map((prod) => (
               <ProductCard
                 key={prod.id}
@@ -85,24 +85,24 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
         {/* Paginación */}
         {totalPages > 1 && !loading && (
-          <div className="mt-10 flex items-center justify-center gap-3">
+          <div className="mt-8 flex items-center justify-center gap-3">
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="inline-flex items-center gap-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-all select-none"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-colors cursor-pointer select-none"
             >
               <ChevronLeft className="h-4 w-4" />
               <span>Anterior</span>
             </button>
 
-            <span className="text-xs font-semibold text-zinc-400 font-mono">
-              Página <span className="text-white font-bold">{currentPage}</span> de {totalPages}
+            <span className="text-xs text-zinc-400 font-mono">
+              Página <strong className="text-white font-bold">{currentPage}</strong> de {totalPages}
             </span>
 
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="inline-flex items-center gap-1 rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-all select-none"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-colors cursor-pointer select-none"
             >
               <span>Siguiente</span>
               <ChevronRight className="h-4 w-4" />

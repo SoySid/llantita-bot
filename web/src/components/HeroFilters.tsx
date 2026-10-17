@@ -8,6 +8,7 @@ import {
   Clock,
   X,
   RotateCcw,
+  Search,
 } from 'lucide-react';
 import { BrandIcon, BrandWordmark } from './BrandBadge';
 
@@ -44,7 +45,6 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  // Normalizar marcas únicas para asegurar que no haya duplicados
   const uniqueMarcas = useMemo(() => {
     const map = new Map<string, { marca: string; cantidad: number }>();
     for (const m of marcasDisponibles) {
@@ -86,7 +86,6 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
     }
   };
 
-  // Scroll horizontal ultrasuave al usar la rueda del ratón
   const handleWheelScroll = (e: React.WheelEvent<HTMLDivElement>) => {
     if (e.deltaY !== 0 && !e.shiftKey && scrollContainerRef.current) {
       scrollContainerRef.current.scrollLeft += e.deltaY;
@@ -94,26 +93,25 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   };
 
   const SORT_OPTIONS = [
-    { id: 'descuento', label: '% Rebaja', icon: Percent, iconColor: 'text-rose-400' },
-    { id: 'precio_asc', label: '$ Menor', icon: TrendingDown, iconColor: 'text-emerald-400' },
-    { id: 'precio_desc', label: '$ Mayor', icon: TrendingUp, iconColor: 'text-zinc-400' },
-    { id: 'recientes', label: 'Novedades', icon: Clock, iconColor: 'text-sky-400' },
+    { id: 'descuento', label: '% Rebaja', icon: Percent },
+    { id: 'precio_asc', label: '$ Menor', icon: TrendingDown },
+    { id: 'precio_desc', label: '$ Mayor', icon: TrendingUp },
+    { id: 'recientes', label: 'Novedades', icon: Clock },
   ];
 
   return (
-    <div className="w-full bg-[#09090b] border-b border-zinc-800/80 py-4 sm:py-5">
+    <div className="w-full bg-[#09090b] border-b border-zinc-800 py-4 sm:py-5">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4">
         
-        {/* 1. Selector de Marcas con Microinteracciones */}
-        <div className="space-y-2.5">
+        {/* Selector de Marcas */}
+        <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <span className="font-mono font-bold uppercase tracking-wider text-zinc-300">
                 Marcas
               </span>
               {selectedMarcas.length > 0 ? (
-                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-mono font-bold bg-white text-zinc-950 animate-filter-pop shadow-sm">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-white text-zinc-950">
                   {selectedMarcas.length} seleccionada{selectedMarcas.length > 1 ? 's' : ''}
                 </span>
               ) : (
@@ -127,58 +125,37 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onMarcasChange([])}
-                className="group flex items-center gap-1 text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-[11px] font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
               >
-                <RotateCcw className="h-3 w-3 transition-transform duration-300 group-hover:-rotate-90" />
+                <RotateCcw className="h-3 w-3" />
                 <span>Restablecer marcas</span>
               </button>
             )}
           </div>
 
-          {/* Carril de marcas horizontal con máscara de bordes difuminados y animaciones */}
-          <div className="relative mask-edges-fade">
+          <div className="relative">
             <div
               ref={scrollContainerRef}
               onWheel={handleWheelScroll}
-              className="flex items-center gap-2 sm:gap-2.5 overflow-x-auto no-scrollbar scroll-smooth py-1.5 px-1 select-none"
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 select-none"
             >
-              {/* Botón Todas las marcas */}
               <button
                 type="button"
                 onClick={() => onMarcasChange([])}
-                className={`group shrink-0 h-11 sm:h-12 px-4 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-200 ease-out cursor-pointer text-xs font-bold tracking-wide transform active:scale-95 hover:-translate-y-0.5 ${
+                className={`shrink-0 h-10 px-3.5 rounded-lg border flex items-center gap-2 transition-colors cursor-pointer text-xs font-semibold ${
                   selectedMarcas.length === 0
-                    ? 'bg-zinc-100 text-zinc-950 border-white shadow-[0_4px_20px_-2px_rgba(255,255,255,0.25)] ring-2 ring-white/30 scale-[1.02]'
-                    : 'bg-zinc-900/80 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white hover:bg-zinc-850 hover:shadow-lg hover:shadow-black/40'
+                    ? 'bg-white text-zinc-950 border-white font-bold'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
                 }`}
               >
-                <div
-                  className={`h-6 w-6 rounded-lg flex items-center justify-center transition-colors ${
-                    selectedMarcas.length === 0
-                      ? 'bg-zinc-200 text-zinc-950'
-                      : 'bg-zinc-800/80 text-zinc-400 group-hover:text-white group-hover:bg-zinc-700'
-                  }`}
-                >
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
-                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
-                    <rect x="14" y="14" width="7" height="7" rx="1.5" />
-                  </svg>
-                </div>
                 <span>TODAS</span>
-                <span
-                  className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md transition-colors ${
-                    selectedMarcas.length === 0
-                      ? 'bg-zinc-300/80 text-zinc-900 font-bold'
-                      : 'bg-zinc-800/70 text-zinc-500 group-hover:text-zinc-300'
-                  }`}
-                >
+                <span className={`text-[10px] font-mono px-1 rounded ${
+                  selectedMarcas.length === 0 ? 'bg-zinc-200 text-zinc-900' : 'bg-zinc-800 text-zinc-400'
+                }`}>
                   {totalModelos}
                 </span>
               </button>
 
-              {/* Botones de Marca individuales */}
               {uniqueMarcas.map((m) => {
                 const isSelected = selectedMarcas.some(
                   (sm) => sm.toLowerCase() === m.marca.toLowerCase()
@@ -188,36 +165,22 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                     key={m.marca}
                     type="button"
                     onClick={() => toggleMarca(m.marca)}
-                    className={`group shrink-0 h-11 sm:h-12 px-3.5 sm:px-4 rounded-xl sm:rounded-2xl border flex items-center gap-2.5 transition-all duration-200 ease-out cursor-pointer select-none transform active:scale-95 hover:-translate-y-0.5 ${
+                    className={`shrink-0 h-10 px-3 rounded-lg border flex items-center gap-2 transition-colors cursor-pointer select-none text-xs ${
                       isSelected
-                        ? 'bg-zinc-100 text-zinc-950 border-white shadow-[0_4px_20px_-2px_rgba(255,255,255,0.25)] ring-2 ring-white/30 scale-[1.02] font-semibold'
-                        : 'bg-zinc-900/80 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white hover:bg-zinc-850 hover:shadow-lg hover:shadow-black/40'
+                        ? 'bg-white text-zinc-950 border-white font-bold'
+                        : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
                     }`}
                   >
-                    <div
-                      className={`h-6 w-6 sm:h-7 sm:w-7 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-200 ${
-                        isSelected
-                          ? 'bg-zinc-200 text-zinc-950'
-                          : 'bg-zinc-800/80 text-zinc-400 group-hover:text-white group-hover:bg-zinc-700/80 group-hover:scale-105'
-                      }`}
-                    >
+                    <div className="h-4 w-4 flex items-center justify-center">
                       <BrandIcon
                         marca={m.marca}
-                        className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${
-                          isSelected
-                            ? 'text-zinc-950'
-                            : 'text-zinc-400 group-hover:text-zinc-100 transition-colors'
-                        }`}
+                        className={`h-3.5 w-3.5 ${isSelected ? 'text-zinc-950' : 'text-zinc-400'}`}
                       />
                     </div>
                     <BrandWordmark marca={m.marca} isSelected={isSelected} />
-                    <span
-                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md transition-colors ${
-                        isSelected
-                          ? 'bg-zinc-300/80 text-zinc-900 font-bold'
-                          : 'bg-zinc-800/70 text-zinc-500 group-hover:text-zinc-300'
-                      }`}
-                    >
+                    <span className={`text-[10px] font-mono px-1 rounded ${
+                      isSelected ? 'bg-zinc-200 text-zinc-900 font-bold' : 'bg-zinc-800 text-zinc-400'
+                    }`}>
                       {m.cantidad}
                     </span>
                   </button>
@@ -227,134 +190,156 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
           </div>
         </div>
 
-        {/* 2. Dock de Talles y Filtros Rápidos */}
-        <div className="rounded-2xl bg-zinc-900/50 border border-zinc-800/80 p-2.5 sm:p-3 backdrop-blur-md flex flex-col xl:flex-row xl:items-center justify-between gap-3 shadow-xl shadow-black/20">
+        {/* Barra unificada de controles: Buscador, Talles, Ofertas y Orden */}
+        <div className="border border-zinc-800 bg-zinc-900/40 p-3 rounded-xl flex flex-col gap-3">
           
-          {/* Selector de Talles interactivo */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400 shrink-0 mr-1.5">
-              TALLES:
-            </span>
-            {TALLES_COMUNES.map((talle) => {
-              const isTodos = talle === 'Todos';
-              const isSelected = isTodos
-                ? selectedTalles.length === 0
-                : selectedTalles.includes(talle);
-              return (
+          {/* Fila superior: Buscador + Toggle Ofertas */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            {/* Buscador de modelos */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => onSearchChange?.(e.target.value)}
+                placeholder="Buscar modelo (ej: Air Max, Forum, Runner, Grand Court)..."
+                className="w-full h-9 pl-9 pr-8 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-600 transition-colors"
+              />
+              {searchQuery && (
                 <button
-                  key={talle}
                   type="button"
-                  onClick={() => {
-                    if (isTodos) {
-                      onTallesChange([]);
-                    } else {
-                      toggleTalle(talle);
-                    }
-                  }}
-                  className={`h-8 sm:h-9 rounded-xl font-bold transition-all duration-150 border shrink-0 flex items-center justify-center select-none cursor-pointer transform active:scale-90 hover:-translate-y-0.5 ${
-                    isTodos
-                      ? 'px-3 text-xs uppercase tracking-wide'
-                      : 'w-8 sm:w-9 text-xs sm:text-sm font-mono'
-                  } ${
-                    isSelected
-                      ? 'bg-zinc-100 text-zinc-950 border-white shadow-[0_2px_12px_rgba(255,255,255,0.2)] ring-1 ring-white/30 scale-105'
-                      : 'bg-zinc-900/90 text-zinc-300 border-zinc-800 hover:border-zinc-600 hover:text-white hover:bg-zinc-800'
-                  }`}
+                  onClick={() => onSearchChange?.('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white cursor-pointer"
                 >
-                  {talle}
+                  <X className="h-3 w-3" />
                 </button>
-              );
-            })}
-          </div>
+              )}
+            </div>
 
-          {/* Acciones de Rebajas, Ordenamiento y Limpieza */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start xl:self-auto overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1 sm:mx-0 sm:px-0 w-full xl:w-auto">
-            
-            {/* Toggle Háptico de Rebajas con Switch Deslizable */}
+            {/* Toggle de solo ofertas */}
             <button
               type="button"
               onClick={() => onSoloOfertasChange(!soloOfertas)}
-              className={`group shrink-0 h-8 sm:h-9 px-3 rounded-xl border flex items-center gap-2.5 transition-all duration-200 select-none cursor-pointer transform active:scale-95 ${
+              className={`shrink-0 h-9 px-3.5 rounded-lg border flex items-center gap-2 transition-colors cursor-pointer text-xs font-semibold ${
                 soloOfertas
-                  ? 'bg-rose-500/15 border-rose-500/50 text-rose-300 shadow-[0_0_16px_rgba(244,63,94,0.25)] ring-1 ring-rose-500/30'
-                  : 'bg-zinc-900/90 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850'
+                  ? 'bg-rose-600 text-white border-rose-500 font-bold'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
               }`}
-              title={soloOfertas ? 'Desactivar filtro de rebajas' : 'Filtrar exclusivamente zapatillas rebajadas'}
             >
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider">
-                Solo rebajas
-              </span>
-              <div
-                className={`w-7 h-4 rounded-full p-0.5 transition-colors duration-200 flex items-center ${
-                  soloOfertas ? 'bg-rose-500' : 'bg-zinc-800 border border-zinc-700/60'
-                }`}
-              >
-                <div
-                  className={`h-3 w-3 rounded-full bg-white shadow-sm transition-transform duration-200 ${
-                    soloOfertas ? 'translate-x-3' : 'translate-x-0'
-                  }`}
-                />
-              </div>
+              <span className="font-mono text-[11px] uppercase tracking-wide">Solo rebajas</span>
+              <span className={`inline-block h-2 w-2 rounded-full ${soloOfertas ? 'bg-white' : 'bg-zinc-600'}`} />
             </button>
+          </div>
 
-            {/* Segmented Control de Ordenamiento Directo */}
-            <div className="flex items-center p-1 rounded-xl bg-zinc-950/80 border border-zinc-800/80 gap-0.5 shrink-0">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 px-1.5 hidden lg:inline">
-                ORDEN:
+          {/* Fila inferior: Talles + Orden */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2 border-t border-zinc-800/60">
+            
+            {/* Selector de Talles */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-zinc-400 shrink-0 mr-1">
+                Talle:
               </span>
-              {SORT_OPTIONS.map((opt) => {
-                const isSelected = selectedOrden === opt.id;
-                const OptIcon = opt.icon;
+              {TALLES_COMUNES.map((talle) => {
+                const isTodos = talle === 'Todos';
+                const isSelected = isTodos
+                  ? selectedTalles.length === 0
+                  : selectedTalles.includes(talle);
                 return (
                   <button
-                    key={opt.id}
+                    key={talle}
                     type="button"
-                    onClick={() => onOrdenChange(opt.id)}
-                    className={`shrink-0 h-6 sm:h-7 px-2 sm:px-2.5 rounded-lg text-[11px] font-mono font-bold flex items-center gap-1.5 transition-all duration-150 cursor-pointer select-none active:scale-95 ${
+                    onClick={() => {
+                      if (isTodos) {
+                        onTallesChange([]);
+                      } else {
+                        toggleTalle(talle);
+                      }
+                    }}
+                    className={`h-8 rounded-md font-semibold transition-colors border shrink-0 flex items-center justify-center select-none cursor-pointer ${
+                      isTodos
+                        ? 'px-2.5 text-xs uppercase'
+                        : 'w-8 text-xs font-mono'
+                    } ${
                       isSelected
-                        ? 'bg-zinc-100 text-zinc-950 shadow-sm scale-100 font-extrabold'
-                        : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/80'
+                        ? 'bg-white text-zinc-950 border-white font-bold'
+                        : 'bg-zinc-900 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white'
                     }`}
                   >
-                    <OptIcon className={`h-3 w-3 ${isSelected ? 'text-zinc-950' : opt.iconColor}`} />
-                    <span>{opt.label}</span>
+                    {talle}
                   </button>
                 );
               })}
             </div>
 
-            {/* Botón Limpiar filtros cuando hay activos */}
-            {hasActiveFilters && (
-              <button
-                type="button"
-                onClick={onReset}
-                className="group h-8 sm:h-9 px-2.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer shrink-0"
-                title="Restablecer todos los filtros"
-              >
-                <X className="h-3.5 w-3.5 transition-transform duration-200 group-hover:rotate-90" />
-                <span className="hidden sm:inline">Limpiar</span>
-              </button>
-            )}
+            {/* Ordenamiento y Reset */}
+            <div className="flex items-center gap-2 shrink-0 self-start lg:self-auto overflow-x-auto no-scrollbar">
+              <div className="flex items-center p-0.5 rounded-lg bg-zinc-950 border border-zinc-800 gap-0.5">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 px-2 hidden sm:inline">
+                  Orden:
+                </span>
+                {SORT_OPTIONS.map((opt) => {
+                  const isSelected = selectedOrden === opt.id;
+                  const OptIcon = opt.icon;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => onOrdenChange(opt.id)}
+                      className={`h-7 px-2.5 rounded-md text-[11px] font-mono font-medium flex items-center gap-1 transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'bg-zinc-100 text-zinc-950 font-bold'
+                          : 'text-zinc-400 hover:text-zinc-200'
+                      }`}
+                    >
+                      <OptIcon className="h-3 w-3" />
+                      <span>{opt.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={onReset}
+                  className="h-8 px-2.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+                  title="Restablecer todos los filtros"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Limpiar</span>
+                </button>
+              )}
+            </div>
 
           </div>
 
         </div>
 
-        {/* 3. Chips de Filtros Activos con Animación Pop-in */}
+        {/* Filtros Activos */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-zinc-800/40 text-xs">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mr-1">
-              ACTIVOS:
+          <div className="flex flex-wrap items-center gap-1.5 pt-1 text-xs">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-400 mr-1">
+              Filtros:
             </span>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => onSearchChange?.('')}
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
+              >
+                <span>&ldquo;{searchQuery}&rdquo;</span>
+                <X className="h-2.5 w-2.5 text-zinc-400" />
+              </button>
+            )}
             {selectedMarcas.map((marca) => (
               <button
                 key={marca}
                 type="button"
                 onClick={() => toggleMarca(marca)}
-                className="animate-filter-pop group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-300 transition-all duration-150 text-[11px] font-semibold active:scale-95"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
               >
                 <span>{marca}</span>
-                <X className="h-2.5 w-2.5 text-zinc-400 group-hover:text-rose-300 transition-colors" />
+                <X className="h-2.5 w-2.5 text-zinc-400" />
               </button>
             ))}
             {selectedTalles.map((talle) => (
@@ -362,26 +347,26 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 key={talle}
                 type="button"
                 onClick={() => toggleTalle(talle)}
-                className="animate-filter-pop group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800/90 border border-zinc-700/60 text-zinc-200 hover:border-rose-500/50 hover:bg-rose-500/10 hover:text-rose-300 transition-all duration-150 text-[11px] font-semibold active:scale-95"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
               >
                 <span>Talle {talle}</span>
-                <X className="h-2.5 w-2.5 text-zinc-400 group-hover:text-rose-300 transition-colors" />
+                <X className="h-2.5 w-2.5 text-zinc-400" />
               </button>
             ))}
             {soloOfertas && (
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(false)}
-                className="animate-filter-pop group inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30 transition-all duration-150 text-[11px] font-semibold active:scale-95"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-200 hover:bg-rose-900 transition-colors text-[11px]"
               >
                 <span>Solo rebajas</span>
-                <X className="h-2.5 w-2.5 text-rose-400 group-hover:text-white transition-colors" />
+                <X className="h-2.5 w-2.5 text-rose-300" />
               </button>
             )}
             <button
               type="button"
               onClick={onReset}
-              className="text-[11px] text-zinc-500 hover:text-zinc-200 ml-1.5 underline underline-offset-2 transition-colors cursor-pointer"
+              className="text-[11px] text-zinc-400 hover:text-white ml-1 underline underline-offset-2 transition-colors cursor-pointer"
             >
               Borrar todos
             </button>
@@ -392,3 +377,4 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
     </div>
   );
 };
+

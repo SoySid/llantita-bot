@@ -3,21 +3,21 @@
 @tailwind utilities;
 
 :root {
-  --background: #0b0f17;
-  --surface: #111827;
-  --surface-card: #161f30;
-  --surface-border: #1f293d;
+  --background: #09090b;
+  --surface: #121215;
+  --surface-card: #18181b;
+  --surface-border: #27272a;
 }
 
 body {
   background-color: var(--background);
-  color: #f1f5f9;
+  color: #f4f4f5;
   min-height: 100vh;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
 }
 
-/* Custom scrollbar for smooth horizontal carousels */
+/* Ocultar barra de desplazamiento en carruseles táctiles */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -26,70 +26,3 @@ body {
   scrollbar-width: none;
 }
 
-/* Pulse animation for live data badge */
-@keyframes live-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.4;
-    transform: scale(0.9);
-  }
-}
-
-.animate-live-pulse {
-  animation: live-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Microinteracciones y transiciones de filtros */
-@keyframes filter-pop-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.92) translateY(3px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.animate-filter-pop {
-  animation: filter-pop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes menu-dropdown {
-  0% {
-    opacity: 0;
-    transform: scale(0.96) translateY(-6px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.animate-menu-dropdown {
-  animation: menu-dropdown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes flame-pulse {
-  0%, 100% {
-    transform: scale(1);
-    filter: drop-shadow(0 0 2px rgba(251, 146, 60, 0.4));
-  }
-  50% {
-    transform: scale(1.12);
-    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8));
-  }
-}
-
-.animate-flame-pulse {
-  animation: flame-pulse 1.6s ease-in-out infinite;
-}
-
-/* Máscara de desvanecimiento suave para scroll horizontal */
-.mask-edges-fade {
-  mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%);
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 20px, black calc(100% - 20px), transparent 100%);
-}

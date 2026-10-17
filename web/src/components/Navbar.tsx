@@ -10,12 +10,12 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#09090b]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#09090b]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         
-        {/* Brand / Logo sobrio con la foto del gatito */}
-        <div className="flex items-center gap-3.5">
-          <div className="h-12 w-12 sm:h-14 sm:w-14 rounded-full overflow-hidden border-2 border-zinc-700 bg-zinc-800 shrink-0 hover:border-zinc-400 transition-colors">
+        {/* Marca y avatar */}
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-zinc-700 bg-zinc-800 shrink-0">
             <img
               src="/logo.jpg"
               alt="Llantita"
@@ -24,31 +24,28 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
           </div>
 
           <div>
-            <span className="text-xl sm:text-2xl font-black uppercase tracking-tight text-zinc-100">
+            <span className="text-lg sm:text-xl font-black uppercase tracking-tight text-white font-mono">
               Llantita
             </span>
-            <p className="text-xs text-zinc-400 hidden sm:block">
+            <p className="text-[11px] text-zinc-400 hidden sm:block">
               Precios y ofertas en Sporting Argentina
             </p>
           </div>
         </div>
 
-        {/* Datos de sincronización y Botón */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          
-          {/* Indicador de modelos en catálogo */}
+        {/* Acciones */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-400 border border-zinc-800 bg-zinc-900/60 px-3.5 py-1.5 rounded-lg font-mono">
+            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-400 border border-zinc-800 bg-zinc-900 px-3 py-1.5 rounded-lg font-mono">
               <span className="text-zinc-200 font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
             </div>
           )}
 
-          {/* Botón de GitHub */}
           <a
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+            className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
@@ -57,16 +54,15 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             </svg>
           </a>
 
-          {/* Botón de Telegram de alto contraste */}
           <a
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs px-3.5 sm:px-4 py-2 transition-colors shadow-sm"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs px-3.5 py-1.5 transition-colors"
           >
             <Send className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Bot de Telegram</span>
-            <span className="sm:hidden">Telegram</span>
+            <span className="hidden sm:inline">Bot Telegram</span>
+            <span className="sm:hidden">Bot</span>
           </a>
         </div>
       </div>
