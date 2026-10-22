@@ -118,15 +118,19 @@ export default function HomePage() {
   };
 
   return (
-    <div ref={topRef} className="min-h-screen flex flex-col bg-[#09090b] text-zinc-100">
+    <div ref={topRef} className="min-h-dvh flex flex-col bg-[#09090b] text-zinc-100">
       {/* 1. Header con indicador de tiempo */}
       <Navbar
         ultimaActualizacion={ultimaActualizacion}
         totalProductos={totalProductos}
       />
 
-      {/* 2. Sección explicativa de bienvenida */}
-      <AboutSection onExploreClick={handleScrollToCatalog} />
+      {/* 2. Sección explicativa y producto protagonista */}
+      <AboutSection
+        topDeal={featuredDeals[0]}
+        onExploreClick={handleScrollToCatalog}
+        onOpenHistory={setSelectedProductForHistory}
+      />
 
       {/* 3. Hero con buscador y filtros */}
       <div ref={catalogRef}>

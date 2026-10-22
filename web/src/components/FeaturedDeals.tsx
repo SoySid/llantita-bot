@@ -30,12 +30,12 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
   const topDeals = deals.slice(0, 8);
 
   return (
-    <section className="w-full py-8 border-b border-zinc-800 bg-[#09090b]">
+    <section className="w-full py-10 bg-[#09090b]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
         {/* Encabezado sin botones artificiales */}
-        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-4">
-          <h2 className="text-base sm:text-lg font-black text-white tracking-tight uppercase font-mono">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 mb-5">
+          <h2 className="text-base sm:text-xl font-black text-white tracking-tight uppercase">
             Bajas de precio destacadas
           </h2>
           <span className="text-xs text-zinc-400">
@@ -52,7 +52,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
             return (
               <div
                 key={item.id}
-                className="rounded-xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 hover-lift p-3 flex flex-col justify-between transition-[border-color,background-color] duration-180 ease-out group relative"
+                className="rounded-xl bg-zinc-900/60 hover:bg-zinc-900 hover-lift p-3 flex flex-col justify-between transition-[background-color] duration-180 ease-out group relative"
               >
                 <div>
                   {/* Vitrina de Producto con fondo neutro */}
@@ -63,7 +63,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     className="relative w-full aspect-square rounded-lg bg-[#f4f4f5] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
                   >
                     {item.descuento_pct > 0 && (
-                      <span className="absolute top-2 right-2 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-950 text-white text-[11px] font-bold font-mono">
+                      <span className="absolute top-2 right-2 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-950 text-white text-xs font-bold tabular-nums">
                         -{item.descuento_pct}%
                       </span>
                     )}
@@ -77,14 +77,14 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-zinc-400">
-                        <span className="text-xs font-mono">Sin foto</span>
+                        <span className="text-xs">Sin foto</span>
                       </div>
                     )}
                   </a>
 
                   {/* Marca y Nombre */}
                   <div className="space-y-1">
-                    <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                    <span className="block text-xs font-bold text-zinc-400">
                       {item.marca || 'Calzado'}
                     </span>
 
@@ -101,16 +101,16 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   {/* Precios */}
                   <div className="mt-2.5 space-y-0.5">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-lg sm:text-xl font-black text-white tracking-tight">
+                      <span className="text-lg sm:text-xl font-black text-white tracking-tight tabular-nums">
                         {formatCurrency(item.precio)}
                       </span>
                       {item.precio_anterior && (
-                        <span className="text-xs text-zinc-400 line-through font-mono">
+                        <span className="text-xs text-zinc-500 line-through tabular-nums">
                           {formatCurrency(item.precio_anterior)}
                         </span>
                       )}
                     </div>
-                    <p className="text-[11px] text-zinc-400">
+                    <p className="text-xs text-zinc-400 tabular-nums">
                       3 cuotas de {formatCurrency(valorCuota)}
                     </p>
                   </div>
@@ -118,18 +118,18 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   {/* Talles */}
                   {tallesList.length > 0 && (
                     <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[11px] text-zinc-400">Talles:</span>
+                      <span className="text-xs text-zinc-400">Talles:</span>
                       <div className="flex flex-wrap gap-1">
                         {tallesList.slice(0, 5).map((t, idx) => (
                           <span
                             key={idx}
-                            className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-300 border border-zinc-800"
+                            className="text-xs tabular-nums px-1.5 py-0.5 rounded bg-zinc-950 text-zinc-300"
                           >
                             {t}
                           </span>
                         ))}
                         {tallesList.length > 5 && (
-                          <span className="text-[10px] text-zinc-400 self-center font-mono">
+                          <span className="text-xs text-zinc-400 self-center tabular-nums">
                             +{tallesList.length - 5}
                           </span>
                         )}

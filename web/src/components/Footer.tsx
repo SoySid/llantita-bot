@@ -7,8 +7,8 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
   return (
-    <footer className="w-full border-t border-zinc-800/80 bg-[#09090b] py-8 pb-24 sm:pb-10 text-zinc-400 text-xs">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <footer className="w-full bg-[#09090b] pt-12 pb-24 sm:pb-12 text-zinc-400 text-xs">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Izquierda: Michi, Marca y Desarrollador */}
@@ -16,7 +16,7 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
             <img
               src="/logo.jpg"
               alt="Llantita"
-              className="h-10 w-10 rounded-full object-cover border border-zinc-700 shadow-xs shrink-0"
+              className="h-10 w-10 rounded-full object-cover shrink-0"
             />
             <div>
               <div className="flex items-center gap-2">
@@ -28,14 +28,14 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
                   Desarrollado por <strong className="text-white font-bold">Alfredo López (@SoySid)</strong>
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-500 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5">
                 Rastreador de ofertas y bajas de precio en Sporting Argentina
               </p>
             </div>
           </div>
 
           {/* Derecha: Enlaces limpios */}
-          <div className="flex items-center gap-5 text-xs font-mono">
+          <div className="flex items-center gap-5 text-xs font-medium">
             <a
               href="https://github.com/SoySid/llantita-bot"
               target="_blank"
@@ -71,7 +71,7 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
         </div>
 
         {/* Línea inferior limpia */}
-        <div className="mt-6 pt-5 border-t border-zinc-800/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-zinc-500 font-mono">
+        <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-400">
           <p>© {new Date().getFullYear()} Llantita. Precios tomados del catálogo público.</p>
           <span>Monitoreo automático cada 1 hora</span>
         </div>

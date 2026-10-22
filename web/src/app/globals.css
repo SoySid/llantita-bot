@@ -17,7 +17,7 @@
 body {
   background-color: var(--background);
   color: #f4f4f5;
-  min-height: 100vh;
+  min-height: 100dvh;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   -webkit-font-smoothing: antialiased;
 }
@@ -68,7 +68,7 @@ body {
 /* Transiciones táctiles solo en punteros precisos para evitar sticky hover en móviles */
 @media (hover: hover) and (pointer: fine) {
   .hover-lift {
-    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), border-color 180ms ease-out;
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
   }
   .hover-lift:hover {
     transform: translateY(-2px);

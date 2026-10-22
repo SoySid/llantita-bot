@@ -159,7 +159,7 @@ export const BrandWordmark: React.FC<{ marca?: string | null; isSelected?: boole
   }
   if (m === 'FILA') {
     return (
-      <span className={`font-black uppercase tracking-widest text-[11px] font-mono ${className}`}>
+      <span className={`font-black uppercase tracking-widest text-[11px] font-sans ${className}`}>
         <span className={isSelected ? 'text-zinc-950' : 'text-rose-500'}>F</span>ILA
       </span>
     );
@@ -180,7 +180,7 @@ export const BrandWordmark: React.FC<{ marca?: string | null; isSelected?: boole
   }
   if (m === 'SALOMON') {
     return (
-      <span className={`font-black uppercase tracking-widest text-[10px] font-mono ${className}`}>
+      <span className={`font-black uppercase tracking-widest text-[10px] font-sans ${className}`}>
         SALOMON
       </span>
     );
@@ -251,7 +251,7 @@ export const BrandWordmark: React.FC<{ marca?: string | null; isSelected?: boole
 
 export const BrandBadge: React.FC<BrandProps> = ({ marca, className = '' }) => {
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-950/85 backdrop-blur-xs border border-zinc-800/90 text-zinc-100 shadow-xs ${className}`}>
+    <div className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-zinc-900 text-zinc-100 ${className}`}>
       <BrandIcon marca={marca} className="h-3.5 w-3.5 shrink-0 text-zinc-300" />
       <BrandWordmark marca={marca} className="text-zinc-100" />
     </div>

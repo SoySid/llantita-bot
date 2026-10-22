@@ -10,12 +10,12 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-800 bg-[#09090b]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full bg-[#09090b]">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
         
         {/* Marca y avatar */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full overflow-hidden border border-zinc-700 bg-zinc-800 shrink-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden bg-zinc-800 shrink-0">
             <img
               src="/logo.jpg"
               alt="Llantita"
@@ -24,10 +24,10 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
           </div>
 
           <div>
-            <span className="text-lg sm:text-xl font-black uppercase tracking-tight text-white font-mono">
+            <span className="text-lg sm:text-xl font-black uppercase tracking-tight text-white">
               Llantita
             </span>
-            <p className="text-[11px] text-zinc-400 hidden sm:block">
+            <p className="text-xs text-zinc-400 hidden sm:block">
               Precios y ofertas en Sporting Argentina
             </p>
           </div>
@@ -36,8 +36,8 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
         {/* Acciones */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-400 border border-zinc-800 bg-zinc-900 px-3 py-1.5 rounded-lg font-mono">
-              <span className="text-zinc-200 font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
+            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-lg tabular-nums">
+              <span className="font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
             </div>
           )}
 
@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-[0.92] transition-[border-color,color,transform] duration-150 ease-out cursor-pointer"
+            className="flex items-center justify-center h-8 w-8 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white active:scale-[0.92] transition-[color,transform] duration-150 ease-out cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >

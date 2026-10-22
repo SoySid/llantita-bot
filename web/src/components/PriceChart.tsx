@@ -151,29 +151,29 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
   if (dataSeries.length <= 1) {
     return (
-      <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 mb-4 text-center">
+      <div className="rounded-2xl bg-zinc-950 p-4 mb-4 text-center">
         <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs mb-1">
           <Minus className="h-4 w-4 text-emerald-400" />
           <span>Sin variaciones de precio detectadas aún</span>
         </div>
         <p className="text-sm font-semibold text-zinc-300">
-          Precio único registrado: <span className="text-emerald-400 font-bold">{formatCurrency(currentPrice)}</span>
+          Precio único registrado: <span className="text-emerald-400 font-bold tabular-nums">{formatCurrency(currentPrice)}</span>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-3 mb-4 select-none">
+    <div className="rounded-2xl bg-zinc-950 p-4 mb-4 select-none">
       {/* Barra superior interactiva del gráfico */}
-      <div className="flex items-center justify-between pb-2 border-b border-zinc-800/60 text-xs">
+      <div className="flex items-center justify-between pb-3 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-zinc-300 font-mono">
+          <span className="font-semibold text-zinc-300 tabular-nums">
             {formatTooltipDate(activePoint.fecha)}
           </span>
           {diffFromPrev !== null && diffFromPrev !== 0 && (
             <span
-              className={`inline-flex items-center gap-0.5 text-[11px] font-bold px-1.5 py-0.5 rounded ${
+              className={`inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded tabular-nums ${
                 diffFromPrev < 0
                   ? 'bg-emerald-500/15 text-emerald-400'
                   : 'bg-rose-500/15 text-rose-400'
@@ -184,7 +184,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             </span>
           )}
         </div>
-        <div className="font-mono font-black text-emerald-400 text-sm">
+        <div className="font-black text-emerald-400 text-sm tabular-nums">
           {formatCurrency(activePoint.precio)}
         </div>
       </div>
@@ -218,7 +218,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 x={padLeft - 6}
                 y={gl.y + 3.5}
                 textAnchor="end"
-                className="fill-zinc-500 text-[10px] font-mono"
+                className="fill-zinc-500 text-xs tabular-nums"
               >
                 ${Math.round(gl.valor / 1000)}k
               </text>
@@ -275,7 +275,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                   fill={isActive ? '#34d399' : '#10b981'}
                   stroke="#09090b"
                   strokeWidth={isActive ? '2.5' : '1.5'}
-                  className="transition-all duration-150 pointer-events-none"
+                  className="transition-[r,fill] duration-150 pointer-events-none"
                 />
               </g>
             );
@@ -286,7 +286,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft}
             y={height - 8}
             textAnchor="start"
-            className="fill-zinc-400 text-[10px] font-mono"
+            className="fill-zinc-400 text-xs tabular-nums"
           >
             {formatDateLabel(points[0].fecha)}
           </text>
@@ -296,7 +296,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               x={padLeft + chartWidth / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-zinc-500 text-[10px] font-mono"
+              className="fill-zinc-500 text-xs tabular-nums"
             >
               {formatDateLabel(points[Math.floor(points.length / 2)].fecha)}
             </text>
@@ -306,7 +306,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft + chartWidth}
             y={height - 8}
             textAnchor="end"
-            className="fill-zinc-400 text-[10px] font-mono"
+            className="fill-zinc-400 text-xs tabular-nums"
           >
             {formatDateLabel(points[points.length - 1].fecha)}
           </text>

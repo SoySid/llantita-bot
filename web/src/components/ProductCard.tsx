@@ -20,7 +20,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   const hasDiscount = product.descuento_pct > 0 && product.precio_anterior;
 
   return (
-    <div className="flex flex-col justify-between rounded-xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 hover-lift transition-[border-color,background-color] duration-180 ease-out p-3 group relative">
+    <div className="flex flex-col justify-between rounded-xl bg-zinc-900/60 hover:bg-zinc-900 hover-lift transition-[background-color] duration-180 ease-out p-3.5 group relative">
       <div>
         {/* Vitrina de Producto con fondo neutro de alta fidelidad */}
         <a
@@ -30,7 +30,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           className="relative w-full aspect-square rounded-lg bg-[#f4f4f5] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
         >
           {hasDiscount && (
-            <span className="absolute top-2 right-2 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-950 text-white text-[11px] font-bold font-mono">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center px-2 py-0.5 rounded bg-zinc-950 text-white text-xs font-bold tabular-nums">
               -{product.descuento_pct}%
             </span>
           )}
@@ -44,14 +44,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-zinc-400">
-              <span className="text-xs font-mono">Sin foto</span>
+              <span className="text-xs">Sin foto</span>
             </div>
           )}
         </a>
 
         {/* Marca y Nombre */}
         <div className="space-y-1">
-          <span className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+          <span className="block text-xs font-bold text-zinc-400">
             {product.marca || 'Calzado'}
           </span>
 
@@ -68,16 +68,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Precios */}
         <div className="mt-2.5 space-y-0.5">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg sm:text-xl font-black text-white tracking-tight">
+            <span className="text-lg sm:text-xl font-black text-white tracking-tight tabular-nums">
               {formatCurrency(product.precio)}
             </span>
             {hasDiscount && product.precio_anterior && (
-              <span className="text-xs text-zinc-400 line-through font-mono">
+              <span className="text-xs text-zinc-500 line-through tabular-nums">
                 {formatCurrency(product.precio_anterior)}
               </span>
             )}
           </div>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-xs text-zinc-400 tabular-nums">
             3 cuotas de {formatCurrency(Math.round(product.precio / 3))}
           </p>
         </div>
@@ -85,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Talles disponibles */}
         {tallesList.length > 0 && (
           <div className="mt-3 flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] text-zinc-400">Talles:</span>
+            <span className="text-xs text-zinc-400">Talles:</span>
             <div className="flex flex-wrap gap-1">
               {tallesList.slice(0, 5).map((t, idx) => {
                 const isMatchingSelected =
@@ -93,10 +93,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 return (
                   <span
                     key={idx}
-                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-[background-color,color,border-color] duration-150 select-none ${
+                    className={`text-xs tabular-nums px-1.5 py-0.5 rounded transition-[background-color,color] duration-150 select-none ${
                       isMatchingSelected
                         ? 'bg-white text-zinc-950 font-bold'
-                        : 'bg-zinc-950 text-zinc-300 border border-zinc-800'
+                        : 'bg-zinc-950 text-zinc-300'
                     }`}
                   >
                     {t}
@@ -104,7 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 );
               })}
               {tallesList.length > 5 && (
-                <span className="text-[10px] text-zinc-400 self-center font-mono">
+                <span className="text-xs text-zinc-400 self-center tabular-nums">
                   +{tallesList.length - 5}
                 </span>
               )}
