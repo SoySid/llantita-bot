@@ -73,7 +73,7 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
         {/* Línea inferior limpia */}
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-zinc-400">
           <p>© {new Date().getFullYear()} Llantita. Precios tomados del catálogo público.</p>
-          <span>Monitoreo automático cada 1 hora</span>
+          <span>Monitoreo automático cada 30 min</span>
         </div>
 
       </div>

@@ -125,12 +125,8 @@ export default function HomePage() {
         totalProductos={totalProductos}
       />
 
-      {/* 2. Sección explicativa y producto protagonista */}
-      <AboutSection
-        topDeal={featuredDeals[0]}
-        onExploreClick={handleScrollToCatalog}
-        onOpenHistory={setSelectedProductForHistory}
-      />
+      {/* 2. Sección principal editorial */}
+      <AboutSection onExploreClick={handleScrollToCatalog} />
 
       {/* 3. Hero con buscador y filtros */}
       <div ref={catalogRef}>
