@@ -57,7 +57,7 @@ export const HowItWorksSection: React.FC = () => {
                 href="https://t.me/llantita_bot"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:border-zinc-700 transition-colors"
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-900 px-3.5 py-2 text-xs font-semibold text-zinc-200 hover:text-white hover:border-zinc-700 active:scale-[0.96] transition-[border-color,background-color,transform] duration-150 ease-out cursor-pointer"
               >
                 <Send className="h-3.5 w-3.5 text-[#229ED9]" />
                 <span>Canal de Telegram (@llantita_bot)</span>
@@ -74,14 +74,14 @@ export const HowItWorksSection: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => toggleItem(idx)}
-                    className="flex w-full items-start justify-between gap-4 text-left group"
+                    className="flex w-full items-start justify-between gap-4 text-left group cursor-pointer"
                   >
-                    <span className="text-sm sm:text-base font-semibold text-zinc-200 group-hover:text-white transition-colors">
+                    <span className="text-sm sm:text-base font-semibold text-zinc-200 group-hover:text-white transition-colors duration-150">
                       {item.pregunta}
                     </span>
                     <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-zinc-400 group-hover:text-zinc-200 transition-transform">
                       <ChevronDown
-                        className={`h-4 w-4 transition-transform duration-200 ${
+                        className={`h-4 w-4 transition-transform duration-200 ease-out ${
                           isOpen ? 'rotate-180 text-white' : ''
                         }`}
                       />
@@ -89,7 +89,7 @@ export const HowItWorksSection: React.FC = () => {
                   </button>
 
                   {isOpen && (
-                    <div className="pt-3 pr-8">
+                    <div className="pt-3 pr-8 animate-in fade-in duration-150 ease-out">
                       <p className="text-sm text-zinc-400 leading-relaxed">
                         {item.respuesta}
                       </p>

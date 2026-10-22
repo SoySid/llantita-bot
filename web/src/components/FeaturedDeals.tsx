@@ -47,15 +47,12 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
         <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {topDeals.map((item) => {
             const tallesList = parseTalles(item.talles);
-            const ahorro = item.precio_anterior && item.precio_anterior > item.precio
-              ? item.precio_anterior - item.precio
-              : 0;
             const valorCuota = Math.round(item.precio / 3);
 
             return (
               <div
                 key={item.id}
-                className="rounded-xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 p-3 flex flex-col justify-between transition-colors group relative"
+                className="rounded-xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 hover-lift p-3 flex flex-col justify-between transition-[border-color,background-color] duration-180 ease-out group relative"
               >
                 <div>
                   {/* Vitrina de Producto con fondo neutro */}
@@ -63,7 +60,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="relative w-full aspect-square rounded-lg bg-[#f4f4f5] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer"
+                    className="relative w-full aspect-square rounded-lg bg-[#f4f4f5] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.98] transition-transform duration-150 ease-out"
                   >
                     {item.descuento_pct > 0 && (
                       <span className="absolute top-2 right-2 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-zinc-950 text-white text-[11px] font-bold font-mono">
@@ -76,7 +73,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                         src={item.imagen_url}
                         alt={item.nombre}
                         loading="lazy"
-                        className="h-full w-full object-contain mix-blend-multiply transition-transform duration-200 group-hover:scale-105"
+                        className="h-full w-full object-contain mix-blend-multiply transition-transform duration-200 ease-out md:group-hover:scale-[1.04]"
                       />
                     ) : (
                       <div className="flex flex-col items-center justify-center text-zinc-400">
@@ -95,7 +92,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs sm:text-sm font-semibold text-zinc-200 line-clamp-2 leading-snug hover:text-white transition-colors block min-h-[36px]"
+                      className="text-xs sm:text-sm font-semibold text-zinc-200 line-clamp-2 leading-snug hover:text-white transition-colors duration-150 block min-h-[36px]"
                     >
                       {item.nombre}
                     </a>
@@ -146,7 +143,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   <button
                     type="button"
                     onClick={() => onSelectProduct(item)}
-                    className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer text-xs"
+                    className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white active:scale-[0.95] transition-[color,transform] duration-150 ease-out cursor-pointer text-xs select-none"
                   >
                     <LineChart className="h-3.5 w-3.5" />
                     <span>Historial</span>
@@ -156,7 +153,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-white transition-colors text-xs"
+                    className="inline-flex items-center gap-1 font-semibold text-zinc-200 hover:text-white active:scale-[0.95] transition-[color,transform] duration-150 ease-out text-xs select-none"
                   >
                     <span>Sporting</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -172,4 +169,3 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
     </section>
   );
 };
-

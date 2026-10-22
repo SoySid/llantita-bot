@@ -20,7 +20,7 @@ export const StickyActionBar: React.FC<StickyActionBarProps> = ({
       {/* Botón Volver Arriba / Filtros */}
       <button
         onClick={onScrollToTop}
-        className="flex items-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-semibold text-zinc-300 active:bg-zinc-800 transition-colors"
+        className="flex items-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-semibold text-zinc-300 active:scale-[0.96] active:bg-zinc-800 transition-[background-color,transform] duration-150 ease-out cursor-pointer"
       >
         <ArrowUp className="h-3.5 w-3.5 text-zinc-400" />
         <span>Subir {filterCount > 0 ? `(${filterCount} filtros)` : ''}</span>
@@ -31,7 +31,7 @@ export const StickyActionBar: React.FC<StickyActionBarProps> = ({
         href="https://t.me/llantita_bot"
         target="_blank"
         rel="noopener noreferrer"
-        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 px-4 py-2 text-xs font-bold shadow-md active:scale-[0.98] transition-all"
+        className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 px-4 py-2 text-xs font-bold shadow-md active:scale-[0.97] transition-[background-color,transform] duration-150 ease-out cursor-pointer"
       >
         <Send className="h-3.5 w-3.5" />
         <span>Alertas Telegram</span>

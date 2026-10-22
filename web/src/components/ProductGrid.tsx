@@ -49,7 +49,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         {/* Estado de carga */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-zinc-400">
-            <Loader2 className="h-6 w-6 animate-spin text-zinc-200 mb-3" />
+            <Loader2 className="h-6 w-6 fast-spin text-zinc-200 mb-3" />
             <p className="text-xs font-mono">Cargando catálogo...</p>
           </div>
         ) : productos.length === 0 ? (
@@ -64,7 +64,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             </p>
             <button
               onClick={onResetFilters}
-              className="rounded-lg bg-white text-zinc-950 text-xs font-bold px-4 py-2 hover:bg-zinc-200 transition-colors cursor-pointer"
+              className="rounded-lg bg-white text-zinc-950 text-xs font-bold px-4 py-2 hover:bg-zinc-200 active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out cursor-pointer"
             >
               Restablecer filtros
             </button>
@@ -89,7 +89,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-colors cursor-pointer select-none"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 active:enabled:scale-[0.96] disabled:opacity-30 disabled:hover:border-zinc-800 transition-[border-color,transform] duration-150 ease-out cursor-pointer select-none"
             >
               <ChevronLeft className="h-4 w-4" />
               <span>Anterior</span>
@@ -102,7 +102,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 disabled:opacity-30 disabled:hover:border-zinc-800 transition-colors cursor-pointer select-none"
+              className="inline-flex items-center gap-1 rounded-lg bg-zinc-900 border border-zinc-800 px-3.5 py-2 text-xs font-bold text-zinc-200 hover:border-zinc-700 active:enabled:scale-[0.96] disabled:opacity-30 disabled:hover:border-zinc-800 transition-[border-color,transform] duration-150 ease-out cursor-pointer select-none"
             >
               <span>Siguiente</span>
               <ChevronRight className="h-4 w-4" />

@@ -45,7 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-colors"
+            className="flex items-center justify-center h-8 w-8 rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 active:scale-[0.92] transition-[border-color,color,transform] duration-150 ease-out cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
@@ -58,7 +58,7 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-200 text-zinc-950 font-bold text-xs px-3.5 py-1.5 transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-200 active:scale-[0.96] text-zinc-950 font-bold text-xs px-3.5 py-1.5 transition-[background-color,transform] duration-150 ease-out cursor-pointer"
           >
             <Send className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Bot Telegram</span>

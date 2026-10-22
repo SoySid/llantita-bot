@@ -114,7 +114,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onMarcasChange([])}
-                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white active:scale-[0.96] transition-[color,transform] duration-150 ease-out cursor-pointer"
               >
                 <RotateCcw className="h-3 w-3" />
                 <span>Restablecer marcas</span>
@@ -131,7 +131,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onMarcasChange([])}
-                className={`shrink-0 h-10 px-3.5 rounded-lg border flex items-center gap-2 transition-colors cursor-pointer text-xs font-semibold ${
+                className={`shrink-0 h-10 px-3.5 rounded-lg border flex items-center gap-2 active:scale-[0.96] transition-[background-color,border-color,color,transform] duration-150 ease-out cursor-pointer text-xs font-semibold ${
                   selectedMarcas.length === 0
                     ? 'bg-white text-zinc-950 border-white font-bold'
                     : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
@@ -154,7 +154,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                     key={m.marca}
                     type="button"
                     onClick={() => toggleMarca(m.marca)}
-                    className={`shrink-0 h-10 px-3 rounded-lg border flex items-center gap-2 transition-colors cursor-pointer select-none text-xs ${
+                    className={`shrink-0 h-10 px-3 rounded-lg border flex items-center gap-2 active:scale-[0.96] transition-[background-color,border-color,color,transform] duration-150 ease-out cursor-pointer select-none text-xs ${
                       isSelected
                         ? 'bg-white text-zinc-950 border-white font-bold'
                         : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
@@ -192,13 +192,13 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 placeholder="Buscar por modelo o estilo (ej: Air Max, Forum, Runner)..."
-                className="w-full h-9 pl-9 pr-8 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors"
+                className="w-full h-9 pl-9 pr-8 bg-zinc-900 border border-zinc-800 rounded-lg text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-zinc-500 transition-colors duration-150"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange?.('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white active:scale-[0.9] transition-transform duration-150 ease-out cursor-pointer"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -210,7 +210,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(!soloOfertas)}
-                className={`h-9 px-3.5 rounded-lg border text-xs font-semibold transition-colors cursor-pointer shrink-0 ${
+                className={`h-9 px-3.5 rounded-lg border text-xs font-semibold active:scale-[0.96] transition-[background-color,border-color,color,transform] duration-150 ease-out cursor-pointer shrink-0 ${
                   soloOfertas
                     ? 'bg-white text-zinc-950 font-bold border-white'
                     : 'bg-zinc-900 border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
@@ -223,7 +223,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <select
                   value={selectedOrden}
                   onChange={(e) => onOrdenChange(e.target.value)}
-                  className="h-9 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs px-3 rounded-lg focus:outline-none focus:border-zinc-500 cursor-pointer"
+                  className="h-9 bg-zinc-900 border border-zinc-800 text-zinc-200 text-xs px-3 rounded-lg focus:outline-none focus:border-zinc-500 transition-colors duration-150 cursor-pointer"
                   aria-label="Ordenar productos"
                 >
                   <option value="descuento">Mayor descuento</option>
@@ -237,7 +237,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <button
                   type="button"
                   onClick={onReset}
-                  className="h-9 px-2 text-xs font-semibold text-zinc-400 hover:text-white transition-colors flex items-center gap-1 cursor-pointer shrink-0"
+                  className="h-9 px-2 text-xs font-semibold text-zinc-400 hover:text-white active:scale-[0.95] transition-[color,transform] duration-150 ease-out flex items-center gap-1 cursor-pointer shrink-0"
                   title="Restablecer todos los filtros"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -268,7 +268,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                       toggleTalle(talle);
                     }
                   }}
-                  className={`h-8 rounded-md font-semibold transition-colors border shrink-0 flex items-center justify-center select-none cursor-pointer ${
+                  className={`h-8 rounded-md font-semibold active:scale-[0.94] transition-[background-color,border-color,color,transform] duration-150 ease-out border shrink-0 flex items-center justify-center select-none cursor-pointer ${
                     isTodos
                       ? 'px-3 text-xs'
                       : 'w-8 text-xs font-mono'
@@ -296,7 +296,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onSearchChange?.('')}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out text-[11px]"
               >
                 <span>&ldquo;{searchQuery}&rdquo;</span>
                 <X className="h-2.5 w-2.5 text-zinc-400" />
@@ -307,7 +307,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 key={marca}
                 type="button"
                 onClick={() => toggleMarca(marca)}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out text-[11px]"
               >
                 <span>{marca}</span>
                 <X className="h-2.5 w-2.5 text-zinc-400" />
@@ -318,7 +318,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 key={talle}
                 type="button"
                 onClick={() => toggleTalle(talle)}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 transition-colors text-[11px]"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 hover:bg-zinc-700 active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out text-[11px]"
               >
                 <span>Talle {talle}</span>
                 <X className="h-2.5 w-2.5 text-zinc-400" />
@@ -328,7 +328,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(false)}
-                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-200 hover:bg-rose-900 transition-colors text-[11px]"
+                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-rose-950 border border-rose-800 text-rose-200 hover:bg-rose-900 active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out text-[11px]"
               >
                 <span>Solo rebajas</span>
                 <X className="h-2.5 w-2.5 text-rose-300" />
@@ -337,7 +337,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             <button
               type="button"
               onClick={onReset}
-              className="text-[11px] text-zinc-400 hover:text-white ml-1 underline underline-offset-2 transition-colors cursor-pointer"
+              className="text-[11px] text-zinc-400 hover:text-white ml-1 underline underline-offset-2 active:scale-[0.96] transition-[color,transform] duration-150 ease-out cursor-pointer"
             >
               Borrar todos
             </button>
@@ -348,4 +348,3 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
     </div>
   );
 };
-

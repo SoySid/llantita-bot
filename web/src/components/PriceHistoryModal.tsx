@@ -60,11 +60,11 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="backdrop-enter fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-xl rounded-t-3xl sm:rounded-2xl bg-zinc-900 border-t sm:border border-zinc-800 shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
+        className="modal-enter origin-center relative w-full max-w-xl rounded-t-3xl sm:rounded-2xl bg-zinc-900 border-t sm:border border-zinc-800 shadow-2xl p-4 sm:p-6 overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Indicador táctil en móvil */}
@@ -96,7 +96,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors shrink-0"
+            className="rounded-lg p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 active:scale-[0.92] transition-[background-color,color,transform] duration-150 ease-out shrink-0 cursor-pointer"
             aria-label="Cerrar"
           >
             <X className="h-5 w-5" />
@@ -219,7 +219,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
               href={product.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-black text-xs px-4 py-2 transition-all shadow-sm"
+              className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-zinc-200 active:scale-[0.96] text-zinc-950 font-black text-xs px-4 py-2 transition-[background-color,transform] duration-150 ease-out shadow-sm cursor-pointer"
             >
               <span>Ver en Sporting</span>
               <ExternalLink className="h-3.5 w-3.5" />

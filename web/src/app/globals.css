@@ -7,6 +7,11 @@
   --surface: #121215;
   --surface-card: #18181b;
   --surface-border: #27272a;
+
+  /* Curvas de aceleración precisas (Emil Kowalski) */
+  --ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-emil: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 body {
@@ -26,3 +31,56 @@ body {
   scrollbar-width: none;
 }
 
+/* Micro-interacciones y animaciones de entrada controladas */
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.modal-enter {
+  animation: modalEnter 200ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes backdropEnter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.backdrop-enter {
+  animation: backdropEnter 180ms ease-out forwards;
+}
+
+/* Spinner rápido para mejorar la velocidad percibida */
+.fast-spin {
+  animation: spin 0.65s linear infinite;
+}
+
+/* Transiciones táctiles solo en punteros precisos para evitar sticky hover en móviles */
+@media (hover: hover) and (pointer: fine) {
+  .hover-lift {
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1), border-color 180ms ease-out;
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+}
+
+/* Respeto por preferencias de reducción de movimiento */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
