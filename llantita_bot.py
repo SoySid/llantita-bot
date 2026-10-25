@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import html
 import time
 import psycopg2
 from psycopg2.extras import execute_values
@@ -20,6 +21,14 @@ except ImportError:
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
+def sanitizar_error(err):
+    texto = str(err)
+    if TELEGRAM_BOT_TOKEN:
+        texto = texto.replace(TELEGRAM_BOT_TOKEN, "[REDACTED_TOKEN]")
+    if DATABASE_URL:
+        texto = texto.replace(DATABASE_URL, "[REDACTED_DB_URL]")
+    return texto
 
 
 def obtener_conexion():
@@ -88,7 +97,7 @@ async def procesar_mensajes_telegram(conn, session):
             print(f"⚠️ Telegram Timeout en getUpdates (Intento {intento + 1}/3)")
             await asyncio.sleep(2)
         except Exception as e:
-            print(f"Error al conectar con Telegram: {e}")
+            print(f"Error al conectar con Telegram: {sanitizar_error(e)}")
             return
 
     if not data or not data.get("ok"):
@@ -167,7 +176,7 @@ async def enviar_mensaje_telegram(session, chat_id, texto):
             print(f"⚠️ Telegram Timeout enviando mensaje a {chat_id} (Intento {intento + 1}/5)")
             await asyncio.sleep(3 * (intento + 1))
         except Exception as e:
-            print(f"Error enviando mensaje a {chat_id}: {e}")
+            print(f"Error enviando mensaje a {chat_id}: {sanitizar_error(e)}")
             return
 
     print(f"❌ No se pudo enviar el mensaje a {chat_id} tras 5 intentos.")
@@ -257,8 +266,10 @@ def tiene_talle_43(talles_str):
 
 
 def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca, categoria):
-    marca_str = marca if marca else "Sin marca"
-    cat_str = categoria if categoria else "Calzado"
+    nom_esc = html.escape(str(nombre)) if nombre else "Producto"
+    marca_esc = html.escape(str(marca)) if marca else "Sin marca"
+    cat_esc = html.escape(str(categoria)) if categoria else "Calzado"
+    url_esc = html.escape(str(url), quote=True) if url else "#"
     emoji = "🔥"
 
     try:
@@ -268,10 +279,10 @@ def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca,
     descuento_str = f" (-{descuento:.0f}%)" if descuento > 0 else ""
 
     return (
-        f"👟 <b>{nombre}</b> · {marca_str} / {cat_str}\n"
+        f"👟 <b>{nom_esc}</b> · {marca_esc} / {cat_esc}\n"
         f"📏 Talle 43 disponible\n"
         f"<s>${precio_anterior:,.2f}</s> → {emoji} <b>${precio_nuevo:,.2f}</b>{descuento_str}\n"
-        f"🔗 <a href='{url}'>Comprar</a>"
+        f"🔗 <a href='{url_esc}'>Comprar</a>"
     )
 
 

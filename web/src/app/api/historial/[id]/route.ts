@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { checkRateLimit, productoIdSchema } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,13 +8,21 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // 1. Rate Limiting por IP
+  const rateLimitResponse = checkRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
-    const { id } = await params;
-    if (!id) {
-      return NextResponse.json({ error: 'ID de producto requerido' }, { status: 400 });
+    const rawParams = await params;
+    const validation = productoIdSchema.safeParse(rawParams?.id);
+
+    if (!validation.success) {
+      return NextResponse.json({ error: 'ID de producto no válido' }, { status: 400 });
     }
 
-    // Consulta única que obtiene el producto y su historial en un solo roundtrip
+    const id = validation.data;
+
+    // Consulta única parametrizada que obtiene el producto y su historial
     const rows = await sql`
       SELECT 
         p.id, 

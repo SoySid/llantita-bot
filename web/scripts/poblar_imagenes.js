@@ -4,6 +4,11 @@ const { neon } = require('@neondatabase/serverless');
 
 async function main() {
   const envPath = path.join(__dirname, '..', '.env.local');
+  if (!fs.existsSync(envPath)) {
+    console.error('.env.local no existe.');
+    process.exit(1);
+  }
+
   const envContent = fs.readFileSync(envPath, 'utf8');
   const dbMatch = envContent.match(/DATABASE_URL=(.*)/);
   if (!dbMatch) {
@@ -36,23 +41,25 @@ async function main() {
             if (res.ok || res.status === 206) {
               const data = await res.json();
               if (Array.isArray(data)) {
-                return data.map((item) => {
-                  const id = String(item.productId);
-                  let img = null;
-                  if (item.items && item.items.length > 0) {
-                    for (const sku of item.items) {
-                      if (sku.images && sku.images.length > 0 && sku.images[0].imageUrl) {
-                        img = sku.images[0].imageUrl;
-                        break;
+                return data
+                  .map((item) => {
+                    const id = String(item.productId);
+                    let img = null;
+                    if (item.items && item.items.length > 0) {
+                      for (const sku of item.items) {
+                        if (sku.images && sku.images.length > 0 && sku.images[0].imageUrl) {
+                          img = sku.images[0].imageUrl;
+                          break;
+                        }
                       }
                     }
-                  }
-                  return { id, img };
-                }).filter((x) => x.id && x.img);
+                    return { id, img };
+                  })
+                  .filter((x) => x.id && x.img);
               }
             }
             await new Promise((r) => setTimeout(r, 1000 * (intento + 1)));
-          } catch (e) {
+          } catch {
             await new Promise((r) => setTimeout(r, 1000 * (intento + 1)));
           }
         }
@@ -66,29 +73,26 @@ async function main() {
     console.log(`📦 Procesadas páginas ${i + 1}-${Math.min(i + concurrency, pages.length)} de ${pages.length} (${allUpdates.length} fotos obtenidas)...`);
   }
 
-  console.log(`\n💾 Guardando ${allUpdates.length} imágenes en la base de datos PostgreSQL...`);
+  console.log(`\n💾 Guardando ${allUpdates.length} imágenes en la base de datos PostgreSQL de forma parametrizada...`);
 
-  // Guardar en lotes de 100 con VALUES
+  // Guardar en lotes con consulta 100% parametrizada (evita inyección SQL)
   const dbBatchSize = 100;
   let totalSaved = 0;
 
   for (let i = 0; i < allUpdates.length; i += dbBatchSize) {
     const chunk = allUpdates.slice(i, i + dbBatchSize);
-    
-    // Armar UPDATE en bloque
-    const valuesSql = chunk
-      .map((item) => `('${item.id.replace(/'/g, "''")}', '${item.img.replace(/'/g, "''")}')`)
-      .join(', ');
+    const ids = chunk.map((item) => String(item.id));
+    const imgs = chunk.map((item) => String(item.img));
 
     const query = `
       UPDATE productos AS p
       SET imagen_url = v.imagen_url
-      FROM (VALUES ${valuesSql}) AS v(id, imagen_url)
+      FROM UNNEST($1::text[], $2::text[]) AS v(id, imagen_url)
       WHERE p.id = v.id;
     `;
 
     try {
-      await sql(query);
+      await sql(query, [ids, imgs]);
       totalSaved += chunk.length;
       process.stdout.write(`✅ Actualizados ${totalSaved}/${allUpdates.length} productos...\r`);
     } catch (err) {

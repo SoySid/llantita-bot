@@ -1,7 +1,10 @@
-name: Monitor de Precios Llantitas
+﻿name: Monitor de Precios Llantitas
 
 on:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   ejecutar-bot:
@@ -18,3 +21,4 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           PYTHONUNBUFFERED: "1"
         run: python llantita_bot.py
+

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, safeExternalUrl } from '@/lib/utils';
 import { DealProduct } from './FeaturedDeals';
 import { PriceChart } from './PriceChart';
 import { BrandBadge } from './BrandBadge';
@@ -77,7 +77,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
             <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl bg-white p-1.5 shrink-0 flex items-center justify-center overflow-hidden">
               {product.imagen_url ? (
                 <img
-                  src={product.imagen_url}
+                  src={safeExternalUrl(product.imagen_url)}
                   alt={product.nombre}
                   className="h-full w-full object-contain mix-blend-multiply"
                 />
@@ -216,7 +216,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
             </span>
           ) : (
             <a
-              href={product.url}
+              href={safeExternalUrl(product.url)}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl bg-white hover:bg-zinc-200 active:scale-[0.96] text-zinc-950 font-bold text-xs px-4 py-2.5 transition-[background-color,transform] duration-150 ease-out cursor-pointer"

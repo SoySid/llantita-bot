@@ -1,9 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { checkRateLimit } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  // 1. Rate Limiting por IP
+  const rateLimitResponse = checkRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     // 1. Obtener última actualización y conteo total de activos
     const statsResult = await sql`
@@ -56,12 +61,19 @@ export async function GET() {
 
     const stats = statsResult[0] || {};
 
-    return NextResponse.json({
-      ultima_actualizacion: stats.ultima_actualizacion,
-      total_productos: stats.total_productos || 0,
-      marcas: marcasResult,
-      destacados: destacadosResult,
-    });
+    return NextResponse.json(
+      {
+        ultima_actualizacion: stats.ultima_actualizacion,
+        total_productos: stats.total_productos || 0,
+        marcas: marcasResult,
+        destacados: destacadosResult,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error al consultar estado:', error);
     return NextResponse.json(

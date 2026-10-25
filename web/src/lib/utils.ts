@@ -59,3 +59,10 @@ export function parseTalles(tallesStr: string | null | undefined): string[] {
     })
     .slice(0, 10);
 }
+
+export function safeExternalUrl(url: string | null | undefined): string {
+  if (!url) return '#';
+  const trimmed = url.trim();
+  if (trimmed.startsWith('https://')) return trimmed;
+  return '#';
+}

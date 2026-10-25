@@ -1,17 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
+import { checkRateLimit, escapeRegExp, productosQuerySchema } from '@/lib/security';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // 1. Rate Limiting por IP
+  const rateLimitResponse = checkRateLimit(request);
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { searchParams } = new URL(request.url);
-    const q = searchParams.get('q')?.trim() || '';
+
+    // 2. Extraer parámetros crudos
     const marcasRaw = [
       ...searchParams.getAll('marca'),
       ...searchParams.getAll('marcas'),
     ];
-    const marcas = marcasRaw
+    const marcasParsed = marcasRaw
       .flatMap((m) => m.split(','))
       .map((m) => m.trim())
       .filter((m) => m.length > 0);
@@ -20,18 +26,37 @@ export async function GET(request: NextRequest) {
       ...searchParams.getAll('talle'),
       ...searchParams.getAll('talles'),
     ];
-    const talles = tallesRaw
+    const tallesParsed = tallesRaw
       .flatMap((t) => t.split(','))
       .map((t) => t.trim())
       .filter((t) => t.length > 0);
 
-    const soloOfertas = searchParams.get('solo_ofertas') === 'true';
-    const orden = searchParams.get('orden') || 'descuento';
-    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
-    const limit = Math.min(60, Math.max(12, parseInt(searchParams.get('limit') || '24', 10)));
+    // 3. Validación y sanitización estricta con Zod
+    const validationResult = productosQuerySchema.safeParse({
+      q: searchParams.get('q')?.trim() || '',
+      marcas: marcasParsed,
+      talles: tallesParsed,
+      solo_ofertas: searchParams.get('solo_ofertas') === 'true',
+      orden: searchParams.get('orden') || 'descuento',
+      page: parseInt(searchParams.get('page') || '1', 10),
+      limit: parseInt(searchParams.get('limit') || '24', 10),
+    });
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Parámetros de consulta no válidos',
+          detalles: validationResult.error.flatten().fieldErrors,
+        },
+        { status: 400 }
+      );
+    }
+
+    const { q, marcas, talles, solo_ofertas: soloOfertas, orden, page, limit } =
+      validationResult.data;
     const offset = (page - 1) * limit;
 
-    // Construcción de condiciones WHERE seguras (solo productos activos y con stock)
+    // 4. Construcción de condiciones WHERE con consultas parametrizadas
     const conditions: string[] = ['p.activo = TRUE', "p.talles IS NOT NULL AND p.talles != ''"];
     const values: (string | number)[] = [];
     let idx = 1;
@@ -50,9 +75,11 @@ export async function GET(request: NextRequest) {
       conditions.push(`(${orClauses.join(' OR ')})`);
     }
 
+    // Prevención de ReDoS: escapar metacaracteres antes de construir el patrón de talles
     if (talles.length > 0) {
       const orClauses = talles.map((t) => {
-        values.push(`(?<![0-9.])${t}(?![0-9.])`);
+        const escaped = escapeRegExp(t);
+        values.push(`(?<![0-9.])${escaped}(?![0-9.])`);
         return `p.talles ~* $${idx++}`;
       });
       conditions.push(`(${orClauses.join(' OR ')})`);
@@ -62,7 +89,7 @@ export async function GET(request: NextRequest) {
       conditions.push('h.precio_max > p.precio');
     }
 
-    // Ordenamiento
+    // Ordenamiento seguro (garantizado por enum de Zod)
     let orderByClause = 'p.ultima_actualizacion DESC';
     if (orden === 'descuento') {
       orderByClause = 'descuento_pct DESC NULLS LAST, p.precio ASC';
@@ -76,7 +103,7 @@ export async function GET(request: NextRequest) {
 
     const whereString = conditions.join(' AND ');
 
-    // Conteo total para paginación (evita escanear historial si no se filtra por ofertas)
+    // Conteo total para paginación
     const countQuery = soloOfertas
       ? `
         SELECT COUNT(*)::int as total
@@ -94,7 +121,7 @@ export async function GET(request: NextRequest) {
         WHERE ${whereString};
       `;
 
-    // Query principal de productos
+    // Consulta principal
     const selectQuery = `
       SELECT 
         p.id, 
