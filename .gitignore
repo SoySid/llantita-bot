@@ -32,4 +32,8 @@ web/.env*
 !web/.env.example
 *.tsbuildinfo
 
+# Herramientas de IA y skills
 .taste-skill/
+.impeccable/
+AGENTS.md
+web/AGENTS.md

@@ -2,20 +2,21 @@
 
 import React from 'react';
 import { Send } from 'lucide-react';
+import { formatTimeAgo } from '@/lib/utils';
 
 interface NavbarProps {
   ultimaActualizacion?: string | null;
   totalProductos: number;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
+export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProductos }) => {
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#09090b]">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full bg-canvas">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         
         {/* Marca y avatar */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden bg-zinc-800 shrink-0">
+          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden bg-surface-card shrink-0">
             <img
               src="/logo.jpg"
               alt="Llantita"
@@ -24,11 +25,19 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
           </div>
 
           <div>
-            <span className="text-lg sm:text-xl font-black uppercase tracking-tight text-white">
-              Llantita
-            </span>
-            <p className="text-xs text-zinc-400 hidden sm:block">
-              Precios y ofertas en Sporting Argentina
+            <div className="flex items-center gap-2">
+              <span className="font-display text-xl sm:text-2xl font-bold tracking-[-0.03em] text-ink block leading-none">
+                Llantita
+              </span>
+              {ultimaActualizacion && (
+                <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-card text-[11px] font-medium text-ink-muted">
+                  <span className="h-1.5 w-1.5 rounded-full bg-volt animate-pulse" />
+                  <span>Actualizado {formatTimeAgo(ultimaActualizacion)}</span>
+                </span>
+              )}
+            </div>
+            <p className="text-[13px] text-ink-secondary hidden sm:block mt-1">
+              Radar de precios y stock en Sporting Argentina
             </p>
           </div>
         </div>
@@ -36,8 +45,9 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
         {/* Acciones */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden md:flex items-center gap-2 text-xs text-zinc-300 bg-zinc-900 px-3 py-1.5 rounded-lg tabular-nums">
-              <span className="font-semibold">{totalProductos.toLocaleString('es-AR')} modelos</span>
+            <div className="hidden md:flex items-center gap-2 text-[13px] text-ink-secondary bg-surface-card px-3.5 py-2 rounded-lg tabular-nums">
+              <span className="h-2 w-2 rounded-full bg-volt" />
+              <span className="font-semibold text-ink">{totalProductos.toLocaleString('es-AR')} pares</span>
             </div>
           )}
 
@@ -45,7 +55,7 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded-lg bg-zinc-900 text-zinc-400 hover:text-white active:scale-[0.92] transition-[color,transform] duration-150 ease-out cursor-pointer"
+            className="flex items-center justify-center h-9 w-9 rounded-lg bg-surface-card text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.94] transition-[color,transform] duration-150 ease-out cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
@@ -58,11 +68,11 @@ export const Navbar: React.FC<NavbarProps> = ({ totalProductos }) => {
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-white hover:bg-zinc-200 active:scale-[0.96] text-zinc-950 font-bold text-xs px-3.5 py-1.5 transition-[background-color,transform] duration-150 ease-out cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-infrared hover:bg-infrared-hover focus-visible:ring-2 focus-visible:ring-volt active:scale-[0.96] text-white font-display font-bold text-[13px] px-3.5 py-2 transition-[background-color,transform] duration-150 ease-out cursor-pointer"
           >
             <Send className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Bot Telegram</span>
-            <span className="sm:hidden">Bot</span>
+            <span className="hidden sm:inline">Alertas Telegram</span>
+            <span className="sm:hidden">Telegram</span>
           </a>
         </div>
       </div>

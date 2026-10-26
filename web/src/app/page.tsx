@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { AboutSection } from '@/components/AboutSection';
 import { HeroFilters } from '@/components/HeroFilters';
@@ -109,16 +109,35 @@ export default function HomePage() {
     setCurrentPage(1);
   };
 
+  const hasActiveFilters =
+    selectedTalles.length > 0 ||
+    selectedMarcas.length > 0 ||
+    soloOfertas ||
+    debouncedQuery.length > 0;
+
   const handleScrollToTop = () => {
-    topRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (hasActiveFilters && catalogRef.current) {
+      catalogRef.current.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      topRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleScrollToCatalog = () => {
     catalogRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const isPodioVisible = !debouncedQuery && selectedTalles.length === 0 && selectedMarcas.length === 0 && !soloOfertas;
+  const podioIds = useMemo(() => new Set(featuredDeals.slice(0, 4).map((d) => d.id)), [featuredDeals]);
+  const catalogProducts = useMemo(() => {
+    if (isPodioVisible && selectedOrden === 'descuento') {
+      return productos.filter((p) => !podioIds.has(p.id));
+    }
+    return productos;
+  }, [productos, isPodioVisible, selectedOrden, podioIds]);
+
   return (
-    <div ref={topRef} className="min-h-dvh flex flex-col bg-[#09090b] text-zinc-100">
+    <div ref={topRef} className="min-h-dvh flex flex-col bg-canvas text-ink">
       {/* 1. Header con indicador de tiempo */}
       <Navbar
         ultimaActualizacion={ultimaActualizacion}
@@ -159,8 +178,8 @@ export default function HomePage() {
       </div>
 
       <main className="flex-1 pb-16 sm:pb-0">
-        {/* 4. Carrusel de Bajas Destacadas (si no hay filtros activos) */}
-        {!searchQuery && selectedTalles.length === 0 && selectedMarcas.length === 0 && (
+        {/* 4. Podio Bento de Rebajas Récord (si no hay filtros activos) */}
+        {isPodioVisible && (
           <FeaturedDeals
             deals={featuredDeals}
             onSelectProduct={setSelectedProductForHistory}
@@ -169,7 +188,7 @@ export default function HomePage() {
 
         {/* 5. Grilla de Productos */}
         <ProductGrid
-          productos={productos}
+          productos={catalogProducts}
           loading={loading}
           total={totalFound}
           currentPage={currentPage}
@@ -198,6 +217,8 @@ export default function HomePage() {
         onScrollToTop={handleScrollToTop}
         selectedTalles={selectedTalles}
         selectedMarcas={selectedMarcas}
+        soloOfertas={soloOfertas}
+        searchQuery={searchQuery}
       />
 
       {/* 9. Footer técnico */}

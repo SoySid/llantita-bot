@@ -23,9 +23,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 }) => {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
-  // Normalizar y ordenar la serie temporal completa
   const dataSeries = useMemo(() => {
-    // Si no hay historial previo, crear punto con precio actual
     if (!history || history.length === 0) {
       return [
         {
@@ -35,17 +33,14 @@ export const PriceChart: React.FC<PriceChartProps> = ({
       ];
     }
 
-    // Clonar y ordenar por fecha ascendente
     const sorted = [...history].sort(
       (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()
     );
 
-    // Asegurar que el punto final represente el estado actual si la fecha difiere
     const ultimo = sorted[sorted.length - 1];
     const fechaUltimo = new Date(ultimo.fecha).getTime();
     const ahora = lastUpdated ? new Date(lastUpdated).getTime() : Date.now();
 
-    // Si pasaron más de 12 horas desde el último cambio, agregamos punto al presente para ver la meseta
     if (ahora - fechaUltimo > 12 * 3600 * 1000) {
       sorted.push({
         precio: currentPrice,
@@ -56,7 +51,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     return sorted;
   }, [history, currentPrice, lastUpdated]);
 
-  // Dimensiones del SVG
   const width = 520;
   const height = 180;
   const padLeft = 68;
@@ -71,23 +65,20 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   const minPrice = Math.min(...prices);
   const maxPrice = Math.max(...prices);
 
-  // Escala Y con margen para no pegar al borde
   const priceMargin = maxPrice === minPrice ? maxPrice * 0.1 || 1000 : (maxPrice - minPrice) * 0.18;
   const minY = Math.max(0, minPrice - priceMargin);
   const maxY = maxPrice + priceMargin;
   const priceRange = maxY - minY || 1;
 
-  // Escala X basada en tiempo
   const times = dataSeries.map((d) => new Date(d.fecha).getTime());
   let minTime = Math.min(...times);
-  let maxTime = Math.max(...times);
+  const maxTime = Math.max(...times);
 
   if (minTime === maxTime) {
-    minTime -= 86400000; // 1 día antes si solo hay un punto
+    minTime -= 86400000;
   }
   const timeSpan = maxTime - minTime || 1;
 
-  // Mapeo a coordenadas SVG
   const points = useMemo(() => {
     return dataSeries.map((d) => {
       const t = new Date(d.fecha).getTime();
@@ -97,7 +88,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     });
   }, [dataSeries, minTime, timeSpan, chartWidth, chartHeight, padLeft, padTop, minY, priceRange]);
 
-  // Trazados SVG
   const linePath = useMemo(() => {
     if (points.length === 0) return '';
     return points
@@ -113,7 +103,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     return `${linePath} L ${lastX} ${bottomY.toFixed(1)} L ${firstX} ${bottomY.toFixed(1)} Z`;
   }, [linePath, points, padTop, chartHeight]);
 
-  // Punto activo bajo hover (o el último si no hay hover)
   const activeIndex = hoverIndex !== null ? hoverIndex : points.length - 1;
   const activePoint = points[activeIndex];
   const prevPoint = activeIndex > 0 ? points[activeIndex - 1] : null;
@@ -123,7 +112,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     ? ((diffFromPrev || 0) / prevPoint.precio) * 100
     : null;
 
-  // Formato de fechas
   const formatDateLabel = (dateStr: string) => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('es-AR', { day: 'numeric', month: 'short' });
@@ -140,7 +128,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
     });
   };
 
-  // Guías horizontales de precios (mínimo, medio, máximo)
   const gridLines = useMemo(() => {
     return [
       { valor: maxY - priceMargin, y: padTop + (1 - (maxY - priceMargin - minY) / priceRange) * chartHeight },
@@ -151,40 +138,40 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
   if (dataSeries.length <= 1) {
     return (
-      <div className="rounded-2xl bg-zinc-950 p-4 mb-4 text-center">
-        <div className="flex items-center justify-center gap-2 text-zinc-400 text-xs mb-1">
-          <Minus className="h-4 w-4 text-emerald-400" />
+      <div className="rounded-2xl bg-canvas border border-surface-border p-4 mb-4 text-center">
+        <div className="flex items-center justify-center gap-2 text-ink-secondary text-[13px] mb-1">
+          <Minus className="h-4 w-4 text-volt" />
           <span>Sin variaciones de precio detectadas aún</span>
         </div>
-        <p className="text-sm font-semibold text-zinc-300">
-          Precio único registrado: <span className="text-emerald-400 font-bold tabular-nums">{formatCurrency(currentPrice)}</span>
+        <p className="text-sm font-semibold text-ink">
+          Precio único registrado: <span className="font-mono text-volt font-bold tabular-nums">{formatCurrency(currentPrice)}</span>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl bg-zinc-950 p-4 mb-4 select-none">
+    <div className="rounded-2xl bg-canvas border border-surface-border p-4 mb-4 select-none">
       {/* Barra superior interactiva del gráfico */}
-      <div className="flex items-center justify-between pb-3 text-xs">
+      <div className="flex items-center justify-between pb-3 text-[13px]">
         <div className="flex items-center gap-2">
-          <span className="font-semibold text-zinc-300 tabular-nums">
+          <span className="font-mono font-medium text-ink-secondary tabular-nums">
             {formatTooltipDate(activePoint.fecha)}
           </span>
           {diffFromPrev !== null && diffFromPrev !== 0 && (
             <span
-              className={`inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.5 rounded tabular-nums ${
+              className={`inline-flex items-center gap-0.5 font-mono text-[13px] font-bold px-1.5 py-0.5 rounded tabular-nums ${
                 diffFromPrev < 0
-                  ? 'bg-emerald-500/15 text-emerald-400'
-                  : 'bg-rose-500/15 text-rose-400'
+                  ? 'bg-volt-soft text-volt'
+                  : 'bg-infrared-soft text-infrared'
               }`}
             >
-              {diffFromPrev < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+              {diffFromPrev < 0 ? <TrendingDown className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />}
               {pctFromPrev !== null ? `${pctFromPrev.toFixed(1)}%` : ''}
             </span>
           )}
         </div>
-        <div className="font-black text-emerald-400 text-sm tabular-nums">
+        <div className="font-mono font-bold text-volt text-sm tabular-nums">
           {formatCurrency(activePoint.precio)}
         </div>
       </div>
@@ -197,12 +184,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         >
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#10b981" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#b8ff01" stopOpacity="0.22" />
+              <stop offset="100%" stopColor="#b8ff01" stopOpacity="0.0" />
             </linearGradient>
           </defs>
 
-          {/* Líneas de referencia horizontales */}
           {gridLines.map((gl, i) => (
             <g key={i}>
               <line
@@ -210,7 +196,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 y1={gl.y}
                 x2={padLeft + chartWidth}
                 y2={gl.y}
-                stroke="#27272a"
+                stroke="#2e2e29"
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
@@ -218,46 +204,41 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 x={padLeft - 6}
                 y={gl.y + 3.5}
                 textAnchor="end"
-                className="fill-zinc-500 text-xs tabular-nums"
+                className="fill-ink-muted font-mono text-[13px] tabular-nums"
               >
                 ${Math.round(gl.valor / 1000)}k
               </text>
             </g>
           ))}
 
-          {/* Relleno con gradiente bajo la curva */}
           <path d={areaPath} fill="url(#priceGradient)" />
 
-          {/* Línea principal de precio */}
           <path
             d={linePath}
             fill="none"
-            stroke="#10b981"
+            stroke="#b8ff01"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          {/* Línea vertical indicadora bajo el cursor */}
           {activePoint && (
             <line
               x1={activePoint.x}
               y1={padTop}
               x2={activePoint.x}
               y2={padTop + chartHeight}
-              stroke="#10b981"
+              stroke="#b8ff01"
               strokeDasharray="3 3"
               strokeOpacity="0.6"
               strokeWidth="1.5"
             />
           )}
 
-          {/* Puntos sobre la línea */}
           {points.map((p, idx) => {
             const isActive = idx === activeIndex;
             return (
               <g key={idx}>
-                {/* Zona de impacto más amplia para hover táctil o mouse */}
                 <circle
                   cx={p.x}
                   cy={p.y}
@@ -267,13 +248,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                   onMouseEnter={() => setHoverIndex(idx)}
                   onTouchStart={() => setHoverIndex(idx)}
                 />
-                {/* Punto visible */}
                 <circle
                   cx={p.x}
                   cy={p.y}
                   r={isActive ? '5' : '3.5'}
-                  fill={isActive ? '#34d399' : '#10b981'}
-                  stroke="#09090b"
+                  fill="#b8ff01"
+                  stroke="#111110"
                   strokeWidth={isActive ? '2.5' : '1.5'}
                   className="transition-[r,fill] duration-150 pointer-events-none"
                 />
@@ -281,12 +261,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             );
           })}
 
-          {/* Etiquetas del eje X (fechas) */}
           <text
             x={padLeft}
             y={height - 8}
             textAnchor="start"
-            className="fill-zinc-400 text-xs tabular-nums"
+            className="fill-ink-secondary font-mono text-[13px] tabular-nums"
           >
             {formatDateLabel(points[0].fecha)}
           </text>
@@ -296,7 +275,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               x={padLeft + chartWidth / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-zinc-500 text-xs tabular-nums"
+              className="fill-ink-muted font-mono text-[13px] tabular-nums"
             >
               {formatDateLabel(points[Math.floor(points.length / 2)].fecha)}
             </text>
@@ -306,7 +285,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft + chartWidth}
             y={height - 8}
             textAnchor="end"
-            className="fill-zinc-400 text-xs tabular-nums"
+            className="fill-ink-secondary font-mono text-[13px] tabular-nums"
           >
             {formatDateLabel(points[points.length - 1].fecha)}
           </text>

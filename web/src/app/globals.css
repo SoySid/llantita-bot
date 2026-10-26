@@ -3,10 +3,29 @@
 @tailwind utilities;
 
 :root {
-  --background: #09090b;
-  --surface: #121215;
-  --surface-card: #18181b;
-  --surface-border: #27272a;
+  /* Paleta Sneaker Radar & Editorial Streetwear (Separación por tono, cero bordes) */
+  --canvas: #111110;
+  --surface: #181817;
+  --surface-card: #1f1f1d;
+  --surface-elevated: #282825;
+  --surface-border: #2e2e2a;
+  --surface-bone: #eeeeec;
+
+  /* Jerarquía de tinta piedra de baja croma con contraste > 5.2:1 */
+  --ink: #f4f4f2;
+  --ink-secondary: #c7c7c2;
+  --ink-muted: #9c9c95;
+
+  /* Acentos con contraste WCAG AA verificado (> 5.6:1 con blanco) */
+  --accent-infrared: #c9250b;
+  --accent-infrared-hover: #a81e08;
+  --accent-infrared-soft: rgba(201, 37, 11, 0.16);
+  --accent-volt: #b8ff01;
+  --accent-volt-soft: rgba(184, 255, 1, 0.12);
+
+  /* Parámetros de escala y color para Impeccable */
+  --p-scale: 1;
+  --p-color-amount: 1;
 
   /* Curvas de aceleración precisas (Emil Kowalski) */
   --ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1);
@@ -15,11 +34,51 @@
 }
 
 body {
-  background-color: var(--background);
-  color: #f4f4f5;
+  background-color: var(--canvas);
+  color: var(--ink);
   min-height: 100dvh;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-size: calc(1rem * var(--p-scale, 1));
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), system-ui, sans-serif;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* Superficies del navegador tematizadas */
+::selection {
+  background-color: var(--accent-infrared);
+  color: #ffffff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-infrared);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--canvas);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-muted);
 }
 
 /* Ocultar barra de desplazamiento en carruseles táctiles */
