@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatCurrency, parseTalles, safeExternalUrl } from '@/lib/utils';
 import { ArrowUpRight, LineChart, Flame, Pause, Play } from 'lucide-react';
 
@@ -81,27 +81,25 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
 
   return (
     <section
-      className="w-full py-8 sm:py-10 bg-canvas"
+      className="w-full py-4 sm:py-6 bg-canvas"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Encabezado sin la palabra "podio" y con controles sutiles */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-2.5">
+        {/* Encabezado compacto */}
+        <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
+          <div className="flex items-center gap-2">
             <div className="h-6 w-6 rounded-md bg-infrared/20 flex items-center justify-center shrink-0">
-              <Flame className="h-4 w-4 text-infrared" />
+              <Flame className="h-3.5 w-3.5 text-infrared" />
             </div>
-            <div>
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-[-0.03em] leading-tight">
-                Rebajas récord
-              </h2>
-            </div>
+            <h2 className="font-display text-xl sm:text-2xl font-bold text-ink tracking-tight leading-none">
+              Rebajas récord
+            </h2>
           </div>
 
           {/* Segmentos de rotación interactivos */}
-          <div className="flex items-center gap-3 self-start sm:self-auto">
+          <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5" role="tablist" aria-label="Seleccionar oferta">
               {topDeals.map((deal, idx) => {
                 const isActive = idx === activeIndex;
@@ -113,8 +111,8 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     aria-selected={isActive}
                     aria-label={`Oferta ${idx + 1}: ${deal.nombre}`}
                     onClick={() => selectDeal(idx)}
-                    className="relative h-2 rounded-full overflow-hidden transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-volt cursor-pointer"
-                    style={{ width: isActive ? '2.5rem' : '1rem' }}
+                    className="relative h-1.5 rounded-full overflow-hidden transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-volt cursor-pointer"
+                    style={{ width: isActive ? '2rem' : '0.75rem' }}
                   >
                     <span className="absolute inset-0 bg-surface rounded-full" />
                     {isActive ? (
@@ -132,7 +130,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
               type="button"
               onClick={() => setIsPaused((prev) => !prev)}
               aria-label={isPaused ? 'Reanudar rotación' : 'Pausar rotación'}
-              className="text-ink-muted hover:text-ink text-xs p-1 rounded-md transition-colors"
+              className="text-ink-muted hover:text-ink p-1 rounded transition-colors"
               title={isPaused ? 'Reanudar rotación automática' : 'Pausar rotación'}
             >
               {isPaused ? <Play className="h-3.5 w-3.5" /> : <Pause className="h-3.5 w-3.5" />}
@@ -140,34 +138,24 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
           </div>
         </div>
 
-        {/* Grilla balanceada: Hero a la izquierda y Cola de 3 a la derecha con alturas 100% niveladas */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 lg:items-stretch">
+        {/* Grilla balanceada: Altura acotada (320px) para entrar entera en pantalla */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:h-[320px]">
           
-          {/* 1. PRODUCTO DESTACADO ACTUAL (7 de 12, h-full nivelado) */}
-          <div className="lg:col-span-7 rounded-2xl bg-surface-card p-5 sm:p-6 flex flex-col justify-between group relative hover:bg-surface-elevated transition-colors duration-200 h-full">
-            <div>
-              {/* Badge superior con porcentaje de descuento y ahorro */}
-              <div className="flex items-center justify-between gap-2 mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-infrared text-white font-display text-[13px] font-bold tracking-wide">
-                    -{currentDeal.descuento_pct}% OFF
-                  </span>
-                  {currentAhorro && (
-                    <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-md bg-surface text-volt text-[13px] font-semibold tabular-nums">
-                      Ahorrás {formatCurrency(currentAhorro)}
-                    </span>
-                  )}
-                </div>
-                <span className="text-[13px] text-ink-muted">Piso histórico comprobado</span>
-              </div>
-
-              {/* Vitrina Hero en Piedra Hueso */}
+          {/* 1. PRODUCTO DESTACADO (7 de 12: Split horizontal compacto) */}
+          <div className="lg:col-span-7 rounded-2xl bg-surface-card p-4 sm:p-5 flex flex-col justify-between group relative hover:bg-surface-elevated transition-colors duration-200 h-full">
+            <div className="flex flex-col sm:flex-row gap-4 h-full">
+              
+              {/* Vitrina izquierda en Piedra Hueso */}
               <a
                 href={currentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative w-full aspect-[4/3] sm:aspect-[16/10] rounded-xl bg-bone p-6 mb-5 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.99] transition-transform duration-150"
+                className="relative w-full sm:w-56 lg:w-60 h-44 sm:h-full shrink-0 rounded-xl bg-bone p-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.99] transition-transform duration-150"
               >
+                <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-infrared text-white font-display text-xs font-bold tracking-wide">
+                  -{currentDeal.descuento_pct}% OFF
+                </span>
+
                 {currentDeal.imagen_url ? (
                   <img
                     key={currentDeal.id}
@@ -177,88 +165,97 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out md:group-hover:scale-[1.05]"
                   />
                 ) : (
-                  <span className="text-sm font-display text-ink-muted">Sin foto</span>
+                  <span className="text-xs font-display text-ink-muted">Sin foto</span>
                 )}
               </a>
 
-              {/* Marca y Nombre Hero */}
-              <div className="space-y-1.5">
-                <a
-                  href={currentUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-display text-xl sm:text-2xl font-bold text-ink hover:text-infrared transition-colors duration-150 block leading-snug"
-                >
-                  <span className="text-infrared font-bold mr-2">{currentBrand}</span>
-                  {currentDeal.nombre}
-                </a>
+              {/* Información del producto a la derecha */}
+              <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <span className="text-xs font-bold text-infrared uppercase tracking-wider">
+                      {currentBrand}
+                    </span>
+                    {currentAhorro && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface text-volt text-xs font-semibold tabular-nums">
+                        Ahorrás {formatCurrency(currentAhorro)}
+                      </span>
+                    )}
+                  </div>
 
-                {/* Precios Hero */}
-                <div className="pt-2 flex items-baseline gap-3 flex-wrap">
-                  <span className="font-display text-3xl sm:text-4xl font-bold text-ink tracking-tight tabular-nums">
-                    {formatCurrency(currentDeal.precio)}
-                  </span>
-                  {currentDeal.precio_anterior && (
-                    <span className="text-base text-ink-muted line-through tabular-nums">
-                      {formatCurrency(currentDeal.precio_anterior)}
+                  <a
+                    href={currentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-display text-base sm:text-lg font-bold text-ink hover:text-infrared transition-colors duration-150 block line-clamp-2 leading-snug"
+                    title={currentDeal.nombre}
+                  >
+                    {currentDeal.nombre}
+                  </a>
+
+                  {/* Precios */}
+                  <div className="pt-2 flex items-baseline gap-2.5 flex-wrap">
+                    <span className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-tight tabular-nums">
+                      {formatCurrency(currentDeal.precio)}
                     </span>
-                  )}
-                  {currentAhorro && (
-                    <span className="sm:hidden inline-flex px-2 py-0.5 rounded bg-surface text-volt text-[13px] font-semibold tabular-nums">
-                      Ahorrás {formatCurrency(currentAhorro)}
-                    </span>
+                    {currentDeal.precio_anterior && (
+                      <span className="text-sm text-ink-muted line-through tabular-nums">
+                        {formatCurrency(currentDeal.precio_anterior)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Talles compactos */}
+                  {currentTalles.length > 0 && (
+                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-semibold text-ink-muted">Talles:</span>
+                      <div className="flex flex-wrap gap-1">
+                        {currentTalles.slice(0, 6).map((t, idx) => (
+                          <span
+                            key={idx}
+                            className="font-display text-xs font-bold tabular-nums px-1.5 py-0.5 rounded bg-canvas text-ink-secondary"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                        {currentTalles.length > 6 && (
+                          <span className="text-xs text-ink-muted self-center">
+                            +{currentTalles.length - 6}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-                {currentAhorro && (
-                  <p className="text-[13px] text-volt font-medium tabular-nums">
-                    Ahorro de {formatCurrency(currentAhorro)} respecto al precio de lista
-                  </p>
-                )}
+
+                {/* Acciones */}
+                <div className="pt-3 mt-1 flex items-center justify-between gap-2 border-t border-surface/50">
+                  <button
+                    type="button"
+                    onClick={() => onSelectProduct(currentDeal)}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 cursor-pointer"
+                  >
+                    <LineChart className="h-3.5 w-3.5" />
+                    <span>Historial</span>
+                  </button>
+
+                  <a
+                    href={currentUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 rounded-lg bg-infrared hover:bg-infrared-hover active:scale-[0.96] text-white font-display text-xs font-bold px-3 py-1.5 transition-[background-color,transform] duration-150 ease-out"
+                  >
+                    <span>Sporting</span>
+                    <ArrowUpRight className="h-3.5 w-3.5" />
+                  </a>
+                </div>
               </div>
 
-              {/* Talles Hero */}
-              {currentTalles.length > 0 && (
-                <div className="mt-4 flex items-center gap-2 flex-wrap">
-                  <span className="text-[13px] font-semibold text-ink-muted">Talles disponibles:</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {currentTalles.map((t, idx) => (
-                      <span
-                        key={idx}
-                        className="font-display text-[13px] font-bold tabular-nums px-2 py-0.5 rounded bg-canvas text-ink-secondary"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Acciones Hero */}
-            <div className="pt-6 mt-4 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={() => onSelectProduct(currentDeal)}
-                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 cursor-pointer"
-              >
-                <LineChart className="h-4 w-4" />
-                <span>Ver historial de precios</span>
-              </button>
-
-              <a
-                href={currentUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-infrared hover:bg-infrared-hover active:scale-[0.96] text-white font-display text-sm font-bold px-4 py-2.5 transition-[background-color,transform] duration-150 ease-out"
-              >
-                <span>Aprovechar en Sporting</span>
-                <ArrowUpRight className="h-4 w-4" />
-              </a>
             </div>
           </div>
 
-          {/* 2. COLA DE SIGUIENTES 3 ZAPATILLAS (5 de 12, h-full nivelado matemáticamente) */}
-          <div className="lg:col-span-5 flex flex-col justify-between gap-3 sm:gap-3.5 h-full">
+          {/* 2. COLA DE SIGUIENTES 3 ZAPATILLAS (5 de 12: Altura total exacta de 320px) */}
+          <div className="lg:col-span-5 flex flex-col justify-between gap-2 lg:h-[320px]">
             {queuedIndices.map((dealIdx) => {
               const item = topDeals[dealIdx];
               if (!item) return null;
@@ -275,12 +272,12 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 <div
                   key={item.id}
                   onClick={() => selectDeal(dealIdx)}
-                  className="flex-1 rounded-2xl bg-surface-card p-3.5 sm:p-4 flex gap-3.5 hover:bg-surface-elevated transition-all duration-200 group relative cursor-pointer border border-transparent hover:border-surface"
+                  className="flex-1 rounded-xl bg-surface-card p-2.5 sm:p-3 flex gap-3 items-center hover:bg-surface-elevated transition-all duration-150 group relative cursor-pointer border border-transparent hover:border-surface min-h-0"
                   title="Hacer clic para destacar en grande"
                 >
                   {/* Mini vitrina cuadrada en Piedra Hueso */}
-                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-bone p-2.5 shrink-0 overflow-hidden flex items-center justify-center">
-                    <span className="absolute top-1.5 right-1.5 z-10 inline-flex items-center px-1.5 py-0.5 rounded bg-infrared text-white font-display text-[12px] font-bold tabular-nums">
+                  <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-lg bg-bone p-1.5 shrink-0 overflow-hidden flex items-center justify-center">
+                    <span className="absolute top-1 right-1 z-10 inline-flex items-center px-1.5 py-0.2 rounded bg-infrared text-white font-display text-[10px] font-bold tabular-nums leading-tight">
                       -{item.descuento_pct}%
                     </span>
 
@@ -289,56 +286,54 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                         src={safeExternalUrl(item.imagen_url)}
                         alt={item.nombre}
                         loading="lazy"
-                        className="h-full w-full object-contain mix-blend-multiply transition-transform duration-200 ease-out group-hover:scale-[1.06]"
+                        className="h-full w-full object-contain mix-blend-multiply transition-transform duration-150 ease-out group-hover:scale-[1.05]"
                       />
                     ) : (
-                      <span className="text-[13px] text-ink-muted">Sin foto</span>
+                      <span className="text-[10px] text-ink-muted">Sin foto</span>
                     )}
                   </div>
 
                   {/* Datos del producto */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                  <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
                     <div>
                       <div className="flex items-center justify-between gap-1">
-                        <span className="font-display text-[12px] font-bold text-ink-muted uppercase tracking-wider">
+                        <span className="font-display text-[11px] font-bold text-ink-muted uppercase tracking-wider truncate">
                           {brandLabel}
                         </span>
                         {ahorro && (
-                          <span className="text-[12px] text-volt font-medium tabular-nums">
+                          <span className="text-[11px] text-volt font-medium tabular-nums shrink-0">
                             -{formatCurrency(ahorro)}
                           </span>
                         )}
                       </div>
 
-                      <h3 className="font-display text-sm font-bold text-ink line-clamp-2 leading-tight group-hover:text-infrared transition-colors duration-150 mt-0.5">
+                      <h3 className="font-display text-xs sm:text-[13px] font-bold text-ink truncate group-hover:text-infrared transition-colors duration-150 mt-0.5">
                         {item.nombre}
                       </h3>
                     </div>
 
-                    <div>
-                      {/* Precios */}
-                      <div className="flex items-baseline gap-2 flex-wrap">
-                        <span className="font-display text-base font-bold text-ink tabular-nums">
+                    <div className="flex items-center justify-between gap-2 pt-1">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="font-display text-sm font-bold text-ink tabular-nums">
                           {formatCurrency(item.precio)}
                         </span>
                         {item.precio_anterior && (
-                          <span className="text-[13px] text-ink-muted line-through tabular-nums">
+                          <span className="text-[11px] text-ink-muted line-through tabular-nums">
                             {formatCurrency(item.precio_anterior)}
                           </span>
                         )}
                       </div>
 
-                      {/* Botones de acción compactos */}
-                      <div className="pt-2 flex items-center justify-between text-[13px]">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             onSelectProduct(item);
                           }}
-                          className="text-[12px] text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 cursor-pointer flex items-center gap-1"
+                          className="text-[11px] text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 flex items-center gap-0.5"
                         >
-                          <LineChart className="h-3.5 w-3.5" />
+                          <LineChart className="h-3 w-3" />
                           <span>Historial</span>
                         </button>
 
@@ -347,10 +342,10 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="font-display text-[12px] font-bold text-ink hover:text-infrared active:scale-[0.96] transition-colors duration-150 flex items-center gap-1"
+                          className="font-display text-[11px] font-bold text-ink hover:text-infrared active:scale-[0.96] transition-colors duration-150 flex items-center gap-0.5"
                         >
-                          <span>Sporting</span>
-                          <ArrowUpRight className="h-3.5 w-3.5" />
+                          <span>Ir</span>
+                          <ArrowUpRight className="h-3 w-3" />
                         </a>
                       </div>
                     </div>
