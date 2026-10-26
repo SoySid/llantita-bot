@@ -28,7 +28,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
     : 'Calzado';
 
   return (
-    <div className="flex flex-col justify-between rounded-xl bg-surface-card hover:bg-surface-elevated hover-lift transition-[background-color,transform] duration-180 ease-out p-3.5 group relative">
+    <div className="flex flex-col justify-between rounded-xl bg-surface-card hover:bg-surface-elevated hover-lift transition-[background-color,transform] duration-180 ease-out p-3 sm:p-3.5 group relative">
       <div>
         {/* Vitrina de Producto en Piedra Hueso */}
         <a
@@ -128,13 +128,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Acciones al pie */}
-      <div className="pt-3 mt-3 flex items-center justify-between text-[13px]">
+      <div className="pt-3 mt-3 flex items-center justify-between text-xs sm:text-[13px] gap-1">
         <button
           type="button"
           onClick={() => onOpenHistory(product)}
-          className="inline-flex items-center gap-1.5 font-medium text-ink-secondary hover:text-volt focus-visible:ring-2 focus-visible:ring-volt active:scale-[0.95] transition-[color,transform] duration-150 ease-out cursor-pointer text-[13px] select-none"
+          className="inline-flex items-center gap-1 font-medium text-ink-secondary hover:text-volt focus-visible:ring-2 focus-visible:ring-volt active:scale-[0.95] transition-[color,transform] duration-150 ease-out cursor-pointer text-xs sm:text-[13px] select-none"
         >
-          <LineChart className="h-4 w-4" />
+          <LineChart className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
           <span>Historial</span>
         </button>
 
@@ -142,10 +142,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           href={productUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 font-display font-bold text-ink hover:text-infrared focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.95] transition-[color,transform] duration-150 ease-out text-[13px] select-none"
+          className="inline-flex items-center gap-0.5 sm:gap-1 font-display font-bold text-ink hover:text-infrared focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.95] transition-[color,transform] duration-150 ease-out text-xs sm:text-[13px] select-none"
         >
           <span>Sporting</span>
-          <ArrowUpRight className="h-4 w-4" />
+          <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
         </a>
       </div>
     </div>

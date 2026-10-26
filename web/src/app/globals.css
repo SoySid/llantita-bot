@@ -33,14 +33,26 @@
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+html {
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--canvas);
   color: var(--ink);
   min-height: 100dvh;
+  overflow-x: hidden;
+  touch-action: manipulation;
   font-size: calc(1rem * var(--p-scale, 1));
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
+}
+
+button, a {
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 h1, h2, h3, h4 {

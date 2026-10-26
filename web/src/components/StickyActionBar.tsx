@@ -24,7 +24,7 @@ export const StickyActionBar: React.FC<StickyActionBarProps> = ({
     (searchQuery.trim().length > 0 ? 1 : 0);
 
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-canvas/95 backdrop-blur-md border-t border-edge-subtle px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.3)]">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-canvas/95 backdrop-blur-md border-t border-surface-border px-4 pt-2.5 pb-[max(0.625rem,env(safe-area-inset-bottom))] flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.3)]">
       {/* Botón Volver Arriba / Filtros */}
       <button
         onClick={onScrollToTop}

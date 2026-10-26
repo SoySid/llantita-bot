@@ -284,7 +284,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   title="Hacer clic para destacar en grande"
                 >
                   {/* Mini vitrina cuadrada en Piedra Hueso */}
-                  <div className="relative w-18 h-18 sm:w-20 sm:h-20 rounded-lg bg-bone p-1.5 shrink-0 overflow-hidden flex items-center justify-center">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-bone p-1.5 shrink-0 overflow-hidden flex items-center justify-center">
                     <span className="absolute top-1 right-1 z-10 inline-flex items-center px-1.5 py-0.2 rounded bg-infrared text-white font-display text-[10px] font-bold tabular-nums leading-tight">
                       -{item.descuento_pct}%
                     </span>

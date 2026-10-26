@@ -11,7 +11,7 @@ export const AboutSection: React.FC<AboutSectionProps> = () => {
     <section className="w-full bg-canvas pt-6 pb-4 sm:pt-10 sm:pb-6">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl space-y-4">
-          <h1 className="font-display text-4xl sm:text-6xl lg:text-[72px] font-bold tracking-[-0.04em] text-ink leading-[0.96]">
+          <h1 className="font-display text-3xl sm:text-5xl lg:text-[72px] font-bold tracking-[-0.04em] text-ink leading-[0.98] break-words">
             Precios reales y stock en Sporting
           </h1>
 

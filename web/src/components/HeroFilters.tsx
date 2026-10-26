@@ -210,12 +210,12 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
             </div>
 
             {/* Controles de orden y rebajas */}
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(!soloOfertas)}
                 aria-pressed={soloOfertas}
-                className={`h-11 px-4 rounded-xl text-[13px] font-display font-bold active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out cursor-pointer shrink-0 ${
+                className={`h-11 px-3 sm:px-4 rounded-xl text-[13px] font-display font-bold active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out cursor-pointer flex-1 sm:flex-none justify-center ${
                   soloOfertas
                     ? 'bg-infrared text-white'
                     : 'bg-surface-card text-ink-secondary hover:bg-surface-elevated hover:text-ink'
@@ -224,11 +224,11 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 Solo rebajas
               </button>
 
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1.5 flex-1 sm:flex-none">
                 <select
                   value={selectedOrden}
                   onChange={(e) => onOrdenChange(e.target.value)}
-                  className="h-11 bg-surface-card text-ink text-base sm:text-[13px] font-medium px-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-infrared cursor-pointer"
+                  className="w-full sm:w-auto h-11 bg-surface-card text-ink text-base sm:text-[13px] font-medium px-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-infrared cursor-pointer"
                   aria-label="Ordenar productos"
                 >
                   <option value="descuento">Mayor descuento</option>
@@ -242,7 +242,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <button
                   type="button"
                   onClick={onReset}
-                  className="h-11 px-2.5 text-[13px] font-semibold text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.95] transition-[color,transform] duration-150 ease-out flex items-center gap-1 cursor-pointer shrink-0"
+                  className="h-11 px-2.5 text-[13px] font-semibold text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.95] transition-[color,transform] duration-150 ease-out flex items-center justify-center gap-1 cursor-pointer shrink-0"
                   title="Restablecer todos los filtros"
                 >
                   <X className="h-4 w-4" />

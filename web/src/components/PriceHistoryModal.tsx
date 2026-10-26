@@ -69,7 +69,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
         role="dialog"
         aria-modal="true"
         aria-labelledby="price-modal-title"
-        className="modal-enter origin-center relative w-full max-w-xl rounded-t-3xl sm:rounded-2xl bg-surface p-5 sm:p-6 overflow-hidden max-h-[92vh] sm:max-h-[90vh] flex flex-col"
+        className="modal-enter origin-center relative w-full max-w-xl rounded-t-3xl sm:rounded-2xl bg-surface p-5 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6 overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Indicador táctil en móvil */}

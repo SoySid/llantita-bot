@@ -8,7 +8,7 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
   return (
-    <footer className="w-full bg-canvas pt-12 pb-24 sm:pb-12 text-ink-secondary text-[13px]">
+    <footer className="w-full bg-canvas pt-12 pb-[max(6.5rem,env(safe-area-inset-bottom)+4.5rem)] sm:pb-12 text-ink-secondary text-[13px]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
         
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
