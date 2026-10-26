@@ -141,18 +141,18 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
         {/* Grilla balanceada: Altura acotada (320px) para entrar entera en pantalla */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:h-[320px]">
           
-          {/* 1. PRODUCTO DESTACADO (7 de 12: Split horizontal compacto) */}
+          {/* 1. PRODUCTO DESTACADO (7 de 12: Split horizontal compacto y equilibrado) */}
           <div className="lg:col-span-7 rounded-2xl bg-surface-card p-4 sm:p-5 flex flex-col justify-between group relative hover:bg-surface-elevated transition-colors duration-200 h-full">
-            <div className="flex flex-col sm:flex-row gap-4 h-full">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 h-full">
               
-              {/* Vitrina izquierda en Piedra Hueso */}
+              {/* Vitrina izquierda en Piedra Hueso con proporciones optimizadas para calzado */}
               <a
                 href={currentUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative w-full sm:w-56 lg:w-60 h-44 sm:h-full shrink-0 rounded-xl bg-bone p-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.99] transition-transform duration-150"
+                className="relative w-full sm:w-[46%] h-48 sm:h-full shrink-0 rounded-xl bg-bone p-3 sm:p-4 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.99] transition-transform duration-150"
               >
-                <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-infrared text-white font-display text-xs font-bold tracking-wide">
+                <span className="absolute top-2.5 left-2.5 z-10 inline-flex items-center px-2 py-0.5 rounded-md bg-infrared text-white font-display text-xs font-bold tracking-wide shadow-sm">
                   -{currentDeal.descuento_pct}% OFF
                 </span>
 
@@ -162,25 +162,23 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     src={safeExternalUrl(currentDeal.imagen_url)}
                     alt={currentDeal.nombre}
                     loading="eager"
-                    className="h-full w-full object-contain mix-blend-multiply transition-transform duration-300 ease-out md:group-hover:scale-[1.05]"
+                    className="h-full w-full object-contain mix-blend-multiply scale-110 sm:scale-115 transition-transform duration-300 ease-out md:group-hover:scale-125 drop-shadow-sm"
                   />
                 ) : (
                   <span className="text-xs font-display text-ink-muted">Sin foto</span>
                 )}
               </a>
 
-              {/* Información del producto a la derecha */}
+              {/* Información del producto a la derecha sin huecos vacíos */}
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-1">
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-xs font-bold text-infrared uppercase tracking-wider">
                       {currentBrand}
                     </span>
-                    {currentAhorro && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded bg-surface text-volt text-xs font-semibold tabular-nums">
-                        Ahorrás {formatCurrency(currentAhorro)}
-                      </span>
-                    )}
+                    <span className="text-[11px] text-ink-muted font-medium">
+                      Piso histórico
+                    </span>
                   </div>
 
                   <a
@@ -205,15 +203,25 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     )}
                   </div>
 
+                  {/* Resumen de ahorro destacado */}
+                  {currentAhorro && (
+                    <div className="mt-2 px-2.5 py-1.5 rounded-lg bg-surface/80 border border-surface flex items-center justify-between text-xs">
+                      <span className="text-ink-secondary font-medium">Ahorro récord:</span>
+                      <span className="font-display font-bold text-volt tabular-nums">
+                        {formatCurrency(currentAhorro)}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Talles compactos */}
                   {currentTalles.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1.5 flex-wrap">
+                    <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                       <span className="text-xs font-semibold text-ink-muted">Talles:</span>
                       <div className="flex flex-wrap gap-1">
                         {currentTalles.slice(0, 6).map((t, idx) => (
                           <span
                             key={idx}
-                            className="font-display text-xs font-bold tabular-nums px-1.5 py-0.5 rounded bg-canvas text-ink-secondary"
+                            className="font-display text-xs font-bold tabular-nums px-1.5 py-0.5 rounded bg-canvas text-ink-secondary border border-surface/50"
                           >
                             {t}
                           </span>
@@ -229,23 +237,23 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 </div>
 
                 {/* Acciones */}
-                <div className="pt-3 mt-1 flex items-center justify-between gap-2 border-t border-surface/50">
+                <div className="pt-3 mt-2 flex items-center justify-between gap-3 border-t border-surface/60">
                   <button
                     type="button"
                     onClick={() => onSelectProduct(currentDeal)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-secondary hover:text-volt active:scale-[0.96] transition-colors duration-150 cursor-pointer"
                   >
                     <LineChart className="h-3.5 w-3.5" />
-                    <span>Historial</span>
+                    <span>Ver historial</span>
                   </button>
 
                   <a
                     href={currentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 rounded-lg bg-infrared hover:bg-infrared-hover active:scale-[0.96] text-white font-display text-xs font-bold px-3 py-1.5 transition-[background-color,transform] duration-150 ease-out"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-infrared hover:bg-infrared-hover active:scale-[0.96] text-white font-display text-xs sm:text-sm font-bold px-3.5 py-2 transition-[background-color,transform] duration-150 ease-out shadow-sm shadow-infrared/20"
                   >
-                    <span>Sporting</span>
+                    <span>Ir a la tienda</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
                   </a>
                 </div>
