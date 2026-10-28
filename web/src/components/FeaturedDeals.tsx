@@ -78,19 +78,19 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
 
   return (
     <section
-      className="w-full py-5 sm:py-7 bg-[#0d0b0a]"
+      className="w-full py-3 sm:py-5"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      <div className="mx-auto max-w-7xl px-3 sm:px-6">
+      <div className="mx-auto max-w-7xl px-2 sm:px-4">
         
         {/* Encabezado Táctico Mech */}
         <div className="flex items-center justify-between gap-3 mb-3 sm:mb-4">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded bg-[#2a1c12] border border-[#593924] flex items-center justify-center shrink-0">
-              <Flame className="h-3.5 w-3.5 text-[#ff6a1a]" />
+            <div className="h-6 w-6 rounded bg-orange-500/20 border border-orange-500/40 flex items-center justify-center shrink-0">
+              <Flame className="h-3.5 w-3.5 text-orange-400" />
             </div>
-            <h2 className="font-anton text-xl sm:text-2xl text-[#f2ede7] tracking-wider uppercase leading-none">
+            <h2 className="section-title text-xl sm:text-2xl text-stone-100 leading-none">
               Rebajas Récord
             </h2>
           </div>

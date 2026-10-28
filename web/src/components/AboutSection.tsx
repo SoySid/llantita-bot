@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface AboutSectionProps {
   onExploreClick?: () => void;
@@ -10,166 +10,203 @@ interface AboutSectionProps {
 
 export const AboutSection: React.FC<AboutSectionProps> = ({
   onExploreClick,
-  totalProductos = 1872,
+  totalProductos = 1897,
 }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animId: number;
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    const embers = Array.from({ length: 55 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      size: Math.random() * 2.8 + 0.8,
+      speedX: (Math.random() - 0.3) * 0.7,
+      speedY: -(Math.random() * 0.9 + 0.2),
+      alpha: Math.random() * 0.85 + 0.15,
+      angle: Math.random() * Math.PI * 2,
+      stretch: Math.random() * 3 + 1,
+    }));
+
+    const animateEmbers = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (const p of embers) {
+        p.x += p.speedX;
+        p.y += p.speedY;
+
+        if (p.y < -10) p.y = canvas.height + 10;
+        if (p.x < -10) p.x = canvas.width + 10;
+        if (p.x > canvas.width + 10) p.x = -10;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, p.size * p.stretch);
+        grad.addColorStop(0, `rgba(255, 200, 110, ${p.alpha})`);
+        grad.addColorStop(0.5, `rgba(255, 95, 0, ${p.alpha * 0.8})`);
+        grad.addColorStop(1, 'rgba(255, 40, 0, 0)');
+
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, p.size * p.stretch, p.size, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      animId = requestAnimationFrame(animateEmbers);
+    };
+
+    animId = requestAnimationFrame(animateEmbers);
+
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
   return (
-    <section className="hero-viewport relative select-none h-screen min-h-[660px] max-h-[1080px] flex flex-col justify-between overflow-hidden p-[3.2vh_4vw] lg:p-[3.6vh_5.5vw]">
-      {/* Bordes incandescentes */}
-      <div className="left-burn-edge" aria-hidden="true" />
-      <div className="right-burn-edge" aria-hidden="true" />
+    <section className="hero-bg flex flex-col justify-between px-6 py-6 md:px-14 md:py-8 select-none relative min-h-screen overflow-hidden">
+      <div className="noise-overlay" />
+      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
 
-      {/* Marco metálico superior HUD */}
-      <svg
-        className="hud-frame-top"
-        viewBox="0 0 340 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path d="M10 0H330L305 34H230L218 22H122L110 34H35L10 0Z" fill="#181412" stroke="#4a3525" strokeWidth="1.5"/>
-        <path d="M50 0H290L275 20H65L50 0Z" fill="#261912" stroke="#ff6a1a" strokeOpacity="0.45" strokeWidth="1"/>
-        <line x1="0" y1="22" x2="42" y2="22" stroke="#5a3d28" strokeWidth="1"/>
-        <line x1="298" y1="22" x2="340" y2="22" stroke="#5a3d28" strokeWidth="1"/>
-      </svg>
-
-      {/* Marco metálico inferior HUD */}
-      <svg
-        className="hud-frame-bottom"
-        viewBox="0 0 340 48"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path d="M15 48L42 10H112L126 24H214L228 10H298L325 48H15Z" fill="#141312" stroke="#2e2c2a" strokeWidth="2"/>
-        <path d="M52 48L70 22H110L122 34H218L230 22H270L288 48H52Z" fill="#0d0c0b" stroke="#242220" strokeWidth="1.5"/>
-      </svg>
-
-      {/* Marco lateral izquierdo HUD */}
-      <svg
-        className="hud-frame-left hidden lg:block"
-        viewBox="0 0 36 440"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path d="M0 10L24 38V175L12 190V250L24 265V402L0 430" stroke="#59351f" strokeWidth="1.5" fill="rgba(20,14,10,0.45)"/>
-        <line x1="18" y1="60" x2="18" y2="160" stroke="#ff6a1a" strokeOpacity="0.3" strokeWidth="1"/>
-      </svg>
-
-      {/* Marco lateral derecho HUD */}
-      <svg
-        className="hud-frame-right hidden lg:block"
-        viewBox="0 0 48 460"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path d="M48 0L14 34V185L26 200V260L14 275V426L48 460H48V0Z" fill="#121110" stroke="#2c2a29" strokeWidth="2"/>
-        <path d="M44 45L24 65V175L34 190V270L24 285V395L44 415" stroke="#3a3735" strokeWidth="1.2"/>
-      </svg>
-
-      {/* Capa de chispas y brasas de fuego */}
-      <div className="embers-layer" aria-hidden="true">
-        <span className="ember" style={{ width: 4, height: 4, top: '19%', left: '34%' }} />
-        <span className="ember" style={{ width: 6, height: 3, top: '21%', left: '56%', transform: 'rotate(35deg)' }} />
-        <span className="ember" style={{ width: 3, height: 3, top: '14%', left: '48%' }} />
-        <span className="ember" style={{ width: 5, height: 2, top: '31%', left: '5.8%', transform: 'rotate(-65deg)' }} />
-        <span className="ember" style={{ width: 3, height: 3, top: '43%', left: '54%' }} />
-        <span className="ember" style={{ width: 4, height: 4, top: '67%', left: '23%' }} />
-        <span className="ember" style={{ width: 5, height: 3, top: '69%', left: '29.5%', transform: 'rotate(25deg)' }} />
-        <span className="ember" style={{ width: 4, height: 2, top: '73%', left: '45%' }} />
-        <span className="ember" style={{ width: 6, height: 3, top: '85%', left: '19%', transform: 'rotate(-20deg)' }} />
-        <span className="ember" style={{ width: 9, height: 3, top: '90%', left: '8.5%', transform: 'rotate(-45deg)', background: '#ff944d' }} />
-        <span className="ember" style={{ width: 4, height: 4, top: '95%', left: '31%' }} />
-        <span className="ember" style={{ width: 4, height: 4, top: '95%', left: '67%' }} />
-        <span className="ember" style={{ width: 5, height: 2, top: '88%', left: '93%' }} />
+      {/* Marco Superior Central Biselado */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-7 pointer-events-none z-20 flex flex-col items-center">
+        <div
+          className="w-full h-full border-b-2 border-l-2 border-r-2 border-orange-500/40 bg-gradient-to-b from-orange-950/50 to-transparent"
+          style={{ clipPath: 'polygon(0 0, 100% 0, 88% 100%, 12% 100%)' }}
+        >
+          <div className="w-3/5 h-1.5 mx-auto mt-1 bg-orange-500/30 rounded-full" />
+        </div>
       </div>
 
-      {/* Barra Superior con Insignia Metálica */}
-      <header className="relative z-10 flex items-center justify-between w-full px-1 sm:px-4">
-        {/* Insignia metálica LLANTITA */}
-        <div className="brand-badge">
-          <div className="cat-shield-wrapper">
-            <img src="/cat-shield.jpg" alt="Escudo Gato Llantita" />
+      {/* Marco Lateral Izquierdo */}
+      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-8 h-96 pointer-events-none z-20 opacity-80 hidden lg:block">
+        <svg viewBox="0 0 36 400" className="w-full h-full fill-[#171312] stroke-orange-500/40 stroke-1">
+          <path d="M0,0 L28,35 L28,140 L14,155 L14,245 L28,260 L28,365 L0,400 Z" />
+          <rect x="4" y="55" width="12" height="55" fill="none" stroke="#ff6600" strokeOpacity="0.3" />
+          <rect x="6" y="185" width="14" height="16" fill="#ff7700" fillOpacity="0.25" />
+        </svg>
+      </div>
+
+      {/* Marco Lateral Derecho */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-9 h-96 pointer-events-none z-20 opacity-85 hidden lg:block">
+        <svg viewBox="0 0 40 400" className="w-full h-full fill-[#151414] stroke-[#332e2e] stroke-2">
+          <path d="M40,0 L8,35 L8,145 L22,160 L22,240 L8,255 L8,365 L40,400 Z" />
+          <circle cx="22" cy="80" r="6" fill="none" stroke="#443e3e" strokeWidth="2" />
+          <rect x="15" y="280" width="14" height="50" rx="2" fill="#0d0c0c" stroke="#2c2828" />
+        </svg>
+      </div>
+
+      {/* NAVBAR SUPERIOR */}
+      <header className="relative z-30 flex flex-wrap items-center justify-between w-full pt-1 gap-4">
+        <div className="flex items-center">
+          <div className="logo-plate flex items-center rounded-md pl-16 sm:pl-20 pr-4 sm:pr-5 py-1.5 h-14 relative">
+            <div className="logo-shield w-14 sm:w-16 h-18 sm:h-20 absolute -left-1 -top-2.5 flex flex-col items-center justify-center p-1.5">
+              <svg viewBox="0 0 64 64" className="w-10 sm:w-11 h-10 sm:h-11 drop-shadow">
+                <polygon points="12,26 16,8 28,18" fill="#6e685f" stroke="#2a2622" strokeWidth="2" />
+                <polygon points="15,23 18,12 25,18" fill="#47413a" />
+                <polygon points="52,26 48,8 36,18" fill="#6e685f" stroke="#2a2622" strokeWidth="2" />
+                <polygon points="49,23 46,12 39,18" fill="#47413a" />
+                <ellipse cx="32" cy="34" rx="20" ry="17" fill="#7d766d" stroke="#2a2622" strokeWidth="2" />
+                <path d="M28,20 L29,26 M32,19 L32,26 M36,20 L35,26" stroke="#3b3630" strokeWidth="2" strokeLinecap="round" />
+                <circle cx="24" cy="33" r="4.2" fill="#c79b4b" stroke="#1e1b18" strokeWidth="1.5" />
+                <circle cx="24" cy="33" r="2" fill="#111" />
+                <circle cx="25.2" cy="31.8" r="1" fill="#fff" />
+                <circle cx="40" cy="33" r="4.2" fill="#c79b4b" stroke="#1e1b18" strokeWidth="1.5" />
+                <circle cx="40" cy="33" r="2" fill="#111" />
+                <circle cx="41.2" cy="31.8" r="1" fill="#fff" />
+                <ellipse cx="32" cy="40" rx="7" ry="5" fill="#9c9488" />
+                <polygon points="29,37 35,37 32,41" fill="#3a2e28" />
+                <path d="M32,41 L28,44 M32,41 L36,44" stroke="#2a2622" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </div>
+            <span className="logo-text text-4xl sm:text-5xl font-bold tracking-wider leading-none pt-1">LLANTITA</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute top-1.5 right-1.5" />
+            <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute bottom-1.5 right-1.5" />
           </div>
-          <span className="brand-title">LLANTITA</span>
-          <span className="rivet tr" />
-          <span className="rivet br" />
         </div>
 
-        {/* Acciones superiores */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <div className="status-pill font-barlow tracking-wider">
-            {totalProductos > 0 ? `${totalProductos.toLocaleString('es-AR')} PARES ACTIVOS` : '1.872 PARES ACTIVOS'}
+        <div className="flex items-center gap-3 sm:gap-3.5">
+          <div className="badge-active px-3.5 sm:px-5 py-2 rounded text-sm sm:text-lg font-semibold tracking-wider uppercase tabular-nums">
+            {totalProductos > 0 ? `${totalProductos.toLocaleString('es-AR')} PARES ACTIVOS` : '1.897 PARES ACTIVOS'}
           </div>
-
           <a
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="telegram-btn"
+            className="btn-telegram px-4 sm:px-5 py-2 rounded text-sm sm:text-lg font-extrabold uppercase flex items-center gap-2 cursor-pointer"
           >
             <span>ALERTAS TELEGRAM</span>
-            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21.9 2.6L1.8 10.4c-.8.3-.8 1.1-.1 1.4l5.1 1.6 11.8-7.4c.6-.3 1.1-.1.7.2l-9.6 8.7-.3 4.8c.4 0 .6-.2.9-.4l2.3-2.2 4.8 3.5c.9.5 1.5.2 1.7-.8L22.9 3.8c.3-1.1-.4-1.6-1-1.2z"/>
+            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+              <path d="M21.9 2.6L1.8 10.4c-1.3.5-1.3 1.3-.2 1.6l5.1 1.6 11.9-7.5c.6-.3 1.1-.1.7.2l-9.6 8.7-.4 5.3c.5 0 .8-.2 1.1-.5l2.6-2.5 5.3 3.9c1 .5 1.7.3 1.9-.9L23.6 4c.3-1.4-.5-2-1.7-1.4z" />
             </svg>
           </a>
         </div>
       </header>
 
-      {/* Escenario Central */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] items-center w-full flex-1 px-1 sm:px-4 py-2 sm:py-4 gap-4 sm:gap-6">
-        {/* Columna Izquierda: Texto y Coordenadas */}
-        <div className="max-w-[640px] pt-1">
-          {/* Eje de coordenadas X/Y HUD */}
-          <div className="coord-axis">
-            <svg width="46" height="48" viewBox="0 0 46 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <text x="0" y="9" fill="#8d8984" fontFamily="monospace" fontSize="9">Y</text>
-              <circle cx="3" cy="17" r="2" stroke="#8d8984" strokeWidth="1"/>
-              <path d="M3 19V42H30" stroke="#8d8984" strokeWidth="1"/>
-              <circle cx="33" cy="42" r="2" stroke="#8d8984" strokeWidth="1"/>
-              <text x="38" y="45" fill="#8d8984" fontFamily="monospace" fontSize="9">1</text>
-            </svg>
+      {/* CONTENIDO CENTRAL */}
+      <div className="relative z-20 flex-1 grid grid-cols-12 items-center max-w-[1440px] w-full mx-auto py-8">
+        <div className="col-span-12 lg:col-span-6 pl-2 sm:pl-4 md:pl-8 relative">
+          <div className="hud-mono text-[10px] text-stone-500/70 mb-4 flex items-end gap-1">
+            <div className="border-l border-b border-stone-500/50 w-7 h-7 relative">
+              <span className="absolute -top-3 -left-1">Y</span>
+              <span className="absolute -bottom-1.5 -right-3">1</span>
+              <span className="w-1 h-1 rounded-full border border-stone-500 absolute -left-[2.5px] top-2" />
+            </div>
           </div>
 
-          <h1 className="font-anton text-4xl sm:text-6xl lg:text-[clamp(3.2rem,5.5vw,5.4rem)] leading-[1.01] tracking-[0.01em] text-[#e5e5e5] drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] mb-4">
-            Descuentos reales<br />en zapatillas
+          <h1 className="headline text-5xl sm:text-6xl xl:text-[5.4rem] mb-5">
+            Descuentos reales<br />
+            en zapatillas
           </h1>
 
-          <p className="font-sans text-sm sm:text-base lg:text-[clamp(0.95rem,1.3vw,1.2rem)] text-[#969696] max-w-[520px] leading-relaxed mb-6">
-            Monitoreamos bajas de precio y stock en Sporting cada 30 minutos para que compres en su piso histórico.
+          <p className="text-stone-300/85 text-base sm:text-lg sm:text-xl font-normal max-w-xl leading-snug tracking-normal mb-8">
+            Monitoreamos bajas de precio y stock en Sporting cada<br className="hidden sm:inline" />
+            {' '}30 minutos para que compres en su piso histórico.
           </p>
 
           {onExploreClick && (
             <button
               onClick={onExploreClick}
-              className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-[#1d1916] hover:bg-[#26211d] border border-[#5c4737] hover:border-[#ff6a1a] text-[#f2ede7] hover:text-white font-barlow font-bold text-base tracking-wider uppercase transition-all active:scale-[0.98] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+              className="inline-flex items-center gap-3 px-6 py-3.5 rounded bg-[#1c1410] border border-orange-500/40 hover:border-orange-500 text-stone-200 hover:text-white font-barlow font-bold text-lg tracking-wider uppercase transition-all shadow-[0_4px_20px_rgba(0,0,0,0.8)] active:scale-[0.98] cursor-pointer"
             >
-              <span>EXPLORAR CATÁLOGO</span>
-              <svg className="w-4 h-4 text-[#ff6a1a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <span>EXPLORAR RADAR</span>
+              <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 5v14M19 12l-7 7-7-7" />
               </svg>
             </button>
           )}
         </div>
 
-        {/* Columna Derecha: Escena Holográfica + Zapatilla Realista */}
-        <div className="sneaker-showcase relative flex items-center justify-center h-full">
-          <div className="relative w-[340px] sm:w-[440px] lg:w-[480px] h-[460px] flex items-center justify-center">
-            
-            {/* Mira / Cuadrícula fina trasera */}
+        <div className="col-span-12 lg:col-span-6 relative flex items-center justify-center h-full mt-8 lg:mt-0">
+          <div className="relative w-[340px] sm:w-[480px] h-[400px] sm:h-[460px] flex items-center justify-center">
+            {/* Retícula en cruz */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-45">
-              <div className="w-[320px] sm:w-[440px] h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent"></div>
-              <div className="h-[320px] sm:h-[440px] w-[1px] bg-gradient-to-b from-transparent via-orange-500/60 to-transparent absolute"></div>
+              <div className="w-[320px] sm:w-[440px] h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
+              <div className="h-[320px] sm:h-[440px] w-[1px] bg-gradient-to-b from-transparent via-orange-500/60 to-transparent absolute" />
             </div>
 
-            {/* Círculo Naranja Vertical Trasero */}
+            {/* Radar Glowing Rings */}
             <svg viewBox="0 0 400 400" className="w-[300px] sm:w-[380px] h-[300px] sm:h-[380px] absolute pointer-events-none select-none">
               <defs>
                 <radialGradient id="orangeGlow" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#ff6600" stopOpacity="0.42"/>
-                  <stop offset="60%" stopColor="#ff3300" stopOpacity="0.12"/>
-                  <stop offset="100%" stopColor="#ff3300" stopOpacity="0"/>
+                  <stop offset="0%" stopColor="#ff6600" stopOpacity="0.42" />
+                  <stop offset="60%" stopColor="#ff3300" stopOpacity="0.12" />
+                  <stop offset="100%" stopColor="#ff3300" stopOpacity="0" />
                 </radialGradient>
               </defs>
               <circle cx="200" cy="200" r="185" fill="url(#orangeGlow)" />
@@ -179,36 +216,36 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </svg>
 
             {/* Código de barras superior derecho */}
-            <div className="hud-barcode-top-right">
-              <div className="barcode-bars">
-                <span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 4 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} />
+            <div className="absolute top-8 sm:top-12 -right-2 sm:-right-4 hud-mono text-[9px] text-stone-400/60 tracking-widest flex flex-col items-end">
+              <div className="flex h-6 items-stretch gap-[2px] opacity-60">
+                <span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" /><span className="w-[3px] bg-stone-400" />
+                <span className="w-[1px] bg-stone-400 ml-1" /><span className="w-[2px] bg-stone-400" /><span className="w-[4px] bg-stone-400" />
+                <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400 ml-0.5" /><span className="w-[3px] bg-stone-400" />
+                <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" />
+                <span className="w-[3px] bg-stone-400 ml-1" /><span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" />
               </div>
-              <div className="barcode-label">21AE 0503</div>
+              <span className="mt-0.5">21AE 0503</span>
             </div>
 
             {/* Ángulo HUD derecho */}
-            <div className="absolute right-0 sm:right-2 bottom-32 sm:bottom-36 w-6 h-6 border-r border-b border-stone-400/50 pointer-events-none">
-              <div className="w-4 h-[1px] bg-stone-400/50 rotate-45 origin-bottom-right absolute bottom-0 right-0"></div>
+            <div className="absolute right-2 bottom-32 sm:bottom-36 w-6 h-6 border-r border-b border-stone-400/50 pointer-events-none">
+              <div className="w-4 h-[1px] bg-stone-400/50 rotate-45 origin-bottom-right absolute bottom-0 right-0" />
             </div>
 
-            {/* ZAPATILLA CON ANIMACIÓN 3D Y RESPLANDOR */}
-            <div id="sneakerContainer" className="sneaker-wrapper relative z-20 flex items-center justify-center -mt-6">
-              {/* Resplandor de lava debajo de la suela */}
-              <div className="w-56 sm:w-72 h-14 sm:h-16 bg-orange-500/40 rounded-full blur-2xl absolute bottom-2 pointer-events-none"></div>
-              
-              {/* Imagen PNG transparente con filtros tácticos */}
+            {/* Zapatilla flotante 3D */}
+            <div className="sneaker-wrapper relative z-20 flex items-center justify-center -mt-6">
+              <div className="w-56 sm:w-72 h-14 sm:h-16 bg-orange-500/40 rounded-full blur-2xl absolute bottom-2 pointer-events-none" />
               <img 
-                id="sneakerImg"
-                src="/running-sneaker.png" 
+                src="https://pngimg.com/uploads/running_shoes/running_shoes_PNG5816.png" 
                 alt="Zapatilla Táctica Llantita" 
-                className="sneaker-photo select-none pointer-events-none"
+                className="sneaker-photo select-none pointer-events-none w-[320px] sm:w-[440px]"
               />
             </div>
 
-            {/* PLATAFORMA HOLOGRÁFICA NARANJA EN LA BASE */}
-            <div className="absolute -bottom-10 sm:-bottom-12 w-[340px] sm:w-[500px] lg:w-[540px] h-[180px] sm:h-[220px] flex items-center justify-center pointer-events-none z-10 overflow-visible">
+            {/* Base Holográfica Táctil */}
+            <div className="absolute -bottom-10 sm:-bottom-12 w-[340px] sm:w-[540px] h-[180px] sm:h-[220px] flex items-center justify-center pointer-events-none z-10">
               <div className="holo-base w-full h-full flex items-center justify-center relative">
-                <svg viewBox="0 0 500 500" className="w-[320px] sm:w-[440px] lg:w-[480px] h-[320px] sm:h-[440px] lg:h-[480px] overflow-visible">
+                <svg viewBox="0 0 500 500" className="w-[320px] sm:w-[480px] h-[320px] sm:h-[480px] overflow-visible">
                   <defs>
                     <radialGradient id="baseFire" cx="50%" cy="50%" r="50%">
                       <stop offset="0%" stopColor="#ff7700" stopOpacity="0.7" />
@@ -227,32 +264,27 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </svg>
               </div>
             </div>
-
-            {/* Metadatos inferiores derechos (01 / X-DS) */}
-            <div className="hud-bottom-right-meta hidden sm:block">
-              <div className="num-code font-mono text-2xl text-[#b8aba0] tracking-wider leading-none">01</div>
-              <div className="sub-code font-mono text-xs text-[#8c857e] tracking-[0.14em] mt-1 mb-2">X-DS</div>
-              <div className="hud-data-blocks">
-                <span style={{ width: 7, height: 14 }} />
-                <span style={{ width: 3, height: 18 }} />
-                <span style={{ width: 2, height: 18 }} />
-                <span style={{ width: 10, height: 18 }} />
-                <span style={{ width: 18, height: 14, border: '1px solid #8c857e', background: 'transparent' }} />
-              </div>
-              <div className="barcode-label" style={{ letterSpacing: '0.2em', marginTop: 4 }}>01z0 - 0 8</div>
-            </div>
-
           </div>
         </div>
       </div>
 
-      {/* Código de barras inferior izquierdo */}
-      <div className="hud-barcode-bottom-left">
-        <div className="barcode-bars">
-          <span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 4 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 4 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} />
+      {/* FOOTER DEL HERO */}
+      <footer className="relative z-30 flex items-end justify-between w-full pb-2 px-2 sm:px-4">
+        <div className="hud-mono text-[10px] text-stone-400/60 tracking-widest">
+          <div className="flex items-stretch h-6 sm:h-7 gap-[2px] opacity-60">
+            <span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" /><span className="w-[3px] bg-stone-400" />
+            <span className="w-[2px] bg-stone-400 ml-0.5" /><span className="w-[1px] bg-stone-400" /><span className="w-[4px] bg-stone-400" />
+            <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400" /><span className="w-[3px] bg-stone-400 ml-0.5" />
+            <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400" /><span className="w-[2px] bg-stone-400" />
+          </div>
+          <div className="mt-0.5 text-[8px] tracking-[0.25em]">8 118222188 9</div>
         </div>
-        <div className="barcode-label">9 118222188 9</div>
-      </div>
+
+        <div className="hud-mono text-right text-stone-400/70 mr-2 sm:mr-6">
+          <div className="text-xl sm:text-2xl font-bold text-stone-300/60 leading-none tracking-wider">01</div>
+          <div className="text-xs tracking-widest text-stone-400/70 mb-1">X-DS</div>
+        </div>
+      </footer>
     </section>
   );
 };

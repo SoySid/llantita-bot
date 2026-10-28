@@ -29,17 +29,17 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onResetFilters,
 }) => {
   return (
-    <section className="w-full py-8 sm:py-12 bg-[#0d0b0a]">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6">
+    <section className="w-full py-6 sm:py-10">
+      <div className="mx-auto max-w-7xl px-2 sm:px-4">
         
         {/* Encabezado del catálogo */}
         <div className="flex items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-baseline gap-3">
-            <h2 className="font-anton text-2xl sm:text-3xl text-[#f2ede7] uppercase tracking-wider">
+            <h2 className="section-title text-2xl sm:text-3xl text-stone-100">
               Catálogo Completo
             </h2>
             {total > 0 && (
-              <span className="text-xs font-mono text-[#8a8074] tabular-nums">
+              <span className="text-xs hud-mono text-stone-400 tabular-nums">
                 ({total.toLocaleString('es-AR')} MODELOS EN RADAR)
               </span>
             )}

@@ -89,8 +89,8 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   };
 
   return (
-    <div className="w-full bg-[#0d0b0a] py-6 border-t border-[#26201a]">
-      <div className="mx-auto max-w-7xl px-3 sm:px-6 space-y-4">
+    <div className="w-full py-2 sm:py-4 mb-4">
+      <div className="mx-auto max-w-7xl px-2 sm:px-4 space-y-4">
         
         {/* Selector de Marcas con scroll suave */}
         <div className="space-y-2">

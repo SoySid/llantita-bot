@@ -46,10 +46,10 @@ module.exports = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "-apple-system", "sans-serif"],
-        anton: ["var(--font-anton)", "Impact", "sans-serif"],
+        teko: ["var(--font-teko)", "sans-serif"],
         barlow: ["var(--font-barlow)", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
-        display: ["var(--font-anton)", "Impact", "sans-serif"],
+        display: ["var(--font-barlow)", "sans-serif"],
       },
     },
   },

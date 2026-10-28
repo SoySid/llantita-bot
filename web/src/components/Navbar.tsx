@@ -25,14 +25,14 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
     <header
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-200 ease-out ${
         scrolled
-          ? 'opacity-100 translate-y-0 pointer-events-auto bg-[#12100e]/95 backdrop-blur-md border-b border-[#3d3328] shadow-[0_4px_24px_rgba(0,0,0,0.85)]'
+          ? 'opacity-100 translate-y-0 pointer-events-auto bg-[#12100e]/95 backdrop-blur-md border-b border-orange-500/30 shadow-[0_4px_24px_rgba(0,0,0,0.85)]'
           : 'opacity-0 -translate-y-full pointer-events-none border-b border-transparent'
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2.5 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6">
         {/* Marca y avatar táctico */}
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded overflow-hidden bg-[#1f1b17] border border-[#544738] shrink-0 p-0.5 shadow-sm">
+          <div className="h-9 w-9 rounded overflow-hidden bg-[#1f1b17] border border-orange-500/40 shrink-0 p-0.5 shadow-sm">
             <img
               src="/cat-shield.jpg"
               alt="Llantita"
@@ -42,17 +42,17 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-anton text-xl tracking-wider text-[#f5efe8] block leading-none">
+              <span className="logo-text text-2xl font-bold tracking-wider block leading-none">
                 LLANTITA
               </span>
               {ultimaActualizacion && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#211b15] border border-[#4a392b] text-[10px] font-mono text-[#a89b8d]">
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff6a1a] animate-pulse" />
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#1e1915] border border-orange-500/30 text-[10px] hud-mono text-stone-300">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff5500] animate-pulse" />
                   <span>ACT. {formatTimeAgo(ultimaActualizacion).toUpperCase()}</span>
                 </span>
               )}
             </div>
-            <p className="text-[11px] font-mono text-[#8c8275] hidden md:block">
+            <p className="text-[11px] hud-mono text-stone-400 hidden md:block">
               RADAR DE PRECIOS SPORTING
             </p>
           </div>
@@ -61,8 +61,8 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
         {/* Acciones */}
         <div className="flex items-center gap-2 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#f7a261] bg-[#1d1712] border border-[#4d3a2b] px-3 py-1.5 rounded tabular-nums">
-              <span className="h-2 w-2 rounded-full bg-[#ff6a1a]" />
+            <div className="hidden sm:flex items-center gap-2 text-xs hud-mono text-orange-400 bg-[#1d1712] border border-orange-500/30 px-3 py-1.5 rounded tabular-nums">
+              <span className="h-2 w-2 rounded-full bg-[#ff5500]" />
               <span className="font-bold">{totalProductos.toLocaleString('es-AR')} PARES</span>
             </div>
           )}
@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded bg-[#1c1814] border border-[#42362b] text-[#9c8e80] hover:text-[#f2ede7] hover:border-[#ff6a1a] active:scale-[0.94] transition-all cursor-pointer"
+            className="flex items-center justify-center h-8 w-8 rounded bg-[#1c1814] border border-stone-800 text-stone-400 hover:text-stone-100 hover:border-orange-500 active:scale-[0.94] transition-all cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
@@ -84,7 +84,7 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] border border-[#ffa366] text-[#1c110a] font-barlow font-bold text-xs px-3 py-1.5 shadow-[0_0_14px_rgba(255,85,10,0.6)] hover:shadow-[0_0_20px_rgba(255,85,10,0.85)] active:scale-[0.96] transition-all cursor-pointer uppercase"
+            className="btn-telegram px-3 py-1.5 rounded text-xs font-extrabold uppercase flex items-center gap-1.5 cursor-pointer"
           >
             <Send className="h-3 w-3" />
             <span className="hidden sm:inline">Telegram</span>

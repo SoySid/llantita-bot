@@ -39,42 +39,90 @@ export const HowItWorksSection: React.FC = () => {
   };
 
   return (
-    <section className="w-full bg-[#110f0d] border-t border-[#262019] py-12 sm:py-16">
-      <div className="mx-auto max-w-6xl px-3 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14">
-          
-          {/* Columna lateral */}
-          <div className="lg:col-span-4 space-y-3">
-            <span className="font-mono text-xs text-[#ff6a1a] uppercase tracking-widest block">
-              SISTEMA DE MONITOREO
-            </span>
-            <h2 className="font-anton text-2xl sm:text-3xl text-[#f2ede7] uppercase tracking-wider">
-              Cómo funciona Llantita
-            </h2>
-            <p className="text-sm font-sans text-[#a39b91] leading-relaxed max-w-[50ch]">
-              Monitoreamos el catálogo oficial de Sporting para detectar ofertas genuinas y disponibilidad real en cada número.
-            </p>
+    <section className="section-carbon-bg py-20 sm:py-28 px-4 sm:px-8 md:px-16 relative overflow-hidden">
+      <div className="noise-overlay" />
 
-            <div className="pt-3">
-              <a
-                href="https://t.me/llantita_bot"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded bg-[#181411] border border-[#382f25] hover:border-[#ff6a1a] px-4 py-2.5 text-xs font-barlow font-bold uppercase tracking-wider text-[#f2ede7] active:scale-[0.96] transition-all cursor-pointer shadow-[0_4px_14px_rgba(0,0,0,0.5)]"
-              >
-                <Send className="h-3.5 w-3.5 text-[#ff6a1a]" />
-                <span>Canal de Telegram (@llantita_bot)</span>
-              </a>
-            </div>
+      {/* Decoración técnica lateral izquierda */}
+      <div className="absolute left-6 top-1/2 -translate-y-1/2 hidden xl:flex flex-col items-center gap-3 opacity-35 pointer-events-none">
+        <span className="hud-mono text-[10px] text-orange-400 [writing-mode:vertical-rl] tracking-widest">
+          SYS_PIPELINE_V2.4
+        </span>
+        <div className="w-[1px] h-32 bg-orange-500" />
+      </div>
+
+      <div className="max-w-[1360px] mx-auto relative z-10">
+        {/* Cabecera de la Sección 2 */}
+        <div className="text-center max-w-2xl mx-auto mb-16">
+          <span className="hud-mono text-xs text-orange-400 tracking-[0.3em] uppercase block mb-2">
+            SEC // 02 — ARQUITECTURA DE RASTREO
+          </span>
+          <h2 className="section-title text-4xl sm:text-5xl md:text-6xl text-white">
+            Protocolo de intercepción
+          </h2>
+          <p className="text-stone-400 mt-3 text-sm sm:text-base leading-relaxed">
+            Así filtramos el humo de las falsas ofertas para avisarte únicamente cuando un par toca su mínimo real.
+          </p>
+        </div>
+
+        {/* 3 Tarjetas de Arquitectura / Protocolo */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-16">
+          <div className="bg-[#0e0d0c]/90 border-t-2 border-orange-500 p-6 sm:p-8 relative shadow-2xl transition-transform hover:-translate-y-1 duration-200">
+            <span className="hud-mono text-5xl font-bold text-orange-500/20 absolute top-4 right-6 pointer-events-none">
+              01
+            </span>
+            <h3 className="section-title text-2xl sm:text-3xl text-orange-300 mb-3">
+              Barrido de Catálogo
+            </h3>
+            <p className="text-stone-400 text-sm leading-relaxed">
+              Extraemos el listado completo de pares y talles disponibles cada 30 minutos sin interrupción.
+            </p>
           </div>
 
-          {/* Columna principal: Acordeón */}
-          <div className="lg:col-span-8 space-y-2.5">
+          <div className="bg-[#0e0d0c]/90 border-t-2 border-orange-500 p-6 sm:p-8 relative shadow-2xl transition-transform hover:-translate-y-1 duration-200">
+            <span className="hud-mono text-5xl font-bold text-orange-500/20 absolute top-4 right-6 pointer-events-none">
+              02
+            </span>
+            <h3 className="section-title text-2xl sm:text-3xl text-orange-300 mb-3">
+              Contraste Histórico
+            </h3>
+            <p className="text-stone-400 text-sm leading-relaxed">
+              Comparamos el valor actual contra la base de datos histórica para descartar precios inflados.
+            </p>
+          </div>
+
+          <div className="bg-[#0e0d0c]/90 border-t-2 border-orange-500 p-6 sm:p-8 relative shadow-2xl transition-transform hover:-translate-y-1 duration-200">
+            <span className="hud-mono text-5xl font-bold text-orange-500/20 absolute top-4 right-6 pointer-events-none">
+              03
+            </span>
+            <h3 className="section-title text-2xl sm:text-3xl text-orange-300 mb-3">
+              Disparo a Telegram
+            </h3>
+            <p className="text-stone-400 text-sm leading-relaxed">
+              Si el descuento supera el umbral real, el bot envía la alerta instantánea con link directo al carrito.
+            </p>
+          </div>
+        </div>
+
+        {/* Acordeón de Preguntas Frecuentes */}
+        <div className="max-w-3xl mx-auto pt-6 border-t border-stone-800/80">
+          <div className="mb-8 text-center sm:text-left">
+            <span className="hud-mono text-xs text-orange-400 tracking-[0.25em] uppercase block mb-1">
+              CONSULTAS OPERATIVAS
+            </span>
+            <h3 className="section-title text-2xl sm:text-3xl text-stone-200">
+              Preguntas Frecuentes
+            </h3>
+          </div>
+
+          <div className="space-y-3">
             {FAQS.map((item, idx) => {
               const isOpen = openIndex === idx;
               const contentId = `faq-content-${idx}`;
               return (
-                <div key={item.pregunta} className="rounded bg-[#151210] border border-[#2b241c] p-4 transition-colors">
+                <div
+                  key={item.pregunta}
+                  className="tactical-card p-4 sm:p-5 transition-colors"
+                >
                   <button
                     type="button"
                     onClick={() => toggleItem(idx)}
@@ -82,13 +130,13 @@ export const HowItWorksSection: React.FC = () => {
                     aria-controls={contentId}
                     className="flex w-full items-start justify-between gap-4 text-left group cursor-pointer"
                   >
-                    <span className="font-anton text-base sm:text-lg text-[#f2ede7] group-hover:text-[#ff6a1a] transition-colors tracking-wide">
+                    <span className="section-title text-lg sm:text-xl text-stone-200 group-hover:text-orange-400 transition-colors">
                       {item.pregunta}
                     </span>
-                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-[#8a8074] group-hover:text-[#ff6a1a] transition-transform">
+                    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center text-stone-400 group-hover:text-orange-400 transition-transform">
                       <ChevronDown
                         className={`h-4 w-4 transition-transform duration-200 ease-out ${
-                          isOpen ? 'rotate-180 text-[#ff6a1a]' : ''
+                          isOpen ? 'rotate-180 text-orange-400' : ''
                         }`}
                       />
                     </span>
@@ -96,7 +144,7 @@ export const HowItWorksSection: React.FC = () => {
 
                   {isOpen && (
                     <div id={contentId} role="region" className="pt-3 pr-4 animate-in fade-in duration-150">
-                      <p className="text-sm font-sans text-[#a39b91] leading-relaxed max-w-[65ch]">
+                      <p className="text-sm text-stone-300/85 leading-relaxed">
                         {item.respuesta}
                       </p>
                     </div>
@@ -105,8 +153,8 @@ export const HowItWorksSection: React.FC = () => {
               );
             })}
           </div>
-
         </div>
+
       </div>
     </section>
   );

@@ -72,20 +72,15 @@ p {
 
 ::-webkit-scrollbar {
   width: 8px;
-  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--canvas);
+  background: #0d0c0c;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--surface-border);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-muted);
+  background: #3a2316;
+  border: 1px solid #ff5500;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -474,6 +469,246 @@ p {
   height: 26px;
   opacity: 0.45;
   pointer-events: none;
+}
+
+/* ==========================================
+   SISTEMA DE SECCIONES TÁCTICAS LLANTITA
+   ========================================== */
+
+/* Ruido sutil de fondo para todas las secciones */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+/* ==========================================
+   SECCIÓN 0: HERO (Brasas y Viñeta de Fuego)
+   ========================================== */
+.hero-bg {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background: 
+    radial-gradient(circle at 70% 52%, rgba(255, 75, 0, 0.24) 0%, rgba(180, 40, 0, 0.09) 32%, transparent 60%),
+    radial-gradient(circle at 12% 10%, rgba(255, 60, 0, 0.25) 0%, transparent 35%),
+    radial-gradient(circle at 30% 45%, #1f1d1d 0%, #0d0c0c 100%);
+  box-shadow: 
+    inset 14px 0 35px -8px rgba(255, 68, 0, 0.75),
+    inset 0 0 90px rgba(0, 0, 0, 0.95);
+}
+
+/* ==========================================
+   SECCIÓN 1: GRILLA DE RADAR TÁCTICO
+   ========================================== */
+.section-grid-bg {
+  position: relative;
+  background-color: #0b0a0a;
+  background-image: 
+    radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.14) 0%, transparent 55%),
+    linear-gradient(to right, rgba(255, 102, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 102, 0, 0.06) 1px, transparent 1px);
+  background-size: 100% 100%, 48px 48px, 48px 48px;
+  box-shadow: inset 0 25px 50px #060505, inset 0 -25px 50px #060505;
+}
+
+.section-grid-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 136, 0, 0.28) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
+}
+
+/* ==========================================
+   SECCIÓN 2: MALLA DE CARBONO + HALO LATERAL
+   ========================================== */
+.section-carbon-bg {
+  position: relative;
+  background-color: #141211;
+  background-image: 
+    radial-gradient(circle at 92% 50%, rgba(255, 90, 0, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 8% 60%, rgba(255, 140, 0, 0.08) 0%, transparent 40%),
+    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0),
+    radial-gradient(rgba(0, 0, 0, 0.8) 1px, transparent 0);
+  background-size: 100% 100%, 100% 100%, 16px 16px, 16px 16px;
+  background-position: 0 0, 0 0, 0 0, 8px 8px;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9);
+}
+
+/* Franja diagonal industrial (Hazard strip) */
+.hazard-strip {
+  height: 8px;
+  width: 100%;
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 90, 0, 0.35),
+    rgba(255, 90, 0, 0.35) 12px,
+    #0c0b0b 12px,
+    #0c0b0b 24px
+  );
+  border-top: 1px solid rgba(255, 102, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 102, 0, 0.4);
+}
+
+/* ==========================================
+   SECCIÓN 3: NÚCLEO TÉRMICO + SCANLINES
+   ========================================== */
+.section-core-bg {
+  position: relative;
+  background: 
+    radial-gradient(ellipse at 50% 100%, rgba(255, 68, 0, 0.28) 0%, rgba(140, 25, 0, 0.1) 45%, #090808 80%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.015) 0px,
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  background-color: #090808;
+}
+
+/* ==========================================
+   COMPONENTES DE ESTILO TÁCTICO
+   ========================================== */
+
+/* Placa metálica del logo LLANTITA */
+.logo-plate {
+  background: linear-gradient(180deg, #2d2926 0%, #1a1715 100%);
+  border: 2px solid #574b3d;
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.85),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15),
+    inset 0 0 12px rgba(0,0,0,0.9);
+  position: relative;
+}
+
+.logo-shield {
+  background: linear-gradient(145deg, #3a352f 0%, #181512 100%);
+  border: 2px solid #6c5e4c;
+  clip-path: polygon(0 0, 100% 0, 100% 76%, 50% 100%, 0 76%);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.8);
+}
+
+.logo-text {
+  font-family: var(--font-teko), sans-serif;
+  letter-spacing: 0.03em;
+  background: linear-gradient(180deg, #fff6e5 0%, #ffc470 55%, #e07b22 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(255, 115, 0, 0.45));
+}
+
+/* Botones e insignias superiores */
+.badge-active {
+  font-family: var(--font-barlow), sans-serif;
+  background: rgba(28, 22, 19, 0.78);
+  border: 1px solid rgba(255, 125, 50, 0.35);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 90, 0, 0.08);
+  color: #ffca85;
+  letter-spacing: 0.04em;
+}
+
+.btn-telegram {
+  font-family: var(--font-barlow), sans-serif;
+  background: linear-gradient(90deg, #ff5100 0%, #ff7b00 50%, #ff5100 100%);
+  box-shadow: 
+    0 0 22px rgba(255, 94, 0, 0.75),
+    inset 0 1px 2px rgba(255, 230, 180, 0.65);
+  color: #1c0d06;
+  letter-spacing: 0.03em;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-telegram:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 30px rgba(255, 115, 0, 0.95), inset 0 1px 3px rgba(255, 255, 255, 0.8);
+}
+
+/* Tipografía de encabezados */
+.headline {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 700;
+  line-height: 0.94;
+  letter-spacing: -0.01em;
+  color: #f3f1ed;
+  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
+}
+
+.section-title {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Tarjetas Tácticas con Esquinas Recortadas (Chamfer) */
+.tactical-card {
+  background: linear-gradient(165deg, rgba(32, 28, 26, 0.9) 0%, rgba(16, 14, 13, 0.95) 100%);
+  border: 1px solid rgba(255, 110, 40, 0.25);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 85, 0, 0.05);
+  transition: border-color 0.25s ease, transform 0.25s ease;
+}
+
+.tactical-card:hover {
+  border-color: rgba(255, 115, 0, 0.75);
+  transform: translateY(-4px);
+}
+
+/* Animación realista 3D para la zapatilla del Hero */
+@keyframes floatSneakerReal {
+  0%, 100% {
+    transform: translateY(0px) rotate(-28deg) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) rotate(-24deg) scale(1.035);
+  }
+}
+
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spinReverse {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+.sneaker-wrapper {
+  animation: floatSneakerReal 4.2s ease-in-out infinite;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.sneaker-photo {
+  width: 440px;
+  max-width: none;
+  transform: scaleX(-1);
+  filter: grayscale(0.75) sepia(0.45) hue-rotate(-18deg) contrast(1.35) brightness(0.85) drop-shadow(0 28px 18px rgba(0,0,0,0.85)) drop-shadow(0 4px 16px rgba(255,90,0,0.75));
+}
+
+.holo-base {
+  transform: rotateX(74deg) rotateZ(-6deg);
+  transform-style: preserve-3d;
+}
+
+.ring-spin {
+  animation: spinSlow 24s linear infinite;
+}
+
+.ring-spin-rev {
+  animation: spinReverse 18s linear infinite;
+}
+
+.hud-mono {
+  font-family: var(--font-mono), monospace;
 }
 
 /* Tarjeta Mech Industrial */
