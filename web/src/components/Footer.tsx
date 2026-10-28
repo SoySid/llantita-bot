@@ -70,7 +70,19 @@ export const Footer: React.FC<FooterProps> = ({ ultimaActualizacion }) => {
           {/* Enlaces y Créditos Técnicos */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-stone-500">
             <div className="flex items-center gap-2">
-              <span className="text-stone-400 font-bold">LLANTITA</span>
+              <div
+                className="w-5 h-6 shrink-0 filter drop-shadow(0 1px 3px rgba(0,0,0,0.8)) overflow-hidden bg-[#181512]"
+                style={{
+                  clipPath: 'polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%)',
+                }}
+              >
+                <img
+                  src="/cat-shield.jpg"
+                  alt="Llantita"
+                  className="h-full w-full object-cover select-none pointer-events-none"
+                />
+              </div>
+              <span className="text-stone-300 font-bold tracking-wider">LLANTITA</span>
               <span>·</span>
               <span>
                 Desarrollado por <strong className="text-stone-300 font-semibold">Alfredo López (@SoySid)</strong>

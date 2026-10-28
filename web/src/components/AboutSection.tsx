@@ -114,27 +114,17 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       {/* NAVBAR SUPERIOR */}
       <header className="relative z-30 flex flex-wrap items-center justify-between w-full pt-1 gap-4">
         <div className="flex items-center">
-          <div className="logo-plate flex items-center rounded-md pl-16 sm:pl-20 pr-4 sm:pr-5 py-1.5 h-14 relative">
-            <div className="logo-shield w-14 sm:w-16 h-18 sm:h-20 absolute -left-1 -top-2.5 flex flex-col items-center justify-center p-1.5">
-              <svg viewBox="0 0 64 64" className="w-10 sm:w-11 h-10 sm:h-11 drop-shadow">
-                <polygon points="12,26 16,8 28,18" fill="#6e685f" stroke="#2a2622" strokeWidth="2" />
-                <polygon points="15,23 18,12 25,18" fill="#47413a" />
-                <polygon points="52,26 48,8 36,18" fill="#6e685f" stroke="#2a2622" strokeWidth="2" />
-                <polygon points="49,23 46,12 39,18" fill="#47413a" />
-                <ellipse cx="32" cy="34" rx="20" ry="17" fill="#7d766d" stroke="#2a2622" strokeWidth="2" />
-                <path d="M28,20 L29,26 M32,19 L32,26 M36,20 L35,26" stroke="#3b3630" strokeWidth="2" strokeLinecap="round" />
-                <circle cx="24" cy="33" r="4.2" fill="#c79b4b" stroke="#1e1b18" strokeWidth="1.5" />
-                <circle cx="24" cy="33" r="2" fill="#111" />
-                <circle cx="25.2" cy="31.8" r="1" fill="#fff" />
-                <circle cx="40" cy="33" r="4.2" fill="#c79b4b" stroke="#1e1b18" strokeWidth="1.5" />
-                <circle cx="40" cy="33" r="2" fill="#111" />
-                <circle cx="41.2" cy="31.8" r="1" fill="#fff" />
-                <ellipse cx="32" cy="40" rx="7" ry="5" fill="#9c9488" />
-                <polygon points="29,37 35,37 32,41" fill="#3a2e28" />
-                <path d="M32,41 L28,44 M32,41 L36,44" stroke="#2a2622" strokeWidth="1.8" strokeLinecap="round" />
-              </svg>
+          <div className="logo-plate flex items-center rounded-md pl-[72px] sm:pl-[78px] pr-4 sm:pr-5 py-1.5 h-14 relative">
+            <div className="logo-shield">
+              <img
+                src="/cat-shield.jpg"
+                alt="Escudo Llantita"
+                className="select-none pointer-events-none"
+              />
             </div>
-            <span className="logo-text text-4xl sm:text-5xl font-bold tracking-wider leading-none pt-1">LLANTITA</span>
+            <span className="logo-text text-4xl sm:text-5xl font-bold tracking-wider leading-none pt-0.5">
+              LLANTITA
+            </span>
             <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute top-1.5 right-1.5" />
             <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute bottom-1.5 right-1.5" />
           </div>

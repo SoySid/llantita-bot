@@ -31,12 +31,17 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6">
         {/* Marca y avatar táctico */}
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded overflow-hidden bg-[#1f1b17] border border-orange-500/40 shrink-0 p-0.5 shadow-sm">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="w-7 h-9 shrink-0 filter drop-shadow(0 2px 5px rgba(0,0,0,0.9)) overflow-hidden bg-[#181512]"
+            style={{
+              clipPath: 'polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%)',
+            }}
+          >
             <img
               src="/cat-shield.jpg"
               alt="Llantita"
-              className="h-full w-full object-cover rounded-sm"
+              className="h-full w-full object-cover select-none pointer-events-none"
             />
           </div>
 
