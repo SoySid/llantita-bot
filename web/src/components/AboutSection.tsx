@@ -153,31 +153,83 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           )}
         </div>
 
-        {/* Columna Derecha: Zapatilla Holográfica + Elementos Técnicos HUD */}
-        <div className="sneaker-showcase">
-          <div className="sneaker-holo-container">
+        {/* Columna Derecha: Escena Holográfica + Zapatilla Realista */}
+        <div className="sneaker-showcase relative flex items-center justify-center h-full">
+          <div className="relative w-[340px] sm:w-[440px] lg:w-[480px] h-[460px] flex items-center justify-center">
+            
+            {/* Mira / Cuadrícula fina trasera */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-45">
+              <div className="w-[320px] sm:w-[440px] h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent"></div>
+              <div className="h-[320px] sm:h-[440px] w-[1px] bg-gradient-to-b from-transparent via-orange-500/60 to-transparent absolute"></div>
+            </div>
+
+            {/* Círculo Naranja Vertical Trasero */}
+            <svg viewBox="0 0 400 400" className="w-[300px] sm:w-[380px] h-[300px] sm:h-[380px] absolute pointer-events-none select-none">
+              <defs>
+                <radialGradient id="orangeGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ff6600" stopOpacity="0.42"/>
+                  <stop offset="60%" stopColor="#ff3300" stopOpacity="0.12"/>
+                  <stop offset="100%" stopColor="#ff3300" stopOpacity="0"/>
+                </radialGradient>
+              </defs>
+              <circle cx="200" cy="200" r="185" fill="url(#orangeGlow)" />
+              <circle cx="200" cy="200" r="165" fill="none" stroke="#ff6a00" strokeOpacity="0.55" strokeWidth="1.5" />
+              <circle cx="200" cy="200" r="142" fill="none" stroke="#ff8800" strokeOpacity="0.3" strokeWidth="1" strokeDasharray="8 6" className="ring-spin" style={{ transformOrigin: '200px 200px' }} />
+              <circle cx="200" cy="200" r="115" fill="none" stroke="#ff5500" strokeOpacity="0.35" strokeWidth="1" />
+            </svg>
+
             {/* Código de barras superior derecho */}
             <div className="hud-barcode-top-right">
               <div className="barcode-bars">
                 <span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 4 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} />
               </div>
-              <div className="barcode-label">21AE 10S03</div>
+              <div className="barcode-label">21AE 0503</div>
             </div>
 
-            {/* Imagen de la zapatilla holográfica limpia */}
-            <img
-              src="/hero-sneaker.jpg"
-              alt="Zapatilla deportiva holográfica Llantita"
-              className="sneaker-holo-img"
-            />
+            {/* Ángulo HUD derecho */}
+            <div className="absolute right-0 sm:right-2 bottom-32 sm:bottom-36 w-6 h-6 border-r border-b border-stone-400/50 pointer-events-none">
+              <div className="w-4 h-[1px] bg-stone-400/50 rotate-45 origin-bottom-right absolute bottom-0 right-0"></div>
+            </div>
 
-            {/* Flecha diagonal HUD derecha */}
-            <svg className="hud-corner-arrow" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M2 2L25 25M25 25V4M25 25H4" stroke="#8d8883" strokeWidth="1.5"/>
-            </svg>
+            {/* ZAPATILLA CON ANIMACIÓN 3D Y RESPLANDOR */}
+            <div id="sneakerContainer" className="sneaker-wrapper relative z-20 flex items-center justify-center -mt-6">
+              {/* Resplandor de lava debajo de la suela */}
+              <div className="w-56 sm:w-72 h-14 sm:h-16 bg-orange-500/40 rounded-full blur-2xl absolute bottom-2 pointer-events-none"></div>
+              
+              {/* Imagen PNG transparente con filtros tácticos */}
+              <img 
+                id="sneakerImg"
+                src="/running-sneaker.png" 
+                alt="Zapatilla Táctica Llantita" 
+                className="sneaker-photo select-none pointer-events-none"
+              />
+            </div>
+
+            {/* PLATAFORMA HOLOGRÁFICA NARANJA EN LA BASE */}
+            <div className="absolute -bottom-10 sm:-bottom-12 w-[340px] sm:w-[500px] lg:w-[540px] h-[180px] sm:h-[220px] flex items-center justify-center pointer-events-none z-10 overflow-visible">
+              <div className="holo-base w-full h-full flex items-center justify-center relative">
+                <svg viewBox="0 0 500 500" className="w-[320px] sm:w-[440px] lg:w-[480px] h-[320px] sm:h-[440px] lg:h-[480px] overflow-visible">
+                  <defs>
+                    <radialGradient id="baseFire" cx="50%" cy="50%" r="50%">
+                      <stop offset="0%" stopColor="#ff7700" stopOpacity="0.7" />
+                      <stop offset="45%" stopColor="#ff4400" stopOpacity="0.32" />
+                      <stop offset="75%" stopColor="#ff2200" stopOpacity="0.06" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                    </radialGradient>
+                  </defs>
+                  <circle cx="250" cy="250" r="240" fill="url(#baseFire)" />
+                  <circle cx="250" cy="250" r="230" fill="none" stroke="#ff5500" strokeWidth="1.5" strokeOpacity="0.5" />
+                  <circle cx="250" cy="250" r="210" fill="none" stroke="#ff8800" strokeWidth="2.5" strokeDasharray="18 8 4 8" className="ring-spin" style={{ transformOrigin: '250px 250px' }} />
+                  <circle cx="250" cy="250" r="192" fill="none" stroke="#ff6600" strokeWidth="8" strokeDasharray="2 6" strokeOpacity="0.75" className="ring-spin-rev" style={{ transformOrigin: '250px 250px' }} />
+                  <circle cx="250" cy="250" r="168" fill="none" stroke="#ffaa00" strokeWidth="4" strokeOpacity="0.9" />
+                  <circle cx="250" cy="250" r="145" fill="none" stroke="#ff5500" strokeWidth="12" strokeOpacity="0.35" />
+                  <circle cx="250" cy="250" r="125" fill="none" stroke="#ffcc66" strokeWidth="2" strokeDasharray="40 18" className="ring-spin" style={{ transformOrigin: '250px 250px' }} />
+                </svg>
+              </div>
+            </div>
 
             {/* Metadatos inferiores derechos (01 / X-DS) */}
-            <div className="hud-bottom-right-meta">
+            <div className="hud-bottom-right-meta hidden sm:block">
               <div className="num-code font-mono text-2xl text-[#b8aba0] tracking-wider leading-none">01</div>
               <div className="sub-code font-mono text-xs text-[#8c857e] tracking-[0.14em] mt-1 mb-2">X-DS</div>
               <div className="hud-data-blocks">
@@ -189,6 +241,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
               </div>
               <div className="barcode-label" style={{ letterSpacing: '0.2em', marginTop: 4 }}>01z0 - 0 8</div>
             </div>
+
           </div>
         </div>
       </div>
