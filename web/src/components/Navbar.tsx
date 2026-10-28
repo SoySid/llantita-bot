@@ -14,7 +14,8 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 400);
+      // Aparece únicamente cuando el usuario se desplaza más de 250px hacia el catálogo
+      setScrolled(window.scrollY > 250);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -22,10 +23,10 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
 
   return (
     <header
-      className={`sticky top-0 z-40 w-full transition-[background-color,border-color,backdrop-filter] duration-200 ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-200 ease-out ${
         scrolled
-          ? 'bg-[#12100e]/90 backdrop-blur-md border-b border-[#3d3328] shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
-          : 'bg-transparent border-b border-transparent'
+          ? 'opacity-100 translate-y-0 pointer-events-auto bg-[#12100e]/95 backdrop-blur-md border-b border-[#3d3328] shadow-[0_4px_24px_rgba(0,0,0,0.85)]'
+          : 'opacity-0 -translate-y-full pointer-events-none border-b border-transparent'
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2.5 sm:px-6">
@@ -33,7 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded overflow-hidden bg-[#1f1b17] border border-[#544738] shrink-0 p-0.5 shadow-sm">
             <img
-              src="/logo.jpg"
+              src="/cat-shield.jpg"
               alt="Llantita"
               className="h-full w-full object-cover rounded-sm"
             />

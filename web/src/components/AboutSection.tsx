@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
 
 interface AboutSectionProps {
   onExploreClick?: () => void;
@@ -11,10 +10,10 @@ interface AboutSectionProps {
 
 export const AboutSection: React.FC<AboutSectionProps> = ({
   onExploreClick,
-  totalProductos = 1897,
+  totalProductos = 1872,
 }) => {
   return (
-    <section className="hero-viewport relative select-none">
+    <section className="hero-viewport relative select-none h-screen min-h-[660px] max-h-[1080px] flex flex-col justify-between overflow-hidden p-[3.2vh_4vw] lg:p-[3.6vh_5.5vw]">
       {/* Bordes incandescentes */}
       <div className="left-burn-edge" aria-hidden="true" />
       <div className="right-burn-edge" aria-hidden="true" />
@@ -87,23 +86,21 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       </div>
 
       {/* Barra Superior con Insignia Metálica */}
-      <header className="relative z-10 flex flex-wrap items-center justify-between w-full px-2 sm:px-6 gap-4">
+      <header className="relative z-10 flex items-center justify-between w-full px-1 sm:px-4">
         {/* Insignia metálica LLANTITA */}
         <div className="brand-badge">
           <div className="cat-shield-wrapper">
-            <img src="/logo.jpg" alt="Escudo Gato Llantita" />
+            <img src="/cat-shield.jpg" alt="Escudo Gato Llantita" />
           </div>
           <span className="brand-title">LLANTITA</span>
-          <span className="rivet tl" />
           <span className="rivet tr" />
           <span className="rivet br" />
-          <span className="rivet bl" />
         </div>
 
         {/* Acciones superiores */}
         <div className="flex items-center gap-3 sm:gap-4">
           <div className="status-pill font-barlow tracking-wider">
-            {totalProductos > 0 ? `${totalProductos.toLocaleString('es-AR')} PARES ACTIVOS` : 'MONITOR ACTIVO'}
+            {totalProductos > 0 ? `${totalProductos.toLocaleString('es-AR')} PARES ACTIVOS` : '1.872 PARES ACTIVOS'}
           </div>
 
           <a
@@ -121,9 +118,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       </header>
 
       {/* Escenario Central */}
-      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] items-center w-full flex-1 px-2 sm:px-6 pt-6 lg:pt-0 gap-8">
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] items-center w-full flex-1 px-1 sm:px-4 py-2 sm:py-4 gap-4 sm:gap-6">
         {/* Columna Izquierda: Texto y Coordenadas */}
-        <div className="max-w-[680px]">
+        <div className="max-w-[640px] pt-1">
           {/* Eje de coordenadas X/Y HUD */}
           <div className="coord-axis">
             <svg width="46" height="48" viewBox="0 0 46 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -135,18 +132,18 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </svg>
           </div>
 
-          <h1 className="font-anton text-4xl sm:text-6xl lg:text-[76px] leading-[1.01] tracking-[0.01em] text-[#e5e5e5] drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] mb-5">
+          <h1 className="font-anton text-4xl sm:text-6xl lg:text-[clamp(3.2rem,5.5vw,5.4rem)] leading-[1.01] tracking-[0.01em] text-[#e5e5e5] drop-shadow-[0_6px_24px_rgba(0,0,0,0.85)] mb-4">
             Descuentos reales<br />en zapatillas
           </h1>
 
-          <p className="font-sans text-base sm:text-lg lg:text-xl text-[#969696] max-w-[560px] leading-relaxed mb-8">
+          <p className="font-sans text-sm sm:text-base lg:text-[clamp(0.95rem,1.3vw,1.2rem)] text-[#969696] max-w-[520px] leading-relaxed mb-6">
             Monitoreamos bajas de precio y stock en Sporting cada 30 minutos para que compres en su piso histórico.
           </p>
 
           {onExploreClick && (
             <button
               onClick={onExploreClick}
-              className="inline-flex items-center gap-3 px-6 py-3.5 rounded-md bg-[#1d1916] hover:bg-[#26211d] border border-[#5c4737] hover:border-[#ff6a1a] text-[#f2ede7] hover:text-white font-barlow font-bold text-lg tracking-wider uppercase transition-[border-color,background-color,transform] active:scale-[0.98] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
+              className="inline-flex items-center gap-3 px-5 py-3 rounded-md bg-[#1d1916] hover:bg-[#26211d] border border-[#5c4737] hover:border-[#ff6a1a] text-[#f2ede7] hover:text-white font-barlow font-bold text-base tracking-wider uppercase transition-all active:scale-[0.98] cursor-pointer shadow-[0_4px_16px_rgba(0,0,0,0.6)]"
             >
               <span>EXPLORAR CATÁLOGO</span>
               <svg className="w-4 h-4 text-[#ff6a1a]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -157,41 +154,32 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         </div>
 
         {/* Columna Derecha: Zapatilla Holográfica + Elementos Técnicos HUD */}
-        <div className="relative flex items-center justify-center w-full">
-          <div className="relative w-full max-w-[680px] aspect-[1.18/1] flex items-center justify-center">
+        <div className="sneaker-showcase">
+          <div className="sneaker-holo-container">
             {/* Código de barras superior derecho */}
-            <div className="absolute top-[6%] right-[5%] flex flex-col items-center opacity-45 pointer-events-none">
+            <div className="hud-barcode-top-right">
               <div className="barcode-bars">
                 <span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 4 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} />
               </div>
               <div className="barcode-label">21AE 10S03</div>
             </div>
 
-            {/* Imagen de la zapatilla holográfica */}
-            <div className="relative w-full h-full flex items-center justify-center">
-              <Image
-                src="/hero-sneaker.jpg"
-                alt="Zapatilla deportiva holográfica Llantita"
-                width={700}
-                height={600}
-                priority
-                className="w-[105%] h-[105%] object-contain mix-blend-lighten pointer-events-none drop-shadow-[0_15px_35px_rgba(255,85,0,0.2)]"
-                style={{
-                  maskImage: 'radial-gradient(ellipse 54% 52% at 50% 50%, #000 68%, rgba(0,0,0,0.4) 85%, transparent 100%)',
-                  WebkitMaskImage: 'radial-gradient(ellipse 54% 52% at 50% 50%, #000 68%, rgba(0,0,0,0.4) 85%, transparent 100%)',
-                }}
-              />
-            </div>
+            {/* Imagen de la zapatilla holográfica limpia */}
+            <img
+              src="/hero-sneaker.jpg"
+              alt="Zapatilla deportiva holográfica Llantita"
+              className="sneaker-holo-img"
+            />
 
             {/* Flecha diagonal HUD derecha */}
-            <svg className="absolute right-[6%] top-[51%] w-[26px] h-[26px] opacity-45 pointer-events-none" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg className="hud-corner-arrow" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M2 2L25 25M25 25V4M25 25H4" stroke="#8d8883" strokeWidth="1.5"/>
             </svg>
 
             {/* Metadatos inferiores derechos (01 / X-DS) */}
             <div className="hud-bottom-right-meta">
               <div className="num-code font-mono text-2xl text-[#b8aba0] tracking-wider leading-none">01</div>
-              <div className="sub-code font-mono text-xs text-[#8c857e] tracking-[0.14em] mt-1 mb-2.5">X-DS</div>
+              <div className="sub-code font-mono text-xs text-[#8c857e] tracking-[0.14em] mt-1 mb-2">X-DS</div>
               <div className="hud-data-blocks">
                 <span style={{ width: 7, height: 14 }} />
                 <span style={{ width: 3, height: 18 }} />
@@ -206,7 +194,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       </div>
 
       {/* Código de barras inferior izquierdo */}
-      <div className="relative z-10 px-2 sm:px-6 mb-2 inline-flex flex-col items-start opacity-45 pointer-events-none">
+      <div className="hud-barcode-bottom-left">
         <div className="barcode-bars">
           <span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 4 }} /><span style={{ width: 2 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} /><span style={{ width: 2 }} /><span style={{ width: 4 }} /><span style={{ width: 1 }} /><span style={{ width: 3 }} /><span style={{ width: 1 }} />
         </div>

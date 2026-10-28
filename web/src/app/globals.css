@@ -129,7 +129,7 @@ p {
   top: 0;
   bottom: 0;
   left: 0;
-  width: 24px;
+  width: 28px;
   background: linear-gradient(90deg, 
     #ff3b00 0%, 
     #ff7b00 18%, 
@@ -207,8 +207,8 @@ p {
   background: linear-gradient(180deg, #2a2c28 0%, #1b1c19 55%, #121311 100%);
   border: 2px solid #575951;
   border-radius: 6px;
-  height: 64px;
-  padding: 0 18px 0 76px;
+  height: 76px;
+  padding: 0 22px 0 92px;
   box-shadow: 
     0 10px 25px rgba(0,0,0,0.85),
     inset 0 1px 1px rgba(255,255,255,0.22),
@@ -232,18 +232,18 @@ p {
   background: radial-gradient(circle at 35% 35%, #8c9084, #2b2d28);
   box-shadow: 0 1px 2px rgba(0,0,0,0.9);
 }
-.rivet.tr { top: 6px; right: 6px; }
-.rivet.br { bottom: 6px; right: 6px; }
-.rivet.tl { top: 6px; left: 6px; }
-.rivet.bl { bottom: 6px; left: 6px; }
+.rivet.tr { top: 8px; right: 8px; }
+.rivet.br { bottom: 8px; right: 8px; }
+.rivet.tl { top: 8px; left: 8px; }
+.rivet.bl { bottom: 8px; left: 8px; }
 
 .cat-shield-wrapper {
   position: absolute;
-  left: -4px;
+  left: -6px;
   top: 50%;
   transform: translateY(-48%);
-  width: 72px;
-  height: 88px;
+  width: 86px;
+  height: 104px;
   filter: drop-shadow(0 6px 12px rgba(0,0,0,0.85));
   overflow: hidden;
   clip-path: polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%);
@@ -380,6 +380,67 @@ p {
 .hud-data-blocks span {
   display: inline-block;
   background: #8c857e;
+}
+
+/* Columna derecha: Zapatilla y proyección holográfica */
+.sneaker-showcase {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.sneaker-holo-container {
+  position: relative;
+  width: min(100%, 720px);
+  aspect-ratio: 1.15 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sneaker-holo-img {
+  width: 108%;
+  height: 108%;
+  object-fit: contain;
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 68%, rgba(0,0,0,0.4) 85%, transparent 100%);
+  mask-image: radial-gradient(ellipse 52% 50% at 50% 50%, #000 68%, rgba(0,0,0,0.4) 85%, transparent 100%);
+  pointer-events: none;
+}
+
+.hud-barcode-top-right {
+  position: absolute;
+  top: 6%;
+  right: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.42;
+  pointer-events: none;
+}
+
+.hud-barcode-bottom-left {
+  position: relative;
+  z-index: 8;
+  margin-left: 2.8vw;
+  margin-bottom: 2.2vh;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  opacity: 0.42;
+}
+
+.hud-corner-arrow {
+  position: absolute;
+  right: 6%;
+  top: 51%;
+  width: 26px;
+  height: 26px;
+  opacity: 0.45;
+  pointer-events: none;
 }
 
 /* Tarjeta Mech Industrial */
