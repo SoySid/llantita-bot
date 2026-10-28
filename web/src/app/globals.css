@@ -413,8 +413,9 @@ p {
 }
 
 .sneaker-photo {
-  width: 440px;
-  max-width: none;
+  width: 100%;
+  max-width: 440px;
+  height: auto;
   transform: scaleX(-1);
   filter: grayscale(0.75) sepia(0.45) hue-rotate(-18deg) contrast(1.35) brightness(0.85) drop-shadow(0 28px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 16px rgba(255, 90, 0, 0.75));
   transition: filter 0.3s ease;
@@ -422,7 +423,7 @@ p {
 
 @media (max-width: 640px) {
   .sneaker-photo {
-    width: 310px;
+    max-width: 260px;
   }
 }
 
@@ -675,51 +676,6 @@ p {
   transform: translateY(-4px);
 }
 
-/* Animación realista 3D para la zapatilla del Hero */
-@keyframes floatSneakerReal {
-  0%, 100% {
-    transform: translateY(0px) rotate(-28deg) scale(1);
-  }
-  50% {
-    transform: translateY(-20px) rotate(-24deg) scale(1.035);
-  }
-}
-
-@keyframes spinSlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes spinReverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
-}
-
-.sneaker-wrapper {
-  animation: floatSneakerReal 4.2s ease-in-out infinite;
-  transform-origin: center center;
-  will-change: transform;
-}
-
-.sneaker-photo {
-  width: 440px;
-  max-width: none;
-  transform: scaleX(-1);
-  filter: grayscale(0.75) sepia(0.45) hue-rotate(-18deg) contrast(1.35) brightness(0.85) drop-shadow(0 28px 18px rgba(0,0,0,0.85)) drop-shadow(0 4px 16px rgba(255,90,0,0.75));
-}
-
-.holo-base {
-  transform: rotateX(74deg) rotateZ(-6deg);
-  transform-style: preserve-3d;
-}
-
-.ring-spin {
-  animation: spinSlow 24s linear infinite;
-}
-
-.ring-spin-rev {
-  animation: spinReverse 18s linear infinite;
-}
 
 .hud-mono {
   font-family: var(--font-mono), monospace;

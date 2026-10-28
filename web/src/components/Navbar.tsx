@@ -14,26 +14,36 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
 
   useEffect(() => {
     const handleScroll = () => {
-      // Aparece únicamente cuando el usuario se desplaza más de 250px hacia el catálogo
-      setScrolled(window.scrollY > 250);
+      setScrolled(window.scrollY > 30);
     };
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleScrollTop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-200 ease-out ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ease-out ${
         scrolled
-          ? 'opacity-100 translate-y-0 pointer-events-auto bg-[#12100e]/95 backdrop-blur-md border-b border-orange-500/30 shadow-[0_4px_24px_rgba(0,0,0,0.85)]'
-          : 'opacity-0 -translate-y-full pointer-events-none border-b border-transparent'
+          ? 'bg-[#12100e]/95 backdrop-blur-md border-b border-orange-500/30 shadow-[0_4px_24px_rgba(0,0,0,0.85)] py-2 sm:py-2.5'
+          : 'bg-[#0d0b0a]/80 sm:bg-gradient-to-b sm:from-[#0d0b0a]/95 sm:via-[#0d0b0a]/60 sm:to-transparent backdrop-blur-sm sm:backdrop-blur-none border-b border-orange-500/10 sm:border-transparent py-2.5 sm:py-4'
       }`}
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2 sm:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 sm:px-6">
         {/* Marca y avatar táctico */}
-        <div className="flex items-center gap-2.5">
+        <a
+          href="#"
+          onClick={handleScrollTop}
+          className="flex items-center gap-2 sm:gap-2.5 group cursor-pointer"
+          title="Ir al inicio"
+        >
           <div
-            className="w-7 h-9 shrink-0 filter drop-shadow(0 2px 5px rgba(0,0,0,0.9)) overflow-hidden bg-[#181512]"
+            className="w-7 h-9 sm:w-8 sm:h-10 shrink-0 filter drop-shadow(0 2px 5px rgba(0,0,0,0.9)) overflow-hidden bg-[#181512] transition-transform group-hover:scale-105 duration-200"
             style={{
               clipPath: 'polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%)',
             }}
@@ -46,8 +56,8 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <span className="logo-text text-2xl font-bold tracking-wider block leading-none">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="logo-text text-2xl sm:text-3xl font-bold tracking-wider block leading-none">
                 LLANTITA
               </span>
               {ultimaActualizacion && (
@@ -57,18 +67,21 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
                 </span>
               )}
             </div>
-            <p className="text-[11px] hud-mono text-stone-400 hidden md:block">
+            <p className="text-[10px] sm:text-[11px] hud-mono text-stone-400 hidden md:block tracking-wider">
               RADAR DE PRECIOS SPORTING
             </p>
           </div>
-        </div>
+        </a>
 
         {/* Acciones */}
         <div className="flex items-center gap-2 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden sm:flex items-center gap-2 text-xs hud-mono text-orange-400 bg-[#1d1712] border border-orange-500/30 px-3 py-1.5 rounded tabular-nums">
-              <span className="h-2 w-2 rounded-full bg-[#ff5500]" />
-              <span className="font-bold">{totalProductos.toLocaleString('es-AR')} PARES</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs hud-mono text-orange-400 bg-[#1d1712]/90 border border-orange-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded tabular-nums">
+              <span className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#ff5500] animate-pulse" />
+              <span className="font-bold">
+                {totalProductos.toLocaleString('es-AR')}
+                <span className="hidden xs:inline sm:inline"> PARES</span>
+              </span>
             </div>
           )}
 
@@ -76,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-8 w-8 rounded bg-[#1c1814] border border-stone-800 text-stone-400 hover:text-stone-100 hover:border-orange-500 active:scale-[0.94] transition-all cursor-pointer"
+            className="flex items-center justify-center h-7 w-7 sm:h-8 sm:w-8 rounded bg-[#1c1814] border border-stone-800 text-stone-400 hover:text-stone-100 hover:border-orange-500 active:scale-[0.94] transition-all cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
@@ -89,10 +102,10 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-telegram px-3 py-1.5 rounded text-xs font-extrabold uppercase flex items-center gap-1.5 cursor-pointer"
+            className="btn-telegram px-2.5 sm:px-3.5 py-1.5 rounded text-xs font-extrabold uppercase flex items-center gap-1.5 cursor-pointer shadow-[0_0_15px_rgba(255,85,0,0.3)]"
           >
             <Send className="h-3 w-3" />
-            <span className="hidden sm:inline">Telegram</span>
+            <span className="hidden xs:inline">Telegram</span>
           </a>
         </div>
       </div>

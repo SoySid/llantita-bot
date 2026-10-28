@@ -23,8 +23,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
     let animId: number;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      if (!canvas) return;
+      canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
+      canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -79,12 +80,12 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
   }, []);
 
   return (
-    <section className="hero-bg flex flex-col justify-between px-6 py-6 md:px-14 md:py-8 select-none relative min-h-screen overflow-hidden">
+    <section className="hero-bg flex flex-col justify-between px-4 sm:px-8 md:px-14 pt-20 sm:pt-24 pb-4 sm:pb-8 select-none relative min-h-[100dvh] overflow-hidden">
       <div className="noise-overlay" />
       <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-10" />
 
       {/* Marco Superior Central Biselado */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-7 pointer-events-none z-20 flex flex-col items-center">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-7 pointer-events-none z-20 hidden md:flex flex-col items-center">
         <div
           className="w-full h-full border-b-2 border-l-2 border-r-2 border-orange-500/40 bg-gradient-to-b from-orange-950/50 to-transparent"
           style={{ clipPath: 'polygon(0 0, 100% 0, 88% 100%, 12% 100%)' }}
@@ -111,60 +112,20 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
         </svg>
       </div>
 
-      {/* NAVBAR SUPERIOR */}
-      <header className="relative z-30 flex flex-wrap items-center justify-between w-full pt-1 gap-4">
-        <div className="flex items-center">
-          <div className="logo-plate flex items-center rounded-md pl-[72px] sm:pl-[78px] pr-4 sm:pr-5 py-1.5 h-14 relative">
-            <div className="logo-shield">
-              <img
-                src="/cat-shield.jpg"
-                alt="Escudo Llantita"
-                className="select-none pointer-events-none"
-              />
-            </div>
-            <span className="logo-text text-4xl sm:text-5xl font-bold tracking-wider leading-none pt-0.5">
-              LLANTITA
-            </span>
-            <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute top-1.5 right-1.5" />
-            <span className="w-1.5 h-1.5 rounded-full bg-stone-500/70 absolute bottom-1.5 right-1.5" />
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-3.5">
-          <div className="badge-active px-3.5 sm:px-5 py-2 rounded text-sm sm:text-lg font-semibold tracking-wider uppercase tabular-nums">
-            {totalProductos > 0 ? `${totalProductos.toLocaleString('es-AR')} PARES ACTIVOS` : '1.897 PARES ACTIVOS'}
-          </div>
-          <a
-            href="https://t.me/llantita_bot"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-telegram px-4 sm:px-5 py-2 rounded text-sm sm:text-lg font-extrabold uppercase flex items-center gap-2 cursor-pointer"
-          >
-            <span>ALERTAS TELEGRAM</span>
-            <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
-              <path d="M21.9 2.6L1.8 10.4c-1.3.5-1.3 1.3-.2 1.6l5.1 1.6 11.9-7.5c.6-.3 1.1-.1.7.2l-9.6 8.7-.4 5.3c.5 0 .8-.2 1.1-.5l2.6-2.5 5.3 3.9c1 .5 1.7.3 1.9-.9L23.6 4c.3-1.4-.5-2-1.7-1.4z" />
-            </svg>
-          </a>
-        </div>
-      </header>
-
       {/* CONTENIDO CENTRAL */}
-      <div className="relative z-20 flex-1 grid grid-cols-12 items-center max-w-[1440px] w-full mx-auto py-8">
-        <div className="col-span-12 lg:col-span-6 pl-2 sm:pl-4 md:pl-8 relative">
-          <div className="hud-mono text-[10px] text-stone-500/70 mb-4 flex items-end gap-1">
-            <div className="border-l border-b border-stone-500/50 w-7 h-7 relative">
-              <span className="absolute -top-3 -left-1">Y</span>
-              <span className="absolute -bottom-1.5 -right-3">1</span>
-              <span className="w-1 h-1 rounded-full border border-stone-500 absolute -left-[2.5px] top-2" />
-            </div>
+      <div className="relative z-20 flex-1 grid grid-cols-12 items-center max-w-[1440px] w-full mx-auto py-4 sm:py-8 gap-6 lg:gap-8">
+        <div className="col-span-12 lg:col-span-6 pl-1 sm:pl-4 md:pl-8 relative text-left flex flex-col items-start">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-[#1e1713]/80 border border-orange-500/30 text-[10px] sm:text-xs hud-mono text-orange-400/90 tracking-widest uppercase mb-3 sm:mb-4">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ff5500] animate-pulse" />
+            <span>RADAR DE PRECIOS // SPORTING</span>
           </div>
 
-          <h1 className="headline text-5xl sm:text-6xl xl:text-[5.4rem] mb-5">
+          <h1 className="headline text-4xl sm:text-6xl xl:text-[5.4rem] mb-3 sm:mb-5 leading-[0.95] tracking-tight">
             Descuentos reales<br />
             en zapatillas
           </h1>
 
-          <p className="text-stone-300/85 text-base sm:text-lg sm:text-xl font-normal max-w-xl leading-snug tracking-normal mb-8">
+          <p className="text-stone-300/85 text-sm sm:text-lg sm:text-xl font-normal max-w-xl leading-relaxed sm:leading-snug tracking-normal mb-6 sm:mb-8 text-pretty">
             Monitoreamos bajas de precio y stock en Sporting cada<br className="hidden sm:inline" />
             {' '}30 minutos para que compres en su piso histórico.
           </p>
@@ -172,7 +133,7 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           {onExploreClick && (
             <button
               onClick={onExploreClick}
-              className="inline-flex items-center gap-3 px-6 py-3.5 rounded bg-[#1c1410] border border-orange-500/40 hover:border-orange-500 text-stone-200 hover:text-white font-barlow font-bold text-lg tracking-wider uppercase transition-all shadow-[0_4px_20px_rgba(0,0,0,0.8)] active:scale-[0.98] cursor-pointer"
+              className="inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded bg-[#1c1410] border border-orange-500/40 hover:border-orange-500 text-stone-200 hover:text-white font-barlow font-bold text-base sm:text-lg tracking-wider uppercase transition-all shadow-[0_4px_20px_rgba(0,0,0,0.8)] active:scale-[0.98] cursor-pointer w-full sm:w-auto"
             >
               <span>EXPLORAR RADAR</span>
               <svg className="w-4 h-4 text-orange-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -182,16 +143,16 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           )}
         </div>
 
-        <div className="col-span-12 lg:col-span-6 relative flex items-center justify-center h-full mt-8 lg:mt-0">
-          <div className="relative w-[340px] sm:w-[480px] h-[400px] sm:h-[460px] flex items-center justify-center">
+        <div className="col-span-12 lg:col-span-6 relative flex items-center justify-center h-full mt-4 sm:mt-6 lg:mt-0">
+          <div className="relative w-full max-w-[280px] xs:max-w-[320px] sm:max-w-[460px] md:max-w-[500px] h-[240px] xs:h-[280px] sm:h-[400px] md:h-[440px] flex items-center justify-center">
             {/* Retícula en cruz */}
             <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-45">
-              <div className="w-[320px] sm:w-[440px] h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
-              <div className="h-[320px] sm:h-[440px] w-[1px] bg-gradient-to-b from-transparent via-orange-500/60 to-transparent absolute" />
+              <div className="w-[260px] xs:w-[300px] sm:w-[440px] h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
+              <div className="h-[240px] xs:h-[280px] sm:h-[420px] w-[1px] bg-gradient-to-b from-transparent via-orange-500/60 to-transparent absolute" />
             </div>
 
             {/* Radar Glowing Rings */}
-            <svg viewBox="0 0 400 400" className="w-[300px] sm:w-[380px] h-[300px] sm:h-[380px] absolute pointer-events-none select-none">
+            <svg viewBox="0 0 400 400" className="w-[240px] xs:w-[280px] sm:w-[380px] h-[240px] xs:h-[280px] sm:h-[380px] absolute pointer-events-none select-none">
               <defs>
                 <radialGradient id="orangeGlow" cx="50%" cy="50%" r="50%">
                   <stop offset="0%" stopColor="#ff6600" stopOpacity="0.42" />
@@ -206,8 +167,8 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </svg>
 
             {/* Código de barras superior derecho */}
-            <div className="absolute top-8 sm:top-12 -right-2 sm:-right-4 hud-mono text-[9px] text-stone-400/60 tracking-widest flex flex-col items-end">
-              <div className="flex h-6 items-stretch gap-[2px] opacity-60">
+            <div className="absolute top-2 sm:top-8 md:top-12 -right-1 sm:-right-4 hud-mono text-[8px] sm:text-[9px] text-stone-400/60 tracking-widest flex flex-col items-end">
+              <div className="flex h-5 sm:h-6 items-stretch gap-[2px] opacity-60">
                 <span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" /><span className="w-[3px] bg-stone-400" />
                 <span className="w-[1px] bg-stone-400 ml-1" /><span className="w-[2px] bg-stone-400" /><span className="w-[4px] bg-stone-400" />
                 <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400 ml-0.5" /><span className="w-[3px] bg-stone-400" />
@@ -218,24 +179,24 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
             </div>
 
             {/* Ángulo HUD derecho */}
-            <div className="absolute right-2 bottom-32 sm:bottom-36 w-6 h-6 border-r border-b border-stone-400/50 pointer-events-none">
-              <div className="w-4 h-[1px] bg-stone-400/50 rotate-45 origin-bottom-right absolute bottom-0 right-0" />
+            <div className="absolute right-2 bottom-20 sm:bottom-32 md:bottom-36 w-5 sm:w-6 h-5 sm:h-6 border-r border-b border-stone-400/50 pointer-events-none">
+              <div className="w-3 sm:w-4 h-[1px] bg-stone-400/50 rotate-45 origin-bottom-right absolute bottom-0 right-0" />
             </div>
 
             {/* Zapatilla flotante 3D */}
-            <div className="sneaker-wrapper relative z-20 flex items-center justify-center -mt-6">
-              <div className="w-56 sm:w-72 h-14 sm:h-16 bg-orange-500/40 rounded-full blur-2xl absolute bottom-2 pointer-events-none" />
+            <div className="sneaker-wrapper relative z-20 flex items-center justify-center -mt-3 sm:-mt-6">
+              <div className="w-44 xs:w-52 sm:w-72 h-10 xs:h-12 sm:h-16 bg-orange-500/40 rounded-full blur-xl sm:blur-2xl absolute bottom-2 pointer-events-none" />
               <img 
                 src="https://pngimg.com/uploads/running_shoes/running_shoes_PNG5816.png" 
                 alt="Zapatilla Táctica Llantita" 
-                className="sneaker-photo select-none pointer-events-none w-[320px] sm:w-[440px]"
+                className="sneaker-photo select-none pointer-events-none w-[220px] xs:w-[260px] sm:w-[380px] md:w-[440px] max-w-full"
               />
             </div>
 
             {/* Base Holográfica Táctil */}
-            <div className="absolute -bottom-10 sm:-bottom-12 w-[340px] sm:w-[540px] h-[180px] sm:h-[220px] flex items-center justify-center pointer-events-none z-10">
+            <div className="absolute -bottom-6 xs:-bottom-8 sm:-bottom-12 w-[260px] xs:w-[320px] sm:w-[500px] md:w-[540px] h-[130px] xs:h-[150px] sm:h-[200px] md:h-[220px] flex items-center justify-center pointer-events-none z-10">
               <div className="holo-base w-full h-full flex items-center justify-center relative">
-                <svg viewBox="0 0 500 500" className="w-[320px] sm:w-[480px] h-[320px] sm:h-[480px] overflow-visible">
+                <svg viewBox="0 0 500 500" className="w-[240px] xs:w-[300px] sm:w-[440px] md:w-[480px] h-[240px] xs:h-[300px] sm:h-[440px] md:h-[480px] overflow-visible">
                   <defs>
                     <radialGradient id="baseFire" cx="50%" cy="50%" r="50%">
                       <stop offset="0%" stopColor="#ff7700" stopOpacity="0.7" />
@@ -259,9 +220,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
       </div>
 
       {/* FOOTER DEL HERO */}
-      <footer className="relative z-30 flex items-end justify-between w-full pb-2 px-2 sm:px-4">
-        <div className="hud-mono text-[10px] text-stone-400/60 tracking-widest">
-          <div className="flex items-stretch h-6 sm:h-7 gap-[2px] opacity-60">
+      <footer className="relative z-30 flex items-end justify-between w-full pb-2 px-1 sm:px-4">
+        <div className="hud-mono text-[9px] sm:text-[10px] text-stone-400/60 tracking-widest">
+          <div className="flex items-stretch h-5 sm:h-7 gap-[2px] opacity-60">
             <span className="w-[2px] bg-stone-400" /><span className="w-[1px] bg-stone-400" /><span className="w-[3px] bg-stone-400" />
             <span className="w-[2px] bg-stone-400 ml-0.5" /><span className="w-[1px] bg-stone-400" /><span className="w-[4px] bg-stone-400" />
             <span className="w-[1px] bg-stone-400" /><span className="w-[2px] bg-stone-400" /><span className="w-[3px] bg-stone-400 ml-0.5" />
@@ -270,9 +231,9 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
           <div className="mt-0.5 text-[8px] tracking-[0.25em]">8 118222188 9</div>
         </div>
 
-        <div className="hud-mono text-right text-stone-400/70 mr-2 sm:mr-6">
-          <div className="text-xl sm:text-2xl font-bold text-stone-300/60 leading-none tracking-wider">01</div>
-          <div className="text-xs tracking-widest text-stone-400/70 mb-1">X-DS</div>
+        <div className="hud-mono text-right text-stone-400/70 mr-1 sm:mr-6">
+          <div className="text-lg sm:text-2xl font-bold text-stone-300/60 leading-none tracking-wider">01</div>
+          <div className="text-[10px] sm:text-xs tracking-widest text-stone-400/70 mb-1">X-DS</div>
         </div>
       </footer>
     </section>
