@@ -29,18 +29,18 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
   onResetFilters,
 }) => {
   return (
-    <section className="w-full py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section className="w-full py-8 sm:py-12 bg-[#0d0b0a]">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6">
         
         {/* Encabezado del catálogo */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-5 sm:mb-6">
           <div className="flex items-baseline gap-3">
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-ink tracking-[-0.03em]">
-              Catálogo completo
+            <h2 className="font-anton text-2xl sm:text-3xl text-[#f2ede7] uppercase tracking-wider">
+              Catálogo Completo
             </h2>
             {total > 0 && (
-              <span className="text-[13px] text-ink-muted tabular-nums">
-                ({total.toLocaleString('es-AR')} modelos)
+              <span className="text-xs font-mono text-[#8a8074] tabular-nums">
+                ({total.toLocaleString('es-AR')} MODELOS EN RADAR)
               </span>
             )}
           </div>
@@ -48,23 +48,23 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
 
         {/* Estado de carga */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-ink-secondary">
-            <Loader2 className="h-6 w-6 fast-spin text-infrared mb-3" />
-            <p className="text-sm font-medium">Cargando catálogo...</p>
+          <div className="flex flex-col items-center justify-center py-20 text-[#a39b91]">
+            <Loader2 className="h-7 w-7 animate-spin text-[#ff6a1a] mb-3" />
+            <p className="text-sm font-mono tracking-wider">SINCRONIZANDO CATÁLOGO...</p>
           </div>
         ) : productos.length === 0 ? (
           /* Estado vacío */
-          <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-2xl bg-surface">
-            <div className="h-11 w-11 rounded-xl bg-surface-card flex items-center justify-center text-ink-muted mb-3">
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-center rounded-lg bg-[#14110f] border border-[#2b241c]">
+            <div className="h-11 w-11 rounded bg-[#1e1813] border border-[#423425] flex items-center justify-center text-[#8a8074] mb-3">
               <SearchX className="h-5 w-5" />
             </div>
-            <h3 className="font-display text-base font-bold text-ink">No se encontraron zapatillas</h3>
-            <p className="text-sm text-ink-secondary max-w-sm mt-1 mb-4">
+            <h3 className="font-anton text-lg text-[#f2ede7] uppercase tracking-wide">Sin señales en el radar</h3>
+            <p className="text-xs font-mono text-[#8a8074] max-w-sm mt-1 mb-4">
               Probá cambiando los filtros de talle, marca o término de búsqueda.
             </p>
             <button
               onClick={onResetFilters}
-              className="rounded-xl bg-bone text-canvas text-[13px] font-display font-bold px-4 py-2.5 hover:opacity-90 active:scale-[0.96] transition-[opacity,transform] duration-150 ease-out cursor-pointer"
+              className="rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-black text-xs font-barlow font-bold uppercase tracking-wider px-4 py-2 hover:opacity-90 active:scale-[0.96] transition-all cursor-pointer shadow-[0_0_12px_rgba(255,85,10,0.4)]"
             >
               Restablecer filtros
             </button>
@@ -89,20 +89,20 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
             <button
               onClick={() => onPageChange(currentPage - 1)}
               disabled={currentPage <= 1}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-surface-card px-4 py-2.5 text-[13px] font-display font-bold text-ink hover:bg-surface-elevated active:enabled:scale-[0.96] disabled:opacity-30 transition-[background-color,transform] duration-150 ease-out cursor-pointer select-none"
+              className="inline-flex items-center gap-1.5 rounded bg-[#161310] border border-[#382f25] hover:border-[#ff6a1a] px-3.5 py-2 text-xs font-barlow font-bold uppercase tracking-wider text-[#f2ede7] active:enabled:scale-[0.96] disabled:opacity-30 transition-all cursor-pointer select-none"
             >
               <ChevronLeft className="h-4 w-4" />
               <span>Anterior</span>
             </button>
 
-            <span className="text-[13px] text-ink-secondary tabular-nums">
-              Página <strong className="text-ink font-bold">{currentPage}</strong> de {totalPages}
+            <span className="text-xs font-mono text-[#8a8074] tabular-nums">
+              PÁGINA <strong className="text-[#f2ede7] font-bold">{currentPage}</strong> DE {totalPages}
             </span>
 
             <button
               onClick={() => onPageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-surface-card px-4 py-2.5 text-[13px] font-display font-bold text-ink hover:bg-surface-elevated active:enabled:scale-[0.96] disabled:opacity-30 transition-[background-color,transform] duration-150 ease-out cursor-pointer select-none"
+              className="inline-flex items-center gap-1.5 rounded bg-[#161310] border border-[#382f25] hover:border-[#ff6a1a] px-3.5 py-2 text-xs font-barlow font-bold uppercase tracking-wider text-[#f2ede7] active:enabled:scale-[0.96] disabled:opacity-30 transition-all cursor-pointer select-none"
             >
               <span>Siguiente</span>
               <ChevronRight className="h-4 w-4" />

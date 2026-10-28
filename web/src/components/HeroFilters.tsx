@@ -23,7 +23,6 @@ interface HeroFiltersProps {
   onReset: () => void;
 }
 
-// Ampliamos talles para incluir talles reales de calzado (35 al 46 con medios puntos comunes)
 const TALLES_COMUNES = ['Todos', '35', '36', '37', '38', '39', '40', '41', '41.5', '42', '42.5', '43', '44', '45', '46'];
 
 export const HeroFilters: React.FC<HeroFiltersProps> = ({
@@ -90,23 +89,23 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
   };
 
   return (
-    <div className="w-full bg-canvas py-6">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-4">
+    <div className="w-full bg-[#0d0b0a] py-6 border-t border-[#26201a]">
+      <div className="mx-auto max-w-7xl px-3 sm:px-6 space-y-4">
         
         {/* Selector de Marcas con scroll suave */}
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between text-sm">
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-ink-secondary">
+              <span className="font-barlow font-bold text-sm sm:text-base text-[#d1c8bd] uppercase tracking-wider">
                 Marcas
               </span>
               {selectedMarcas.length > 0 ? (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold tabular-nums bg-bone text-canvas">
-                  {selectedMarcas.length} seleccionada{selectedMarcas.length > 1 ? 's' : ''}
+                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold bg-[#ff6a1a] text-black">
+                  {selectedMarcas.length} ACTIVA{selectedMarcas.length > 1 ? 'S' : ''}
                 </span>
               ) : (
-                <span className="text-[13px] text-ink-muted tabular-nums">
-                  ({uniqueMarcas.length} marcas · {totalModelos} pares)
+                <span className="text-xs font-mono text-[#8a8074]">
+                  ({uniqueMarcas.length} MARCAS · {totalModelos} MODELOS)
                 </span>
               )}
             </div>
@@ -115,10 +114,10 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
               <button
                 type="button"
                 onClick={() => onMarcasChange([])}
-                className="flex items-center gap-1 text-[13px] font-medium text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.96] transition-[color,transform] duration-150 ease-out cursor-pointer"
+                className="flex items-center gap-1 text-xs font-mono text-[#ff8c42] hover:text-[#ffb380] active:scale-[0.96] transition-all cursor-pointer uppercase"
               >
-                <RotateCcw className="h-3.5 w-3.5" />
-                <span>Restablecer marcas</span>
+                <RotateCcw className="h-3 w-3" />
+                <span>Restablecer</span>
               </button>
             )}
           </div>
@@ -133,15 +132,15 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 type="button"
                 onClick={() => onMarcasChange([])}
                 aria-pressed={selectedMarcas.length === 0}
-                className={`shrink-0 h-10 px-3.5 rounded-xl flex items-center gap-2 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out cursor-pointer text-[13px] font-display font-bold ${
+                className={`shrink-0 h-9 px-3 rounded flex items-center gap-2 active:scale-[0.96] focus-visible:ring-1 focus-visible:ring-[#ff6a1a] transition-all duration-150 cursor-pointer text-xs font-barlow font-bold uppercase tracking-wider border ${
                   selectedMarcas.length === 0
-                    ? 'bg-bone text-canvas'
-                    : 'bg-surface-card text-ink-secondary hover:bg-surface-elevated hover:text-ink'
+                    ? 'bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-[#1c110a] border-[#ffa366] shadow-[0_0_12px_rgba(255,85,10,0.5)]'
+                    : 'bg-[#181512] text-[#a39b91] hover:bg-[#221d18] hover:text-[#f2ede7] border-[#383027]'
                 }`}
               >
                 <span>Todas</span>
-                <span className={`text-[13px] tabular-nums px-1.5 py-0.5 rounded-md ${
-                  selectedMarcas.length === 0 ? 'bg-canvas/15 text-canvas font-bold' : 'bg-canvas text-ink-muted'
+                <span className={`text-[11px] font-mono px-1.5 py-0.2 rounded ${
+                  selectedMarcas.length === 0 ? 'bg-black/20 text-black font-bold' : 'bg-[#110f0e] text-[#80766a]'
                 }`}>
                   {totalModelos}
                 </span>
@@ -157,21 +156,21 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                     type="button"
                     onClick={() => toggleMarca(m.marca)}
                     aria-pressed={isSelected}
-                    className={`shrink-0 h-10 px-3 rounded-xl flex items-center gap-2 active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out cursor-pointer select-none text-[13px] ${
+                    className={`shrink-0 h-9 px-3 rounded flex items-center gap-2 active:scale-[0.96] focus-visible:ring-1 focus-visible:ring-[#ff6a1a] transition-all duration-150 cursor-pointer select-none text-xs font-barlow font-bold uppercase tracking-wider border ${
                       isSelected
-                        ? 'bg-bone text-canvas font-bold'
-                        : 'bg-surface-card text-ink-secondary hover:bg-surface-elevated hover:text-ink'
+                        ? 'bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-[#1c110a] border-[#ffa366] shadow-[0_0_12px_rgba(255,85,10,0.5)]'
+                        : 'bg-[#181512] text-[#a39b91] hover:bg-[#221d18] hover:text-[#f2ede7] border-[#383027]'
                     }`}
                   >
-                    <div className="h-4 w-4 flex items-center justify-center">
+                    <div className="h-3.5 w-3.5 flex items-center justify-center">
                       <BrandIcon
                         marca={m.marca}
-                        className={`h-3.5 w-3.5 ${isSelected ? 'text-canvas' : 'text-ink-muted'}`}
+                        className={`h-3 w-3 ${isSelected ? 'text-black' : 'text-[#80766a]'}`}
                       />
                     </div>
                     <BrandWordmark marca={m.marca} isSelected={isSelected} />
-                    <span className={`text-[13px] tabular-nums px-1.5 py-0.5 rounded-md ${
-                      isSelected ? 'bg-canvas/15 text-canvas font-bold' : 'bg-canvas text-ink-muted'
+                    <span className={`text-[11px] font-mono px-1.5 py-0.2 rounded ${
+                      isSelected ? 'bg-black/20 text-black font-bold' : 'bg-[#110f0e] text-[#80766a]'
                     }`}>
                       {m.cantidad}
                     </span>
@@ -182,27 +181,26 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
           </div>
         </div>
 
-        {/* Barra de controles: Buscador, Talles, Rebajas y Ordenamiento */}
-        <div className="bg-surface p-4 rounded-2xl flex flex-col gap-3.5">
+        {/* Consola Táctica de Controles */}
+        <div className="bg-[#14110f] border border-[#332b22] p-3.5 sm:p-4 rounded-lg flex flex-col gap-3.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.04),0_6px_20px_rgba(0,0,0,0.7)]">
           
-          {/* Fila 1: Buscador de modelos + Controles de Orden y Rebajas */}
+          {/* Fila 1: Buscador + Filtros */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {/* Buscador: fuente 16px en móvil para evitar zoom forzado en iOS */}
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-muted pointer-events-none" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8a8074] pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange?.(e.target.value)}
-                placeholder="Buscar por modelo (ej: Air Max, Forum, Runner)..."
-                className="w-full h-11 pl-10 pr-9 bg-surface-card rounded-xl text-base sm:text-sm text-ink placeholder-ink-muted focus:outline-none focus:ring-2 focus:ring-infrared transition-[box-shadow] duration-150"
+                placeholder="Buscar modelo (ej: Air Max, Forum, Runner)..."
+                className="w-full h-10 pl-10 pr-9 bg-[#1a1613] border border-[#383027] rounded text-sm text-[#f2ede7] placeholder-[#736a5e] focus:outline-none focus:border-[#ff6a1a] focus:ring-1 focus:ring-[#ff6a1a] font-mono transition-all"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => onSearchChange?.('')}
                   aria-label="Limpiar búsqueda"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-muted hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.9] transition-transform duration-150 ease-out cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8a8074] hover:text-[#f2ede7] active:scale-[0.9] transition-transform cursor-pointer"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -215,10 +213,10 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 type="button"
                 onClick={() => onSoloOfertasChange(!soloOfertas)}
                 aria-pressed={soloOfertas}
-                className={`h-11 px-3 sm:px-4 rounded-xl text-[13px] font-display font-bold active:scale-[0.96] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out cursor-pointer flex-1 sm:flex-none justify-center ${
+                className={`h-10 px-3.5 rounded text-xs font-barlow font-bold uppercase tracking-wider active:scale-[0.96] transition-all cursor-pointer flex-1 sm:flex-none justify-center border ${
                   soloOfertas
-                    ? 'bg-infrared text-white'
-                    : 'bg-surface-card text-ink-secondary hover:bg-surface-elevated hover:text-ink'
+                    ? 'bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-[#1c110a] border-[#ffa366] shadow-[0_0_12px_rgba(255,85,10,0.5)]'
+                    : 'bg-[#1a1613] text-[#a39b91] hover:bg-[#221d18] hover:text-[#f2ede7] border-[#383027]'
                 }`}
               >
                 Solo rebajas
@@ -228,7 +226,7 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <select
                   value={selectedOrden}
                   onChange={(e) => onOrdenChange(e.target.value)}
-                  className="w-full sm:w-auto h-11 bg-surface-card text-ink text-base sm:text-[13px] font-medium px-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-infrared cursor-pointer"
+                  className="w-full sm:w-auto h-10 bg-[#1a1613] border border-[#383027] text-[#f2ede7] text-xs font-barlow font-bold uppercase tracking-wider px-3 rounded focus:outline-none focus:border-[#ff6a1a] focus:ring-1 focus:ring-[#ff6a1a] cursor-pointer"
                   aria-label="Ordenar productos"
                 >
                   <option value="descuento">Mayor descuento</option>
@@ -242,19 +240,19 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 <button
                   type="button"
                   onClick={onReset}
-                  className="h-11 px-2.5 text-[13px] font-semibold text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.95] transition-[color,transform] duration-150 ease-out flex items-center justify-center gap-1 cursor-pointer shrink-0"
+                  className="h-10 px-2.5 text-xs font-mono text-[#ff8c42] hover:text-[#ffb380] active:scale-[0.95] transition-all flex items-center justify-center gap-1 cursor-pointer shrink-0 uppercase"
                   title="Restablecer todos los filtros"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5" />
                   <span className="hidden sm:inline">Limpiar</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Fila 2: Selector de Talles táctiles (mínimo 40px para dedo en móvil) */}
+          {/* Fila 2: Selector de Talles */}
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1">
-            <span className="font-display text-sm font-bold text-ink-secondary shrink-0 mr-1.5">
+            <span className="font-barlow text-xs sm:text-sm font-bold text-[#8a8074] shrink-0 mr-1 uppercase tracking-wider">
               Talles:
             </span>
             {TALLES_COMUNES.map((talle) => {
@@ -274,14 +272,14 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                     }
                   }}
                   aria-pressed={isSelected}
-                  className={`h-10 min-w-[40px] px-2.5 rounded-lg active:scale-[0.94] focus-visible:ring-2 focus-visible:ring-infrared transition-[background-color,color,transform] duration-150 ease-out shrink-0 flex items-center justify-center select-none cursor-pointer ${
+                  className={`h-8 sm:h-9 min-w-[36px] sm:min-w-[40px] px-2 rounded active:scale-[0.94] focus-visible:ring-1 focus-visible:ring-[#ff6a1a] transition-all duration-150 shrink-0 flex items-center justify-center select-none cursor-pointer border ${
                     isTodos
-                      ? 'px-3.5 font-display text-[13px] font-bold'
-                      : 'font-display text-[13px] font-bold tabular-nums'
+                      ? 'px-3 font-barlow text-xs font-bold uppercase tracking-wider'
+                      : 'font-mono text-xs font-bold tabular-nums'
                   } ${
                     isSelected
-                      ? 'bg-bone text-canvas font-bold'
-                      : 'bg-surface-card text-ink-secondary hover:bg-surface-elevated hover:text-ink'
+                      ? 'bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-[#1c110a] border-[#ffa366] shadow-[0_0_10px_rgba(255,85,10,0.45)]'
+                      : 'bg-[#1a1613] text-[#a39b91] hover:bg-[#221d18] hover:text-[#f2ede7] border-[#383027]'
                   }`}
                 >
                   {talle}
@@ -292,20 +290,20 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
 
         </div>
 
-        {/* Filtros Activos */}
+        {/* Filtros Activos Tags */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-[13px]">
-            <span className="text-sm font-display font-bold text-ink-muted mr-1">
+          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <span className="font-barlow font-bold text-[#8a8074] mr-1 uppercase tracking-wider">
               Filtros:
             </span>
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => onSearchChange?.('')}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-card text-ink hover:bg-surface-elevated focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out text-[13px]"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1f1b16] border border-[#42362b] text-[#f2ede7] hover:border-[#ff6a1a] active:scale-[0.96] transition-all text-xs font-mono"
               >
                 <span>&ldquo;{searchQuery}&rdquo;</span>
-                <X className="h-3.5 w-3.5 text-ink-muted" />
+                <X className="h-3 w-3 text-[#a39b91]" />
               </button>
             )}
             {selectedMarcas.map((marca) => (
@@ -313,10 +311,10 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 key={marca}
                 type="button"
                 onClick={() => toggleMarca(marca)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-card text-ink hover:bg-surface-elevated focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out font-display text-[13px]"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1f1b16] border border-[#42362b] text-[#f2ede7] hover:border-[#ff6a1a] active:scale-[0.96] transition-all font-barlow font-bold text-xs uppercase tracking-wider"
               >
                 <span>{marca}</span>
-                <X className="h-3.5 w-3.5 text-ink-muted" />
+                <X className="h-3 w-3 text-[#a39b91]" />
               </button>
             ))}
             {selectedTalles.map((talle) => (
@@ -324,26 +322,26 @@ export const HeroFilters: React.FC<HeroFiltersProps> = ({
                 key={talle}
                 type="button"
                 onClick={() => toggleTalle(talle)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-surface-card text-ink hover:bg-surface-elevated focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out font-display text-[13px] tabular-nums"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1f1b16] border border-[#42362b] text-[#f2ede7] hover:border-[#ff6a1a] active:scale-[0.96] transition-all font-mono text-xs tabular-nums"
               >
                 <span>Talle {talle}</span>
-                <X className="h-3.5 w-3.5 text-ink-muted" />
+                <X className="h-3 w-3 text-[#a39b91]" />
               </button>
             ))}
             {soloOfertas && (
               <button
                 type="button"
                 onClick={() => onSoloOfertasChange(false)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-infrared text-white hover:bg-infrared-hover focus-visible:ring-2 focus-visible:ring-volt active:scale-[0.96] transition-[background-color,transform] duration-150 ease-out font-display font-bold text-[13px]"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#ff5100] text-black font-barlow font-bold text-xs uppercase tracking-wider active:scale-[0.96] transition-all"
               >
                 <span>Solo rebajas</span>
-                <X className="h-3.5 w-3.5 text-white" />
+                <X className="h-3 w-3 text-black" />
               </button>
             )}
             <button
               type="button"
               onClick={onReset}
-              className="text-[13px] font-medium text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared ml-1 underline underline-offset-4 active:scale-[0.96] transition-[color,transform] duration-150 ease-out cursor-pointer"
+              className="text-xs font-mono text-[#ff8c42] hover:text-[#ffb380] ml-1 underline underline-offset-4 active:scale-[0.96] transition-all cursor-pointer uppercase"
             >
               Borrar todos
             </button>

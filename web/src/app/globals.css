@@ -3,31 +3,27 @@
 @tailwind utilities;
 
 :root {
-  /* Paleta Sneaker Radar & Editorial Streetwear (Separación por tono, cero bordes) */
-  --canvas: #111110;
-  --surface: #181817;
-  --surface-card: #1f1f1d;
-  --surface-elevated: #282825;
-  --surface-border: #2e2e2a;
-  --surface-bone: #eeeeec;
+  /* Paleta Mech Industrial & Amber Glow */
+  --canvas: #0d0b0a;
+  --surface: #141210;
+  --surface-card: #1c1917;
+  --surface-elevated: #24201c;
+  --surface-border: #3d342c;
+  --surface-bone: #181512;
 
-  /* Jerarquía de tinta piedra de baja croma con contraste > 5.2:1 */
-  --ink: #f4f4f2;
-  --ink-secondary: #c7c7c2;
-  --ink-muted: #9c9c95;
+  --ink: #f2ede7;
+  --ink-secondary: #a39b91;
+  --ink-muted: #736d65;
 
-  /* Acentos con contraste WCAG AA verificado (> 5.6:1 con blanco) */
-  --accent-infrared: #c9250b;
-  --accent-infrared-hover: #a81e08;
-  --accent-infrared-soft: rgba(201, 37, 11, 0.16);
-  --accent-volt: #b8ff01;
-  --accent-volt-soft: rgba(184, 255, 1, 0.12);
+  --accent-infrared: #ff5100;
+  --accent-infrared-hover: #e04700;
+  --accent-infrared-soft: rgba(255, 81, 0, 0.18);
+  --accent-volt: #ff6a1a;
+  --accent-volt-soft: rgba(255, 106, 26, 0.16);
 
-  /* Parámetros de escala y color para Impeccable */
   --p-scale: 1;
   --p-color-amount: 1;
 
-  /* Curvas de aceleración precisas (Emil Kowalski) */
   --ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-emil: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
@@ -56,7 +52,7 @@ button, a {
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-anton), Impact, sans-serif;
   text-wrap: balance;
 }
 
@@ -64,10 +60,9 @@ p {
   text-wrap: pretty;
 }
 
-/* Superficies del navegador tematizadas */
 ::selection {
   background-color: var(--accent-infrared);
-  color: #ffffff;
+  color: #000000;
 }
 
 :focus-visible {
@@ -93,13 +88,313 @@ p {
   background: var(--ink-muted);
 }
 
-/* Ocultar barra de desplazamiento en carruseles táctiles */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Clases del Sistema HUD Industrial */
+.hero-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 88vh;
+  background:
+    radial-gradient(circle at 72% 48%, rgba(255, 86, 15, 0.22) 0%, rgba(180, 45, 5, 0.08) 32%, transparent 62%),
+    radial-gradient(circle at 18% 12%, rgba(255, 95, 20, 0.12) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #1c1917 0%, #110f0e 65%, #090807 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  padding: 3.5vh 3.5vw;
+}
+
+.hero-viewport::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+    radial-gradient(rgba(255, 120, 40, 0.06) 1px, transparent 0);
+  background-size: 100% 3px, 24px 24px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.left-burn-edge {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 24px;
+  background: linear-gradient(90deg, 
+    #ff3b00 0%, 
+    #ff7b00 18%, 
+    rgba(220, 45, 0, 0.55) 48%, 
+    rgba(120, 20, 0, 0.15) 75%, 
+    transparent 100%);
+  box-shadow: 0 0 45px 12px rgba(255, 68, 0, 0.45);
+  z-index: 6;
+  pointer-events: none;
+}
+
+.right-burn-edge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 14px;
+  height: 38%;
+  background: linear-gradient(270deg, rgba(255, 50, 0, 0.65) 0%, transparent 100%);
+  filter: blur(4px);
+  z-index: 6;
+  pointer-events: none;
+}
+
+.hud-frame-top {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 340px);
+  height: 44px;
+  z-index: 4;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 18px rgba(255, 85, 0, 0.25));
+}
+
+.hud-frame-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 340px);
+  height: 48px;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.hud-frame-left {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 420px;
+  z-index: 4;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.hud-frame-right {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 440px;
+  z-index: 4;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.brand-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(180deg, #2a2c28 0%, #1b1c19 55%, #121311 100%);
+  border: 2px solid #575951;
+  border-radius: 6px;
+  height: 64px;
+  padding: 0 18px 0 76px;
+  box-shadow: 
+    0 10px 25px rgba(0,0,0,0.85),
+    inset 0 1px 1px rgba(255,255,255,0.22),
+    inset 0 0 14px rgba(0,0,0,0.8);
+}
+
+.brand-badge::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(130, 135, 120, 0.35);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.rivet {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #8c9084, #2b2d28);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.9);
+}
+.rivet.tr { top: 6px; right: 6px; }
+.rivet.br { bottom: 6px; right: 6px; }
+.rivet.tl { top: 6px; left: 6px; }
+.rivet.bl { bottom: 6px; left: 6px; }
+
+.cat-shield-wrapper {
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  transform: translateY(-48%);
+  width: 72px;
+  height: 88px;
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.85));
+  overflow: hidden;
+  clip-path: polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%);
+  border-radius: 6px;
+}
+
+.cat-shield-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.brand-title {
+  font-family: var(--font-anton), Impact, sans-serif;
+  font-size: 2rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: linear-gradient(180deg, #fff3e0 0%, #ffc285 45%, #e87b2e 90%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(255, 115, 20, 0.65)) drop-shadow(0 2px 3px rgba(0,0,0,0.9));
+  padding-left: 4px;
+}
+
+.status-pill {
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 600;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  color: #f7a261;
+  background: rgba(28, 22, 19, 0.82);
+  border: 1px solid rgba(180, 105, 65, 0.45);
+  box-shadow: inset 0 0 12px rgba(255, 100, 30, 0.12), 0 4px 14px rgba(0,0,0,0.5);
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.telegram-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
+  color: #1c110a;
+  background: linear-gradient(90deg, #ff7b29 0%, #ff5100 100%);
+  border: 1px solid #ffa366;
+  padding: 9px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: 
+    0 0 24px rgba(255, 85, 10, 0.75),
+    inset 0 1px 2px rgba(255, 230, 200, 0.65);
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.telegram-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 32px rgba(255, 95, 20, 0.95);
+}
+
+.embers-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 7;
+  overflow: hidden;
+}
+
+.ember {
+  position: absolute;
+  border-radius: 50%;
+  background: #ff6a00;
+  box-shadow: 0 0 8px 2px rgba(255, 94, 0, 0.85);
+  opacity: 0.75;
+}
+
+.barcode-bars {
+  display: flex;
+  align-items: stretch;
+  height: 22px;
+  gap: 2px;
+}
+
+.barcode-bars span {
+  display: inline-block;
+  background: #b5b0aa;
+  height: 100%;
+}
+
+.barcode-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 9px;
+  letter-spacing: 0.28em;
+  color: #b5b0aa;
+  margin-top: 3px;
+}
+
+.coord-axis {
+  position: relative;
+  width: 48px;
+  height: 52px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+  font-family: var(--font-mono), monospace;
+  font-size: 10px;
+  color: #9e9a95;
+}
+
+.hud-bottom-right-meta {
+  position: absolute;
+  right: 5.5%;
+  bottom: 6%;
+  text-align: right;
+  font-family: var(--font-mono), monospace;
+  color: #9e9790;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.hud-data-blocks {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 3px;
+  height: 16px;
+}
+
+.hud-data-blocks span {
+  display: inline-block;
+  background: #8c857e;
+}
+
+/* Tarjeta Mech Industrial */
+.mech-card {
+  position: relative;
+  background: #171513;
+  border: 1px solid #363028;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
+  transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.mech-card:hover {
+  border-color: #ff6a1a;
+  box-shadow: 0 8px 28px rgba(255, 85, 0, 0.18), 0 4px 12px rgba(0,0,0,0.8);
 }
 
 /* Micro-interacciones y animaciones de entrada controladas */

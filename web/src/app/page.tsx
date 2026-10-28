@@ -145,7 +145,11 @@ export default function HomePage() {
       />
 
       {/* 2. Sección principal editorial */}
-      <AboutSection onExploreClick={handleScrollToCatalog} />
+      <AboutSection
+        onExploreClick={handleScrollToCatalog}
+        totalProductos={totalProductos}
+        ultimaActualizacion={ultimaActualizacion}
+      />
 
       {/* 3. Hero con buscador y filtros */}
       <div ref={catalogRef}>

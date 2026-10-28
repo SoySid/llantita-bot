@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send } from 'lucide-react';
 import { formatTimeAgo } from '@/lib/utils';
 
@@ -10,44 +10,59 @@ interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProductos }) => {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 w-full bg-canvas">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        
-        {/* Marca y avatar */}
+    <header
+      className={`sticky top-0 z-40 w-full transition-[background-color,border-color,backdrop-filter] duration-200 ${
+        scrolled
+          ? 'bg-[#12100e]/90 backdrop-blur-md border-b border-[#3d3328] shadow-[0_4px_24px_rgba(0,0,0,0.8)]'
+          : 'bg-transparent border-b border-transparent'
+      }`}
+    >
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-3 py-2.5 sm:px-6">
+        {/* Marca y avatar táctico */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 sm:h-11 sm:w-11 rounded-full overflow-hidden bg-surface-card shrink-0">
+          <div className="h-9 w-9 rounded overflow-hidden bg-[#1f1b17] border border-[#544738] shrink-0 p-0.5 shadow-sm">
             <img
               src="/logo.jpg"
               alt="Llantita"
-              className="h-full w-full object-cover"
+              className="h-full w-full object-cover rounded-sm"
             />
           </div>
 
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-display text-xl sm:text-2xl font-bold tracking-[-0.03em] text-ink block leading-none">
-                Llantita
+              <span className="font-anton text-xl tracking-wider text-[#f5efe8] block leading-none">
+                LLANTITA
               </span>
               {ultimaActualizacion && (
-                <span className="hidden lg:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-card text-[11px] font-medium text-ink-muted">
-                  <span className="h-1.5 w-1.5 rounded-full bg-volt animate-pulse" />
-                  <span>Actualizado {formatTimeAgo(ultimaActualizacion)}</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#211b15] border border-[#4a392b] text-[10px] font-mono text-[#a89b8d]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#ff6a1a] animate-pulse" />
+                  <span>ACT. {formatTimeAgo(ultimaActualizacion).toUpperCase()}</span>
                 </span>
               )}
             </div>
-            <p className="text-[13px] text-ink-secondary hidden sm:block mt-1">
-              Radar de precios y stock en Sporting Argentina
+            <p className="text-[11px] font-mono text-[#8c8275] hidden md:block">
+              RADAR DE PRECIOS SPORTING
             </p>
           </div>
         </div>
 
         {/* Acciones */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {totalProductos > 0 && (
-            <div className="hidden md:flex items-center gap-2 text-[13px] text-ink-secondary bg-surface-card px-3.5 py-2 rounded-lg tabular-nums">
-              <span className="h-2 w-2 rounded-full bg-volt" />
-              <span className="font-semibold text-ink">{totalProductos.toLocaleString('es-AR')} pares</span>
+            <div className="hidden sm:flex items-center gap-2 text-xs font-mono text-[#f7a261] bg-[#1d1712] border border-[#4d3a2b] px-3 py-1.5 rounded tabular-nums">
+              <span className="h-2 w-2 rounded-full bg-[#ff6a1a]" />
+              <span className="font-bold">{totalProductos.toLocaleString('es-AR')} PARES</span>
             </div>
           )}
 
@@ -55,11 +70,11 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://github.com/SoySid/llantita-bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center h-9 w-9 rounded-lg bg-surface-card text-ink-secondary hover:text-ink focus-visible:ring-2 focus-visible:ring-infrared active:scale-[0.94] transition-[color,transform] duration-150 ease-out cursor-pointer"
+            className="flex items-center justify-center h-8 w-8 rounded bg-[#1c1814] border border-[#42362b] text-[#9c8e80] hover:text-[#f2ede7] hover:border-[#ff6a1a] active:scale-[0.94] transition-all cursor-pointer"
             title="Ver código en GitHub"
             aria-label="GitHub"
           >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
               <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" />
             </svg>
           </a>
@@ -68,11 +83,10 @@ export const Navbar: React.FC<NavbarProps> = ({ ultimaActualizacion, totalProduc
             href="https://t.me/llantita_bot"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 rounded-lg bg-infrared hover:bg-infrared-hover focus-visible:ring-2 focus-visible:ring-volt active:scale-[0.96] text-white font-display font-bold text-[13px] px-3.5 py-2 transition-[background-color,transform] duration-150 ease-out cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] border border-[#ffa366] text-[#1c110a] font-barlow font-bold text-xs px-3 py-1.5 shadow-[0_0_14px_rgba(255,85,10,0.6)] hover:shadow-[0_0_20px_rgba(255,85,10,0.85)] active:scale-[0.96] transition-all cursor-pointer uppercase"
           >
-            <Send className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Alertas Telegram</span>
-            <span className="sm:hidden">Telegram</span>
+            <Send className="h-3 w-3" />
+            <span className="hidden sm:inline">Telegram</span>
           </a>
         </div>
       </div>

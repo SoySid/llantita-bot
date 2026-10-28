@@ -138,45 +138,45 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
   if (dataSeries.length <= 1) {
     return (
-      <div className="rounded-2xl bg-canvas border border-surface-border p-4 mb-4 text-center">
-        <div className="flex items-center justify-center gap-2 text-ink-secondary text-[13px] mb-1">
-          <Minus className="h-4 w-4 text-volt" />
-          <span>Sin variaciones de precio detectadas aún</span>
+      <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3.5 mb-3 text-center">
+        <div className="flex items-center justify-center gap-2 text-[#8a8074] text-xs font-mono mb-1">
+          <Minus className="h-3.5 w-3.5 text-[#ff6a1a]" />
+          <span>SIN VARIACIONES DE PRECIO DETECTADAS AÚN</span>
         </div>
-        <p className="text-sm font-semibold text-ink">
-          Precio único registrado: <span className="font-mono text-volt font-bold tabular-nums">{formatCurrency(currentPrice)}</span>
+        <p className="text-xs font-mono text-[#a39b91]">
+          PRECIO REGISTRADO: <span className="font-anton text-base text-[#f2ede7] tabular-nums">{formatCurrency(currentPrice)}</span>
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl bg-canvas border border-surface-border p-4 mb-4 select-none">
-      {/* Barra superior interactiva del gráfico */}
-      <div className="flex items-center justify-between pb-3 text-[13px]">
+    <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3.5 mb-3 select-none">
+      {/* Barra superior del osciloscopio */}
+      <div className="flex items-center justify-between pb-2 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-mono font-medium text-ink-secondary tabular-nums">
+          <span className="font-mono text-[#8a8074] tabular-nums text-xs">
             {formatTooltipDate(activePoint.fecha)}
           </span>
           {diffFromPrev !== null && diffFromPrev !== 0 && (
             <span
-              className={`inline-flex items-center gap-0.5 font-mono text-[13px] font-bold px-1.5 py-0.5 rounded tabular-nums ${
+              className={`inline-flex items-center gap-0.5 font-mono text-xs font-bold px-1.5 py-0.2 rounded tabular-nums ${
                 diffFromPrev < 0
-                  ? 'bg-volt-soft text-volt'
-                  : 'bg-infrared-soft text-infrared'
+                  ? 'bg-[#26170e] text-[#ff6a1a] border border-[#59351e]'
+                  : 'bg-[#291410] text-[#ff5100] border border-[#59221b]'
               }`}
             >
-              {diffFromPrev < 0 ? <TrendingDown className="h-3.5 w-3.5" /> : <TrendingUp className="h-3.5 w-3.5" />}
+              {diffFromPrev < 0 ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
               {pctFromPrev !== null ? `${pctFromPrev.toFixed(1)}%` : ''}
             </span>
           )}
         </div>
-        <div className="font-mono font-bold text-volt text-sm tabular-nums">
+        <div className="font-anton text-lg text-[#ff6a1a] tabular-nums tracking-wide">
           {formatCurrency(activePoint.precio)}
         </div>
       </div>
 
-      {/* SVG del Gráfico */}
+      {/* SVG del Gráfico Osciloscopio */}
       <div className="relative w-full aspect-[520/180] mt-1">
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -184,9 +184,16 @@ export const PriceChart: React.FC<PriceChartProps> = ({
         >
           <defs>
             <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#b8ff01" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#b8ff01" stopOpacity="0.0" />
+              <stop offset="0%" stopColor="#ff6a1a" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#ff5100" stopOpacity="0.0" />
             </linearGradient>
+            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
           </defs>
 
           {gridLines.map((gl, i) => (
@@ -196,7 +203,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 y1={gl.y}
                 x2={padLeft + chartWidth}
                 y2={gl.y}
-                stroke="#2e2e29"
+                stroke="#292119"
                 strokeDasharray="4 4"
                 strokeWidth="1"
               />
@@ -204,7 +211,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 x={padLeft - 6}
                 y={gl.y + 3.5}
                 textAnchor="end"
-                className="fill-ink-muted font-mono text-[13px] tabular-nums"
+                className="fill-[#736c64] font-mono text-xs tabular-nums"
               >
                 ${Math.round(gl.valor / 1000)}k
               </text>
@@ -216,10 +223,11 @@ export const PriceChart: React.FC<PriceChartProps> = ({
           <path
             d={linePath}
             fill="none"
-            stroke="#b8ff01"
+            stroke="#ff6a1a"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
+            filter="url(#glow)"
           />
 
           {activePoint && (
@@ -228,7 +236,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               y1={padTop}
               x2={activePoint.x}
               y2={padTop + chartHeight}
-              stroke="#b8ff01"
+              stroke="#ff944d"
               strokeDasharray="3 3"
               strokeOpacity="0.6"
               strokeWidth="1.5"
@@ -252,8 +260,8 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                   cx={p.x}
                   cy={p.y}
                   r={isActive ? '5' : '3.5'}
-                  fill="#b8ff01"
-                  stroke="#111110"
+                  fill={isActive ? '#ff944d' : '#ff6a1a'}
+                  stroke="#0d0b0a"
                   strokeWidth={isActive ? '2.5' : '1.5'}
                   className="transition-[r,fill] duration-150 pointer-events-none"
                 />
@@ -265,7 +273,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft}
             y={height - 8}
             textAnchor="start"
-            className="fill-ink-secondary font-mono text-[13px] tabular-nums"
+            className="fill-[#8a8074] font-mono text-[11px] tabular-nums"
           >
             {formatDateLabel(points[0].fecha)}
           </text>
@@ -275,7 +283,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               x={padLeft + chartWidth / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-ink-muted font-mono text-[13px] tabular-nums"
+              className="fill-[#736c64] font-mono text-[11px] tabular-nums"
             >
               {formatDateLabel(points[Math.floor(points.length / 2)].fecha)}
             </text>
@@ -285,7 +293,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft + chartWidth}
             y={height - 8}
             textAnchor="end"
-            className="fill-ink-secondary font-mono text-[13px] tabular-nums"
+            className="fill-[#8a8074] font-mono text-[11px] tabular-nums"
           >
             {formatDateLabel(points[points.length - 1].fecha)}
           </text>
