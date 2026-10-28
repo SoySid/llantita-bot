@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Teko, Barlow_Condensed, Share_Tech_Mono, Inter } from 'next/font/google';
+import { Teko, Barlow_Condensed, Inter } from 'next/font/google';
 import './globals.css';
 
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#111010',
+  themeColor: '#0e0c0b',
 };
 
 const teko = Teko({
@@ -20,13 +20,6 @@ const barlow = Barlow_Condensed({
   subsets: ['latin'],
   weight: ['500', '600', '700', '800'],
   variable: '--font-barlow',
-  display: 'swap',
-});
-
-const techMono = Share_Tech_Mono({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-mono',
   display: 'swap',
 });
 
@@ -53,9 +46,9 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`dark scroll-smooth ${teko.variable} ${barlow.variable} ${techMono.variable} ${inter.variable}`}
+      className={`dark scroll-smooth ${teko.variable} ${barlow.variable} ${inter.variable}`}
     >
-      <body className="bg-[#111010] text-white font-sans antialiased selection:bg-[#ff5500] selection:text-black">
+      <body className="bg-[#0e0c0b] text-white font-sans antialiased selection:bg-[#ff5500] selection:text-black">
         {children}
       </body>
     </html>

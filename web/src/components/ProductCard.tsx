@@ -35,10 +35,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           href={productUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="relative w-full aspect-square rounded bg-[#131110] border border-orange-500/20 p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.98] transition-transform duration-150"
+          className="relative w-full aspect-square rounded bg-[#131110] border border-[#2d2621] p-3 mb-3 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.98] transition-transform duration-150"
         >
           {hasDiscount && (
-            <span className="absolute top-2 right-2 z-10 inline-flex items-center px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 font-barlow text-xs font-bold uppercase tracking-wider border border-orange-500/40">
+            <span className="absolute top-2 right-2 z-10 inline-flex items-center px-2 py-0.5 rounded bg-[#ff5500] text-black font-barlow text-xs font-bold uppercase">
               -{product.descuento_pct}% OFF
             </span>
           )}
@@ -52,7 +52,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             />
           ) : (
             <div className="flex flex-col items-center justify-center text-stone-500">
-              <span className="text-xs hud-mono">Sin foto</span>
+              <span className="text-xs">Sin foto</span>
             </div>
           )}
         </a>
@@ -60,11 +60,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Marca y Nombre */}
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <span className="block font-barlow text-xs font-bold text-orange-400 uppercase tracking-wider">
+            <span className="block font-barlow text-xs font-bold text-orange-400 uppercase">
               {brandLabel}
             </span>
             {hasDiscount && product.descuento_pct >= 30 && (
-              <span className="hud-mono text-[10px] text-emerald-400">● PISO HISTÓRICO</span>
+              <span className="text-xs text-emerald-400 font-semibold">Piso histórico</span>
             )}
           </div>
 
@@ -85,17 +85,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               {formatCurrency(product.precio)}
             </span>
             {hasDiscount && product.precio_anterior && (
-              <span className="text-xs hud-mono text-stone-500 line-through tabular-nums">
+              <span className="text-xs text-stone-500 line-through tabular-nums">
                 {formatCurrency(product.precio_anterior)}
               </span>
             )}
           </div>
           {ahorro ? (
-            <p className="text-xs hud-mono text-amber-300 font-bold tabular-nums">
+            <p className="text-xs text-amber-300 font-semibold tabular-nums">
               Ahorrás {formatCurrency(ahorro)}
             </p>
           ) : (
-            <p className="text-[11px] hud-mono text-stone-500">
+            <p className="text-xs text-stone-500">
               Precio verificado
             </p>
           )}
@@ -104,7 +104,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         {/* Talles disponibles */}
         {tallesList.length > 0 && (
           <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-barlow font-bold text-stone-400 uppercase tracking-wider">Talles:</span>
+            <span className="text-[11px] font-barlow font-bold text-stone-400 uppercase">Talles:</span>
             <div className="flex flex-wrap gap-1">
               {tallesList.slice(0, 5).map((t, idx) => {
                 const isMatchingSelected =
@@ -112,7 +112,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 return (
                   <span
                     key={idx}
-                    className={`hud-mono text-xs tabular-nums px-1.5 py-0.5 rounded border transition-colors select-none ${
+                    className={`text-xs tabular-nums px-1.5 py-0.5 rounded border transition-colors select-none ${
                       isMatchingSelected
                         ? 'bg-orange-500 text-black font-bold border-orange-400'
                         : 'bg-[#100e0d] text-stone-300 border-stone-800'
@@ -123,7 +123,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 );
               })}
               {tallesList.length > 5 && (
-                <span className="text-[11px] hud-mono text-stone-500 self-center tabular-nums">
+                <span className="text-xs text-stone-500 self-center tabular-nums">
                   +{tallesList.length - 5}
                 </span>
               )}
@@ -133,11 +133,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Acciones al pie */}
-      <div className="pt-3 mt-3 flex items-center justify-between text-xs gap-1 border-t border-stone-800">
+      <div className="pt-3 mt-3 flex items-center justify-between text-xs gap-1">
         <button
           type="button"
           onClick={() => onOpenHistory(product)}
-          className="inline-flex items-center gap-1.5 font-barlow font-bold text-xs uppercase tracking-wider text-stone-400 hover:text-orange-400 active:scale-[0.95] transition-all cursor-pointer select-none"
+          className="inline-flex items-center gap-1.5 font-barlow font-bold text-xs uppercase text-stone-400 hover:text-orange-400 active:scale-[0.95] transition-colors cursor-pointer select-none"
         >
           <LineChart className="h-3.5 w-3.5 shrink-0" />
           <span>Historial</span>
@@ -147,7 +147,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           href={productUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 font-barlow font-bold text-xs uppercase tracking-wider text-stone-200 hover:text-orange-400 active:scale-[0.95] transition-all select-none"
+          className="inline-flex items-center gap-1 font-barlow font-bold text-xs uppercase text-stone-200 hover:text-orange-400 active:scale-[0.95] transition-colors select-none"
         >
           <span>Sporting</span>
           <ArrowUpRight className="h-3.5 w-3.5 shrink-0" />

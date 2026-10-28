@@ -139,12 +139,12 @@ export const PriceChart: React.FC<PriceChartProps> = ({
   if (dataSeries.length <= 1) {
     return (
       <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3.5 mb-3 text-center">
-        <div className="flex items-center justify-center gap-2 text-[#8a8074] text-xs font-mono mb-1">
+        <div className="flex items-center justify-center gap-2 text-[#8a8074] text-xs mb-1">
           <Minus className="h-3.5 w-3.5 text-[#ff6a1a]" />
-          <span>SIN VARIACIONES DE PRECIO DETECTADAS AÚN</span>
+          <span>Sin variaciones de precio detectadas aún</span>
         </div>
-        <p className="text-xs font-mono text-[#a39b91]">
-          PRECIO REGISTRADO: <span className="font-anton text-base text-[#f2ede7] tabular-nums">{formatCurrency(currentPrice)}</span>
+        <p className="text-xs text-[#a39b91]">
+          Precio registrado: <span className="font-anton text-base text-[#f2ede7] tabular-nums">{formatCurrency(currentPrice)}</span>
         </p>
       </div>
     );
@@ -152,15 +152,15 @@ export const PriceChart: React.FC<PriceChartProps> = ({
 
   return (
     <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3.5 mb-3 select-none">
-      {/* Barra superior del osciloscopio */}
+      {/* Barra superior */}
       <div className="flex items-center justify-between pb-2 text-xs">
         <div className="flex items-center gap-2">
-          <span className="font-mono text-[#8a8074] tabular-nums text-xs">
+          <span className="text-[#8a8074] tabular-nums text-xs">
             {formatTooltipDate(activePoint.fecha)}
           </span>
           {diffFromPrev !== null && diffFromPrev !== 0 && (
             <span
-              className={`inline-flex items-center gap-0.5 font-mono text-xs font-bold px-1.5 py-0.2 rounded tabular-nums ${
+              className={`inline-flex items-center gap-0.5 text-xs font-bold px-1.5 py-0.2 rounded tabular-nums ${
                 diffFromPrev < 0
                   ? 'bg-[#26170e] text-[#ff6a1a] border border-[#59351e]'
                   : 'bg-[#291410] text-[#ff5100] border border-[#59221b]'
@@ -211,7 +211,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
                 x={padLeft - 6}
                 y={gl.y + 3.5}
                 textAnchor="end"
-                className="fill-[#736c64] font-mono text-xs tabular-nums"
+                className="fill-[#736c64] text-xs tabular-nums"
               >
                 ${Math.round(gl.valor / 1000)}k
               </text>
@@ -227,7 +227,6 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            filter="url(#glow)"
           />
 
           {activePoint && (
@@ -273,7 +272,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft}
             y={height - 8}
             textAnchor="start"
-            className="fill-[#8a8074] font-mono text-[11px] tabular-nums"
+            className="fill-[#8a8074] text-[11px] tabular-nums"
           >
             {formatDateLabel(points[0].fecha)}
           </text>
@@ -283,7 +282,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
               x={padLeft + chartWidth / 2}
               y={height - 8}
               textAnchor="middle"
-              className="fill-[#736c64] font-mono text-[11px] tabular-nums"
+              className="fill-[#736c64] text-[11px] tabular-nums"
             >
               {formatDateLabel(points[Math.floor(points.length / 2)].fecha)}
             </text>
@@ -293,7 +292,7 @@ export const PriceChart: React.FC<PriceChartProps> = ({
             x={padLeft + chartWidth}
             y={height - 8}
             textAnchor="end"
-            className="fill-[#8a8074] font-mono text-[11px] tabular-nums"
+            className="fill-[#8a8074] text-[11px] tabular-nums"
           >
             {formatDateLabel(points[points.length - 1].fecha)}
           </text>

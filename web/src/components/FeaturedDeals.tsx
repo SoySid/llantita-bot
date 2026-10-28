@@ -108,13 +108,13 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     aria-selected={isActive}
                     aria-label={`Oferta ${idx + 1}: ${deal.nombre}`}
                     onClick={() => selectDeal(idx)}
-                    className="relative h-1.5 rounded-full overflow-hidden transition-all duration-300 focus:outline-none cursor-pointer"
+                    className="relative h-1.5 rounded-full overflow-hidden transition-[width] duration-300 focus:outline-none cursor-pointer"
                     style={{ width: isActive ? '2rem' : '0.75rem' }}
                   >
                     <span className="absolute inset-0 bg-[#29221b] rounded-full" />
                     {isActive ? (
                       <span
-                        className="absolute inset-0 bg-gradient-to-r from-[#ff7b29] to-[#ff5100] transition-[width] duration-75 ease-linear rounded-full"
+                        className="absolute inset-0 bg-[#ff5500] transition-[width] duration-75 ease-linear rounded-full"
                         style={{ width: `${progress}%` }}
                       />
                     ) : null}
@@ -139,7 +139,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 lg:h-[320px]">
           
           {/* 1. PRODUCTO DESTACADO (7 de 12) */}
-          <div className="lg:col-span-7 rounded-lg bg-[#151210] border border-[#382f25] p-4 sm:p-5 flex flex-col justify-between group relative hover:border-[#ff6a1a] transition-all duration-200 h-full shadow-[0_4px_20px_rgba(0,0,0,0.6)]">
+          <div className="lg:col-span-7 rounded-lg bg-[#151210] border border-[#382f25] p-4 sm:p-5 flex flex-col justify-between group relative hover:border-[#ff5500] transition-colors duration-150 h-full">
             <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 h-full">
               
               {/* Vitrina izquierda */}
@@ -149,7 +149,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 rel="noopener noreferrer"
                 className="relative w-full sm:w-[46%] h-48 sm:h-full shrink-0 rounded bg-[#1a1714] border border-[#30281f] p-3 sm:p-4 overflow-hidden flex items-center justify-center block cursor-pointer active:scale-[0.99] transition-transform duration-150"
               >
-                <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] text-[#1c110a] font-barlow text-xs font-bold tracking-wider uppercase border border-[#ffa366] shadow-[0_0_10px_rgba(255,85,10,0.5)]">
+                <span className="absolute top-2 left-2 z-10 inline-flex items-center px-2 py-0.5 rounded bg-[#ff5500] text-black font-barlow text-xs font-bold uppercase">
                   -{currentDeal.descuento_pct}% OFF
                 </span>
 
@@ -159,10 +159,10 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     src={safeExternalUrl(currentDeal.imagen_url)}
                     alt={currentDeal.nombre}
                     loading="eager"
-                    className="h-full w-full object-contain scale-110 sm:scale-115 transition-transform duration-300 ease-out md:group-hover:scale-125 drop-shadow-[0_8px_16px_rgba(0,0,0,0.7)]"
+                    className="h-full w-full object-contain scale-110 sm:scale-115 transition-transform duration-200 ease-out md:group-hover:scale-125"
                   />
                 ) : (
-                  <span className="text-xs font-mono text-[#8a8074]">Sin foto</span>
+                  <span className="text-xs text-[#8a8074]">Sin foto</span>
                 )}
               </a>
 
@@ -170,11 +170,11 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="font-barlow text-xs font-bold text-[#ff6a1a] uppercase tracking-wider">
+                    <span className="font-barlow text-xs font-bold text-[#ff6a1a] uppercase">
                       {currentBrand}
                     </span>
-                    <span className="text-[10px] font-mono text-[#8c8275]">
-                      PISO HISTÓRICO
+                    <span className="text-xs text-emerald-400 font-semibold">
+                      Piso histórico
                     </span>
                   </div>
 
@@ -194,7 +194,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                       {formatCurrency(currentDeal.precio)}
                     </span>
                     {currentDeal.precio_anterior && (
-                      <span className="text-sm font-mono text-[#8c8275] line-through tabular-nums">
+                      <span className="text-sm text-[#8c8275] line-through tabular-nums">
                         {formatCurrency(currentDeal.precio_anterior)}
                       </span>
                     )}
@@ -203,8 +203,8 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   {/* Resumen de ahorro destacado */}
                   {currentAhorro && (
                     <div className="mt-2 px-2.5 py-1.5 rounded bg-[#1e1813] border border-[#453123] flex items-center justify-between text-xs">
-                      <span className="text-[#a39b91] font-barlow font-bold uppercase tracking-wider">Ahorro récord:</span>
-                      <span className="font-mono font-bold text-[#ff944d] tabular-nums">
+                      <span className="text-[#a39b91] font-barlow font-bold uppercase">Ahorro real:</span>
+                      <span className="font-bold text-[#ff944d] tabular-nums">
                         {formatCurrency(currentAhorro)}
                       </span>
                     </div>
@@ -213,18 +213,18 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   {/* Talles compactos */}
                   {currentTalles.length > 0 && (
                     <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[11px] font-barlow font-bold text-[#8c8275] uppercase tracking-wider">Talles:</span>
+                      <span className="text-[11px] font-barlow font-bold text-[#8c8275] uppercase">Talles:</span>
                       <div className="flex flex-wrap gap-1">
                         {currentTalles.slice(0, 6).map((t, idx) => (
                           <span
                             key={idx}
-                            className="font-mono text-[11px] font-bold tabular-nums px-1.5 py-0.2 rounded bg-[#0d0b0a] text-[#c7beaf] border border-[#332b22]"
+                            className="text-[11px] font-bold tabular-nums px-1.5 py-0.2 rounded bg-[#0d0b0a] text-[#c7beaf] border border-[#332b22]"
                           >
                             {t}
                           </span>
                         ))}
                         {currentTalles.length > 6 && (
-                          <span className="text-xs font-mono text-[#8a8074] self-center">
+                          <span className="text-xs text-[#8a8074] self-center">
                             +{currentTalles.length - 6}
                           </span>
                         )}
@@ -234,11 +234,11 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 </div>
 
                 {/* Acciones */}
-                <div className="pt-3 mt-2 flex items-center justify-between gap-3 border-t border-[#29221b]">
+                <div className="pt-3 mt-3 flex items-center justify-between gap-3">
                   <button
                     type="button"
                     onClick={() => onSelectProduct(currentDeal)}
-                    className="inline-flex items-center gap-1.5 text-xs font-barlow font-bold uppercase tracking-wider text-[#a39b91] hover:text-[#ff944d] active:scale-[0.96] transition-colors duration-150 cursor-pointer"
+                    className="inline-flex items-center gap-1.5 text-xs font-barlow font-bold uppercase text-[#a39b91] hover:text-[#ff944d] active:scale-[0.96] transition-colors duration-150 cursor-pointer"
                   >
                     <LineChart className="h-3.5 w-3.5" />
                     <span>Ver historial</span>
@@ -248,7 +248,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                     href={currentUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] border border-[#ffa366] text-[#1c110a] font-barlow text-xs sm:text-sm font-bold uppercase tracking-wider px-3.5 py-1.5 transition-all duration-150 active:scale-[0.96] shadow-[0_0_12px_rgba(255,85,10,0.5)]"
+                    className="inline-flex items-center gap-1.5 rounded bg-[#ff5500] hover:bg-[#ff6a1a] text-black font-barlow text-xs sm:text-sm font-bold uppercase px-3.5 py-1.5 transition-colors duration-150 active:scale-[0.96]"
                   >
                     <span>Ir a la tienda</span>
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -277,7 +277,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                 <div
                   key={item.id}
                   onClick={() => selectDeal(dealIdx)}
-                  className="flex-1 rounded bg-[#151210] border border-[#2e271f] p-2 sm:p-2.5 flex gap-3 items-center hover:bg-[#1c1814] hover:border-[#ff6a1a] transition-all duration-150 group relative cursor-pointer min-h-0"
+                  className="flex-1 rounded bg-[#151210] border border-[#2e271f] p-2 sm:p-2.5 flex gap-3 items-center hover:bg-[#1c1814] hover:border-[#ff6a1a] transition-colors duration-150 group relative cursor-pointer min-h-0"
                   title="Hacer clic para destacar en grande"
                 >
                   {/* Mini vitrina */}
@@ -294,7 +294,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                         className="h-full w-full object-contain transition-transform duration-150 ease-out group-hover:scale-[1.05]"
                       />
                     ) : (
-                      <span className="text-[10px] font-mono text-[#8a8074]">Sin foto</span>
+                      <span className="text-[10px] text-[#8a8074]">Sin foto</span>
                     )}
                   </div>
 
@@ -302,11 +302,11 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                   <div className="flex-1 min-w-0 flex flex-col justify-between h-full py-0.5">
                     <div>
                       <div className="flex items-center justify-between gap-1">
-                        <span className="font-barlow text-[11px] font-bold text-[#ff6a1a] uppercase tracking-wider truncate">
+                        <span className="font-barlow text-[11px] font-bold text-[#ff6a1a] uppercase truncate">
                           {brandLabel}
                         </span>
                         {ahorro && (
-                          <span className="text-[11px] font-mono text-[#ff944d] font-bold tabular-nums shrink-0">
+                          <span className="text-[11px] text-[#ff944d] font-bold tabular-nums shrink-0">
                             -{formatCurrency(ahorro)}
                           </span>
                         )}
@@ -323,7 +323,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                           {formatCurrency(item.precio)}
                         </span>
                         {item.precio_anterior && (
-                          <span className="text-[11px] font-mono text-[#8c8275] line-through tabular-nums">
+                          <span className="text-[11px] text-[#8c8275] line-through tabular-nums">
                             {formatCurrency(item.precio_anterior)}
                           </span>
                         )}
@@ -336,7 +336,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                             e.stopPropagation();
                             onSelectProduct(item);
                           }}
-                          className="text-[11px] font-barlow font-bold uppercase tracking-wider text-[#a39b91] hover:text-[#ff944d] active:scale-[0.96] transition-colors flex items-center gap-0.5"
+                          className="text-[11px] font-barlow font-bold uppercase text-[#a39b91] hover:text-[#ff944d] active:scale-[0.96] transition-colors flex items-center gap-0.5"
                         >
                           <LineChart className="h-3 w-3" />
                           <span>Historial</span>
@@ -347,7 +347,7 @@ export const FeaturedDeals: React.FC<FeaturedDealsProps> = ({ deals, onSelectPro
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="font-barlow text-[11px] font-bold uppercase tracking-wider text-[#f2ede7] hover:text-[#ff6a1a] active:scale-[0.96] transition-colors flex items-center gap-0.5"
+                          className="font-barlow text-[11px] font-bold uppercase text-[#f2ede7] hover:text-[#ff6a1a] active:scale-[0.96] transition-colors flex items-center gap-0.5"
                         >
                           <span>Ir</span>
                           <ArrowUpRight className="h-3 w-3" />

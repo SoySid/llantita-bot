@@ -3,26 +3,20 @@
 @tailwind utilities;
 
 :root {
-  /* Paleta Mech Industrial & Amber Glow */
-  --canvas: #0d0b0a;
-  --surface: #141210;
-  --surface-card: #1c1917;
+  /* Paleta Editorial Deportiva Llantita */
+  --canvas: #0e0c0b;
+  --surface: #151311;
+  --surface-card: #1c1815;
   --surface-elevated: #24201c;
-  --surface-border: #3d342c;
-  --surface-bone: #181512;
+  --surface-border: #382f27;
 
-  --ink: #f2ede7;
-  --ink-secondary: #a39b91;
-  --ink-muted: #736d65;
+  --ink: #f5f2ed;
+  --ink-secondary: #a89f94;
+  --ink-muted: #787066;
 
-  --accent-infrared: #ff5100;
-  --accent-infrared-hover: #e04700;
-  --accent-infrared-soft: rgba(255, 81, 0, 0.18);
-  --accent-volt: #ff6a1a;
-  --accent-volt-soft: rgba(255, 106, 26, 0.16);
-
-  --p-scale: 1;
-  --p-color-amount: 1;
+  --accent-orange: #ff5500;
+  --accent-orange-hover: #e64c00;
+  --accent-amber: #ff8800;
 
   --ease-out-emil: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out-emil: cubic-bezier(0.77, 0, 0.175, 1);
@@ -40,7 +34,6 @@ body {
   min-height: 100dvh;
   overflow-x: hidden;
   touch-action: manipulation;
-  font-size: calc(1rem * var(--p-scale, 1));
   line-height: 1.6;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
@@ -52,8 +45,9 @@ button, a {
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-anton), Impact, sans-serif;
+  font-family: var(--font-teko), Impact, sans-serif;
   text-wrap: balance;
+  letter-spacing: 0.02em;
 }
 
 p {
@@ -61,12 +55,12 @@ p {
 }
 
 ::selection {
-  background-color: var(--accent-infrared);
+  background-color: var(--accent-orange);
   color: #000000;
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-infrared);
+  outline: 2px solid var(--accent-orange);
   outline-offset: 2px;
 }
 
@@ -79,8 +73,8 @@ p {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a2316;
-  border: 1px solid #ff5500;
+  background: #332117;
+  border-radius: 4px;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -91,323 +85,127 @@ p {
   scrollbar-width: none;
 }
 
-/* Clases del Sistema HUD Industrial */
-.hero-viewport {
-  position: relative;
-  width: 100%;
-  min-height: 88vh;
-  background:
-    radial-gradient(circle at 72% 48%, rgba(255, 86, 15, 0.22) 0%, rgba(180, 45, 5, 0.08) 32%, transparent 62%),
-    radial-gradient(circle at 18% 12%, rgba(255, 95, 20, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, #1c1917 0%, #110f0e 65%, #090807 100%);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  padding: 3.5vh 3.5vw;
-}
+/* ==========================================
+   SISTEMA DE FONDOS DIFERENCIADOS POR SECCIÓN
+   ========================================== */
 
-.hero-viewport::before {
-  content: "";
+/* Ruido sutil de fondo */
+.noise-overlay {
   position: absolute;
   inset: 0;
-  background-image: 
-    repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
-    radial-gradient(rgba(255, 120, 40, 0.06) 1px, transparent 0);
-  background-size: 100% 3px, 24px 24px;
+  opacity: 0.035;
   pointer-events: none;
-  z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-.left-burn-edge {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 28px;
-  background: linear-gradient(90deg, 
-    #ff3b00 0%, 
-    #ff7b00 18%, 
-    rgba(220, 45, 0, 0.55) 48%, 
-    rgba(120, 20, 0, 0.15) 75%, 
-    transparent 100%);
-  box-shadow: 0 0 45px 12px rgba(255, 68, 0, 0.45);
-  z-index: 6;
-  pointer-events: none;
-}
-
-.right-burn-edge {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 14px;
-  height: 38%;
-  background: linear-gradient(270deg, rgba(255, 50, 0, 0.65) 0%, transparent 100%);
-  filter: blur(4px);
-  z-index: 6;
-  pointer-events: none;
-}
-
-.hud-frame-top {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(90vw, 340px);
-  height: 44px;
-  z-index: 4;
-  pointer-events: none;
-  filter: drop-shadow(0 6px 18px rgba(255, 85, 0, 0.25));
-}
-
-.hud-frame-bottom {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(90vw, 340px);
-  height: 48px;
-  z-index: 4;
-  pointer-events: none;
-}
-
-.hud-frame-left {
-  position: absolute;
-  left: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 420px;
-  z-index: 4;
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.hud-frame-right {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 44px;
-  height: 440px;
-  z-index: 4;
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.brand-badge {
+/* SECCIÓN 0: HERO (Atmósfera Volcánica Cálida & Partículas) */
+.hero-bg {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  background: linear-gradient(180deg, #2a2c28 0%, #1b1c19 55%, #121311 100%);
-  border: 2px solid #575951;
-  border-radius: 6px;
-  height: 76px;
-  padding: 0 22px 0 92px;
-  box-shadow: 
-    0 10px 25px rgba(0,0,0,0.85),
-    inset 0 1px 1px rgba(255,255,255,0.22),
-    inset 0 0 14px rgba(0,0,0,0.8);
-}
-
-.brand-badge::before {
-  content: "";
-  position: absolute;
-  inset: 4px;
-  border: 1px solid rgba(130, 135, 120, 0.35);
-  border-radius: 3px;
-  pointer-events: none;
-}
-
-.rivet {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #8c9084, #2b2d28);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.9);
-}
-.rivet.tr { top: 8px; right: 8px; }
-.rivet.br { bottom: 8px; right: 8px; }
-.rivet.tl { top: 8px; left: 8px; }
-.rivet.bl { bottom: 8px; left: 8px; }
-
-.cat-shield-wrapper {
-  position: absolute;
-  left: -6px;
-  top: 50%;
-  transform: translateY(-48%);
-  width: 86px;
-  height: 104px;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.85));
-  overflow: hidden;
-  clip-path: polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%);
-  border-radius: 6px;
-}
-
-.cat-shield-wrapper img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  min-height: 100dvh;
+  background-color: #0e0c0b;
+  background-image:
+    radial-gradient(circle at 68% 48%, rgba(255, 75, 0, 0.22) 0%, rgba(160, 35, 0, 0.06) 40%, transparent 68%), /* taste-skill-ignore */
+    radial-gradient(circle at 15% 15%, rgba(255, 85, 0, 0.12) 0%, transparent 35%); /* taste-skill-ignore */
 }
 
-.brand-title {
-  font-family: var(--font-anton), Impact, sans-serif;
-  font-size: 2rem;
+/* SECCIÓN 1: GRILLA DE CATÁLOGO TÁCTICO */
+.section-grid-bg {
+  position: relative;
+  background-color: #0c0a0a;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px), /* taste-skill-ignore */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px); /* taste-skill-ignore */
+  background-size: 40px 40px;
+}
+
+/* SECCIÓN 2: MALLA DE CARBONO (Arquitectura y comparativa) */
+.section-carbon-bg {
+  position: relative;
+  background-color: #131110;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0), /* taste-skill-ignore */
+    radial-gradient(rgba(0, 0, 0, 0.7) 1px, transparent 0); /* taste-skill-ignore */
+  background-size: 16px 16px, 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+/* SECCIÓN 3: NÚCLEO TÉRMICO (Footer / CTA Telegram) */
+.section-core-bg {
+  position: relative;
+  background-color: #0a0808;
+  background-image:
+    radial-gradient(ellipse at 50% 100%, rgba(255, 75, 0, 0.25) 0%, rgba(120, 25, 0, 0.08) 45%, transparent 75%); /* taste-skill-ignore */
+}
+
+/* ==========================================
+   TIPOGRAFÍA Y COMPONENTES
+   ========================================== */
+
+.logo-text {
+  font-family: var(--font-teko), sans-serif;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: linear-gradient(180deg, #fff3e0 0%, #ffc285 45%, #e87b2e 90%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 8px rgba(255, 115, 20, 0.65)) drop-shadow(0 2px 3px rgba(0,0,0,0.9));
-  padding-left: 4px;
+  color: #ffffff;
 }
 
-.status-pill {
-  font-family: var(--font-barlow), sans-serif;
-  font-weight: 600;
-  font-size: 1.05rem;
-  letter-spacing: 0.04em;
-  color: #f7a261;
-  background: rgba(28, 22, 19, 0.82);
-  border: 1px solid rgba(180, 105, 65, 0.45);
-  box-shadow: inset 0 0 12px rgba(255, 100, 30, 0.12), 0 4px 14px rgba(0,0,0,0.5);
-  padding: 8px 16px;
-  border-radius: 6px;
-  text-transform: uppercase;
-}
-
-.telegram-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-barlow), sans-serif;
+.headline {
+  font-family: var(--font-teko), sans-serif;
   font-weight: 700;
-  font-size: 1.1rem;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  color: #f7f4ee;
+}
+
+.section-title {
+  font-family: var(--font-teko), sans-serif;
+  font-weight: 600;
   letter-spacing: 0.03em;
-  color: #1c110a;
-  background: linear-gradient(90deg, #ff7b29 0%, #ff5100 100%);
-  border: 1px solid #ffa366;
-  padding: 9px 18px;
-  border-radius: 6px;
-  text-decoration: none;
   text-transform: uppercase;
-  box-shadow: 
-    0 0 24px rgba(255, 85, 10, 0.75),
-    inset 0 1px 2px rgba(255, 230, 200, 0.65);
-  cursor: pointer;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.telegram-btn:hover {
+/* Tarjeta de producto y contenido sólida */
+.tactical-card {
+  background: #151311;
+  border: 1px solid #2d2621;
+  border-radius: 8px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+
+.tactical-card:hover {
+  border-color: var(--accent-orange);
+  transform: translateY(-2px);
+}
+
+/* Botón principal de Telegram */
+.btn-telegram {
+  font-family: var(--font-barlow), sans-serif;
+  background-color: var(--accent-orange);
+  color: #000000;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.btn-telegram:hover {
+  background-color: #ff6a1a;
   transform: translateY(-1px);
-  box-shadow: 0 0 32px rgba(255, 95, 20, 0.95);
 }
 
-.embers-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 7;
-  overflow: hidden;
-}
-
-.ember {
-  position: absolute;
-  border-radius: 50%;
-  background: #ff6a00;
-  box-shadow: 0 0 8px 2px rgba(255, 94, 0, 0.85);
-  opacity: 0.75;
-}
-
-.barcode-bars {
-  display: flex;
-  align-items: stretch;
-  height: 22px;
-  gap: 2px;
-}
-
-.barcode-bars span {
-  display: inline-block;
-  background: #b5b0aa;
-  height: 100%;
-}
-
-.barcode-label {
-  font-family: var(--font-mono), monospace;
-  font-size: 9px;
-  letter-spacing: 0.28em;
-  color: #b5b0aa;
-  margin-top: 3px;
-}
-
-.coord-axis {
-  position: relative;
-  width: 48px;
-  height: 52px;
-  margin-bottom: 16px;
-  opacity: 0.5;
-  font-family: var(--font-mono), monospace;
-  font-size: 10px;
-  color: #9e9a95;
-}
-
-.hud-bottom-right-meta {
-  position: absolute;
-  right: 5.5%;
-  bottom: 6%;
-  text-align: right;
-  font-family: var(--font-mono), monospace;
-  color: #9e9790;
-  opacity: 0.65;
-  pointer-events: none;
-}
-
-.hud-data-blocks {
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 3px;
-  height: 16px;
-}
-
-.hud-data-blocks span {
-  display: inline-block;
-  background: #8c857e;
-}
-
-/* Columna derecha: Zapatilla y proyección holográfica */
-.sneaker-showcase {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-}
+/* ==========================================
+   ANIMACIÓN FLOTANTE DE LA ZAPATILLA
+   ========================================== */
 
 @keyframes floatSneakerReal {
   0%, 100% {
-    transform: translateY(0px) rotate(-28deg) scale(1);
+    transform: translateY(0px) rotate(-24deg);
   }
   50% {
-    transform: translateY(-20px) rotate(-24deg) scale(1.035);
+    transform: translateY(-16px) rotate(-20deg);
   }
-}
-
-@keyframes spinSlow {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes spinReverse {
-  from { transform: rotate(360deg); }
-  to { transform: rotate(0deg); }
 }
 
 .sneaker-wrapper {
-  animation: floatSneakerReal 4.2s ease-in-out infinite;
+  animation: floatSneakerReal 4.5s ease-in-out infinite;
   transform-origin: center center;
   will-change: transform;
 }
@@ -417,290 +215,21 @@ p {
   max-width: 440px;
   height: auto;
   transform: scaleX(-1);
-  filter: grayscale(0.75) sepia(0.45) hue-rotate(-18deg) contrast(1.35) brightness(0.85) drop-shadow(0 28px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 4px 16px rgba(255, 90, 0, 0.75));
-  transition: filter 0.3s ease;
+  filter: contrast(1.15) brightness(0.95);
+  transition: transform 0.3s ease;
 }
 
 @media (max-width: 640px) {
   .sneaker-photo {
-    max-width: 260px;
+    max-width: 270px;
   }
 }
 
-.holo-base {
-  transform: rotateX(74deg) rotateZ(-6deg);
-  transform-style: preserve-3d;
-}
-
-.ring-spin {
-  animation: spinSlow 24s linear infinite;
-}
-
-.ring-spin-rev {
-  animation: spinReverse 18s linear infinite;
-}
-
-.hud-barcode-top-right {
-  position: absolute;
-  top: 6%;
-  right: 5%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  opacity: 0.42;
-  pointer-events: none;
-}
-
-.hud-barcode-bottom-left {
-  position: relative;
-  z-index: 8;
-  margin-left: 2.8vw;
-  margin-bottom: 2.2vh;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: flex-start;
-  opacity: 0.42;
-}
-
-.hud-corner-arrow {
-  position: absolute;
-  right: 6%;
-  top: 51%;
-  width: 26px;
-  height: 26px;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-/* ==========================================
-   SISTEMA DE SECCIONES TÁCTICAS LLANTITA
-   ========================================== */
-
-/* Ruido sutil de fondo para todas las secciones */
-.noise-overlay {
-  position: absolute;
-  inset: 0;
-  opacity: 0.04;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-/* ==========================================
-   SECCIÓN 0: HERO (Brasas y Viñeta de Fuego)
-   ========================================== */
-.hero-bg {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
-  background: 
-    radial-gradient(circle at 70% 52%, rgba(255, 75, 0, 0.24) 0%, rgba(180, 40, 0, 0.09) 32%, transparent 60%),
-    radial-gradient(circle at 12% 10%, rgba(255, 60, 0, 0.25) 0%, transparent 35%),
-    radial-gradient(circle at 30% 45%, #1f1d1d 0%, #0d0c0c 100%);
-  box-shadow: 
-    inset 14px 0 35px -8px rgba(255, 68, 0, 0.75),
-    inset 0 0 90px rgba(0, 0, 0, 0.95);
-}
-
-/* ==========================================
-   SECCIÓN 1: GRILLA DE RADAR TÁCTICO
-   ========================================== */
-.section-grid-bg {
-  position: relative;
-  background-color: #0b0a0a;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(255, 85, 0, 0.14) 0%, transparent 55%),
-    linear-gradient(to right, rgba(255, 102, 0, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 102, 0, 0.06) 1px, transparent 1px);
-  background-size: 100% 100%, 48px 48px, 48px 48px;
-  box-shadow: inset 0 25px 50px #060505, inset 0 -25px 50px #060505;
-}
-
-.section-grid-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(255, 136, 0, 0.28) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 35%, transparent 80%);
-}
-
-/* ==========================================
-   SECCIÓN 2: MALLA DE CARBONO + HALO LATERAL
-   ========================================== */
-.section-carbon-bg {
-  position: relative;
-  background-color: #141211;
-  background-image: 
-    radial-gradient(circle at 92% 50%, rgba(255, 90, 0, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 8% 60%, rgba(255, 140, 0, 0.08) 0%, transparent 40%),
-    radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 0),
-    radial-gradient(rgba(0, 0, 0, 0.8) 1px, transparent 0);
-  background-size: 100% 100%, 100% 100%, 16px 16px, 16px 16px;
-  background-position: 0 0, 0 0, 0 0, 8px 8px;
-  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.9);
-}
-
-/* Franja diagonal industrial (Hazard strip) */
-.hazard-strip {
-  height: 8px;
-  width: 100%;
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(255, 90, 0, 0.35),
-    rgba(255, 90, 0, 0.35) 12px,
-    #0c0b0b 12px,
-    #0c0b0b 24px
-  );
-  border-top: 1px solid rgba(255, 102, 0, 0.4);
-  border-bottom: 1px solid rgba(255, 102, 0, 0.4);
-}
-
-/* ==========================================
-   SECCIÓN 3: NÚCLEO TÉRMICO + SCANLINES
-   ========================================== */
-.section-core-bg {
-  position: relative;
-  background: 
-    radial-gradient(ellipse at 50% 100%, rgba(255, 68, 0, 0.28) 0%, rgba(140, 25, 0, 0.1) 45%, #090808 80%),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.015) 0px,
-      rgba(255, 255, 255, 0.015) 1px,
-      transparent 1px,
-      transparent 4px
-    );
-  background-color: #090808;
-}
-
-/* ==========================================
-   COMPONENTES DE ESTILO TÁCTICO
-   ========================================== */
-
-/* Placa metálica del logo LLANTITA */
-.logo-plate {
-  background: linear-gradient(180deg, #2d2926 0%, #1a1715 100%);
-  border: 2px solid #574b3d;
-  box-shadow: 
-    0 8px 20px rgba(0,0,0,0.85),
-    inset 0 1px 1px rgba(255, 255, 255, 0.15),
-    inset 0 0 12px rgba(0,0,0,0.9);
-  position: relative;
-}
-
-.logo-shield {
-  position: absolute;
-  left: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 66px;
-  height: 84px;
-  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.95));
-  overflow: hidden;
-  clip-path: polygon(12% 0%, 88% 0%, 100% 10%, 100% 74%, 50% 100%, 0% 74%, 0% 10%);
-  border-radius: 4px;
-  background: #181512;
-}
-
-.logo-shield img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.logo-text {
-  font-family: var(--font-teko), sans-serif;
-  letter-spacing: 0.03em;
-  background: linear-gradient(180deg, #fff6e5 0%, #ffc470 55%, #e07b22 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 6px rgba(255, 115, 0, 0.45));
-}
-
-/* Botones e insignias superiores */
-.badge-active {
-  font-family: var(--font-barlow), sans-serif;
-  background: rgba(28, 22, 19, 0.78);
-  border: 1px solid rgba(255, 125, 50, 0.35);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.6), inset 0 0 10px rgba(255, 90, 0, 0.08);
-  color: #ffca85;
-  letter-spacing: 0.04em;
-}
-
-.btn-telegram {
-  font-family: var(--font-barlow), sans-serif;
-  background: linear-gradient(90deg, #ff5100 0%, #ff7b00 50%, #ff5100 100%);
-  box-shadow: 
-    0 0 22px rgba(255, 94, 0, 0.75),
-    inset 0 1px 2px rgba(255, 230, 180, 0.65);
-  color: #1c0d06;
-  letter-spacing: 0.03em;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.btn-telegram:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 30px rgba(255, 115, 0, 0.95), inset 0 1px 3px rgba(255, 255, 255, 0.8);
-}
-
-/* Tipografía de encabezados */
-.headline {
-  font-family: var(--font-barlow), sans-serif;
-  font-weight: 700;
-  line-height: 0.94;
-  letter-spacing: -0.01em;
-  color: #f3f1ed;
-  text-shadow: 0 6px 24px rgba(0, 0, 0, 0.85);
-}
-
-.section-title {
-  font-family: var(--font-barlow), sans-serif;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-/* Tarjetas Tácticas con Esquinas Recortadas (Chamfer) */
-.tactical-card {
-  background: linear-gradient(165deg, rgba(32, 28, 26, 0.9) 0%, rgba(16, 14, 13, 0.95) 100%);
-  border: 1px solid rgba(255, 110, 40, 0.25);
-  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(255, 85, 0, 0.05);
-  transition: border-color 0.25s ease, transform 0.25s ease;
-}
-
-.tactical-card:hover {
-  border-color: rgba(255, 115, 0, 0.75);
-  transform: translateY(-4px);
-}
-
-
-.hud-mono {
-  font-family: var(--font-mono), monospace;
-}
-
-/* Tarjeta Mech Industrial */
-.mech-card {
-  position: relative;
-  background: #171513;
-  border: 1px solid #363028;
-  border-radius: 8px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65);
-  transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-.mech-card:hover {
-  border-color: #ff6a1a;
-  box-shadow: 0 8px 28px rgba(255, 85, 0, 0.18), 0 4px 12px rgba(0,0,0,0.8);
-}
-
-/* Micro-interacciones y animaciones de entrada controladas */
+/* Micro-interacciones controladas */
 @keyframes modalEnter {
   from {
     opacity: 0;
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
   to {
     opacity: 1;
@@ -709,38 +238,9 @@ p {
 }
 
 .modal-enter {
-  animation: modalEnter 200ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  animation: modalEnter 180ms var(--ease-out-emil) forwards;
 }
 
-@keyframes backdropEnter {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.backdrop-enter {
-  animation: backdropEnter 180ms ease-out forwards;
-}
-
-/* Spinner rápido para mejorar la velocidad percibida */
-.fast-spin {
-  animation: spin 0.65s linear infinite;
-}
-
-/* Transiciones táctiles solo en punteros precisos para evitar sticky hover en móviles */
-@media (hover: hover) and (pointer: fine) {
-  .hover-lift {
-    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
-  }
-  .hover-lift:hover {
-    transform: translateY(-2px);
-  }
-}
-
-/* Respeto por preferencias de reducción de movimiento */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;

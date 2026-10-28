@@ -151,48 +151,29 @@ export default function HomePage() {
         ultimaActualizacion={ultimaActualizacion}
       />
 
-      {/* DIVISOR MECÁNICO 1 (Transición entre Hero y Sección 1) */}
-      <div className="relative w-full h-12 bg-[#0b0a0a] flex items-center justify-center z-30">
-        <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent" />
-        <div
-          className="absolute px-6 sm:px-8 py-1.5 bg-[#161312] border border-orange-500/40 hud-mono text-xs text-orange-400 tracking-[0.3em] uppercase select-none"
-          style={{ clipPath: 'polygon(12px 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0 50%)' }}
-        >
-          SEC // 01 — TELEMETRÍA EN VIVO
-        </div>
-      </div>
-
-      {/* SECCIÓN 1: FONDO DE GRILLA DE RADAR TÁCTICO + FILTROS + CATÁLOGO */}
+      {/* SECCIÓN 1: GRILLA DE CATÁLOGO + FILTROS + OFERTAS */}
       <section
         ref={catalogRef}
-        className="section-grid-bg py-16 sm:py-24 px-3 sm:px-8 md:px-14 relative overflow-hidden"
+        className="section-grid-bg py-12 sm:py-20 px-3 sm:px-8 md:px-14 relative overflow-hidden"
       >
         <div className="noise-overlay" />
-
-        {/* Marca de agua gigante de fondo para dar profundidad */}
-        <div
-          className="absolute -right-6 sm:-right-10 top-10 font-bold text-[8rem] sm:text-[14rem] leading-none text-white/[0.02] pointer-events-none select-none"
-          style={{ fontFamily: 'var(--font-teko), sans-serif' }}
-        >
-          RADAR // 01
-        </div>
 
         <div className="max-w-[1360px] mx-auto relative z-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 border-l-4 border-orange-500 pl-4 sm:pl-5">
             <div>
-              <span className="hud-mono text-orange-400 text-xs tracking-[0.25em] uppercase block mb-1">
-                DETECCIÓN DE CAÍDAS &gt; 35%
+              <span className="text-orange-400 text-xs font-semibold uppercase block mb-1">
+                Catálogo en tiempo real
               </span>
-              <h2 className="section-title text-3xl sm:text-5xl md:text-6xl text-stone-100">
-                Anomalías y catálogo en radar
+              <h2 className="section-title text-4xl sm:text-5xl md:text-6xl text-stone-100">
+                Pares y rebajas verificadas
               </h2>
             </div>
-            <p className="hud-mono text-stone-400 text-xs mt-3 md:mt-0">
-              ESCANEO AUTOMÁTICO // CADA 1.800 SEGUNDOS
+            <p className="text-stone-400 text-xs sm:text-sm mt-3 md:mt-0 font-medium">
+              Revisión automática cada 30 minutos
             </p>
           </div>
 
-          {/* Filtros del radar */}
+          {/* Filtros del catálogo */}
           <HeroFilters
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
@@ -248,13 +229,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* DIVISOR MECÁNICO 2: CINTA DE ADVERTENCIA INDUSTRIAL */}
-      <div className="hazard-strip relative z-30" />
-
-      {/* SECCIÓN 2: MALLA DE CARBONO + HALO LATERAL + ARQUITECTURA */}
+      {/* SECCIÓN 2: ARQUITECTURA Y CÓMO FUNCIONA */}
       <HowItWorksSection />
 
-      {/* SECCIÓN 3: NÚCLEO TÉRMICO + SCANLINES + CTA TELEGRAM + FOOTER */}
+      {/* SECCIÓN 3: CIERRE Y TELEGRAM */}
       <Footer ultimaActualizacion={ultimaActualizacion} />
 
       {/* Modal de Historial de Precios */}

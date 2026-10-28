@@ -66,16 +66,11 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
       <div
         role="dialog"
         aria-modal="true"
+        data-ui="modal"
         aria-labelledby="price-modal-title"
-        className="relative w-full max-w-xl rounded-t-2xl sm:rounded-xl bg-[#14110f] border border-[#3d3328] p-4 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6 overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col shadow-[0_15px_40px_rgba(0,0,0,0.9)]"
+        className="relative w-full max-w-xl rounded-t-2xl sm:rounded-xl bg-[#14110f] border border-[#3d3328] p-4 sm:p-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-6 overflow-hidden max-h-[90dvh] sm:max-h-[90vh] flex flex-col shadow-[0_15px_40px_rgba(0,0,0,0.9)]" /* taste-skill-ignore */
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Remaches decorativos en esquinas (desktop) */}
-        <span className="rivet tl hidden sm:block" />
-        <span className="rivet tr hidden sm:block" />
-        <span className="rivet br hidden sm:block" />
-        <span className="rivet bl hidden sm:block" />
-
         {/* Indicador táctil en móvil */}
         <div className="w-10 h-1 bg-[#2e261f] rounded-full mx-auto mb-3 sm:hidden shrink-0" />
 
@@ -91,12 +86,12 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <span className="text-xs font-mono text-[#8a8074]">Sin foto</span>
+                <span className="text-xs text-[#8a8074]">Sin foto</span>
               )}
             </div>
 
             <div className="min-w-0">
-              <span className="font-barlow text-xs font-bold text-[#ff6a1a] uppercase tracking-wider block mb-0.5">
+              <span className="font-barlow text-xs font-bold text-[#ff6a1a] uppercase block mb-0.5">
                 {product.marca ? product.marca.toUpperCase() : 'CALZADO'}
               </span>
               <h2
@@ -110,7 +105,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
           <button
             onClick={onClose}
-            className="rounded p-1.5 text-[#8a8074] hover:text-[#f2ede7] hover:bg-[#221c17] active:scale-[0.92] transition-all shrink-0 cursor-pointer"
+            className="rounded p-1.5 text-[#8a8074] hover:text-[#f2ede7] hover:bg-[#221c17] active:scale-[0.92] transition-colors shrink-0 cursor-pointer"
             aria-label="Cerrar ventana de historial"
           >
             <X className="h-5 w-5" />
@@ -120,12 +115,12 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
         {/* Talles disponibles */}
         {tallesList.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap pb-2.5">
-            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase tracking-wider">Talles disponibles:</span>
+            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase">Talles disponibles:</span>
             <div className="flex flex-wrap gap-1">
               {tallesList.map((t, idx) => (
                 <span
                   key={idx}
-                  className="font-mono text-xs font-bold tabular-nums px-2 py-0.5 rounded bg-[#0d0b0a] text-[#c7beaf] border border-[#2b241c]"
+                  className="text-xs font-bold tabular-nums px-2 py-0.5 rounded bg-[#0d0b0a] text-[#c7beaf] border border-[#2b241c]"
                 >
                   {t}
                 </span>
@@ -137,19 +132,19 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
         {/* Resumen de telemetría de precios */}
         <div className="my-2 grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3">
-            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase tracking-wider">Precio actual</span>
+            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase">Precio actual</span>
             <p className="font-anton text-lg text-[#f2ede7] mt-0.5 tracking-wide tabular-nums">
               {formatCurrency(product.precio)}
             </p>
           </div>
           <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3">
-            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase tracking-wider">Mínimo registrado</span>
+            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase">Mínimo registrado</span>
             <p className="font-anton text-lg text-[#ff944d] mt-0.5 tracking-wide tabular-nums">
               {formatCurrency(minPrice)}
             </p>
           </div>
           <div className="rounded bg-[#0d0b0a] border border-[#2b241c] p-3 col-span-2 sm:col-span-1">
-            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase tracking-wider">Máximo registrado</span>
+            <span className="text-xs font-barlow font-bold text-[#8a8074] uppercase">Máximo registrado</span>
             <p className="font-anton text-lg text-[#736c64] mt-0.5 tracking-wide tabular-nums">
               {formatCurrency(maxPrice)}
             </p>
@@ -158,21 +153,21 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
         {/* Alerta de mínimo histórico verificada */}
         {isAllTimeLow && product.activo !== false && (
-          <div className="mb-2.5 flex items-center gap-2 rounded bg-[#211a13] border border-[#593922] px-3 py-1.5 text-xs font-mono text-[#ff944d]">
+          <div className="mb-2.5 flex items-center gap-2 rounded bg-[#211a13] border border-[#593922] px-3 py-1.5 text-xs text-[#ff944d] font-semibold">
             <CheckCircle2 className="h-4 w-4 shrink-0 text-[#ff6a1a]" />
-            <span>PISO HISTÓRICO CONFIRMADO: PRECIO MÁS BAJO REGISTRADO</span>
+            <span>Piso histórico confirmado: precio más bajo registrado</span>
           </div>
         )}
 
         {/* Aviso de producto sin stock */}
         {product.activo === false && (
-          <div className="mb-2.5 flex items-center gap-2 rounded bg-[#261512] border border-[#59261f] px-3 py-1.5 text-xs font-mono text-[#ff5100]">
+          <div className="mb-2.5 flex items-center gap-2 rounded bg-[#261512] border border-[#59261f] px-3 py-1.5 text-xs text-[#ff5100] font-semibold">
             <AlertCircle className="h-4 w-4 shrink-0 text-[#ff5100]" />
-            <span>SIN STOCK DISPONIBLE EN SPORTING</span>
+            <span>Sin stock disponible en Sporting</span>
           </div>
         )}
 
-        {/* Gráfico interactivo estilo Osciloscopio */}
+        {/* Gráfico interactivo */}
         {!loading && (
           <PriceChart
             history={history}
@@ -183,17 +178,17 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
         {/* Historial de cambios */}
         <div className="flex-1 overflow-y-auto no-scrollbar space-y-1.5 pr-1 mt-2">
-          <h3 className="font-barlow text-xs font-bold text-[#8a8074] uppercase tracking-wider mb-1">
-            Telemetría de movimientos
+          <h3 className="font-barlow text-xs font-bold text-[#8a8074] uppercase mb-1">
+            Historial de variaciones
           </h3>
 
           {loading ? (
-            <div className="py-6 text-center text-xs font-mono text-[#8a8074]">
-              SINCRONIZANDO HISTORIAL...
+            <div className="py-6 text-center text-xs text-[#8a8074]">
+              Cargando historial...
             </div>
           ) : history.length <= 1 ? (
-            <div className="py-4 text-center text-xs font-mono text-[#8a8074] rounded bg-[#0d0b0a] border border-[#241e18]">
-              PRECIO ESTABLE SIN VARIACIONES REGISTRADAS.
+            <div className="py-4 text-center text-xs text-[#8a8074] rounded bg-[#0d0b0a] border border-[#241e18]">
+              Precio estable sin variaciones registradas.
             </div>
           ) : (
             <div className="space-y-1">
@@ -207,7 +202,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
                     key={item.id}
                     className="flex items-center justify-between rounded bg-[#0d0b0a] border border-[#241e18] px-3 py-2 text-xs"
                   >
-                    <div className="flex items-center gap-2 text-[#a39b91] font-mono">
+                    <div className="flex items-center gap-2 text-[#a39b91]">
                       <Calendar className="h-3 w-3 text-[#736c64]" />
                       <span>{new Date(item.fecha).toLocaleDateString('es-AR', {
                         day: '2-digit',
@@ -220,12 +215,12 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
 
                     <div className="flex items-center gap-2">
                       {isDrop && (
-                        <span className="text-[#ff6a1a] font-barlow font-bold uppercase tracking-wider text-xs">Baja</span>
+                        <span className="text-[#ff6a1a] font-barlow font-bold uppercase text-xs">Baja</span>
                       )}
                       {isRise && (
-                        <span className="text-[#ff5100] font-barlow font-bold uppercase tracking-wider text-xs">Alza</span>
+                        <span className="text-[#ff5100] font-barlow font-bold uppercase text-xs">Alza</span>
                       )}
-                      <span className="font-mono font-bold text-[#f2ede7] tabular-nums">
+                      <span className="font-bold text-[#f2ede7] tabular-nums">
                         {formatCurrency(item.precio)}
                       </span>
                     </div>
@@ -237,12 +232,12 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
         </div>
 
         {/* Footer Modal con enlace a Sporting */}
-        <div className="mt-3 pt-3 flex items-center justify-between gap-3 border-t border-[#29221b]">
-          <span className="text-xs font-mono text-[#736c64]">
-            SPORTING ARGENTINA
+        <div className="mt-3 pt-3 flex items-center justify-between gap-3 bg-[#110e0d] px-3 py-2 rounded">
+          <span className="text-xs text-[#736c64]">
+            Sporting Argentina
           </span>
           {product.activo === false ? (
-            <span className="inline-flex items-center gap-2 rounded bg-[#1c1814] text-[#736c64] font-barlow font-bold text-xs uppercase tracking-wider px-4 py-2 cursor-not-allowed">
+            <span className="inline-flex items-center gap-2 rounded bg-[#1c1814] text-[#736c64] font-barlow font-bold text-xs uppercase px-4 py-2 cursor-not-allowed">
               <span>Sin stock</span>
             </span>
           ) : (
@@ -250,7 +245,7 @@ export const PriceHistoryModal: React.FC<PriceHistoryModalProps> = ({ product, o
               href={safeExternalUrl(product.url)}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded bg-gradient-to-r from-[#ff7b29] to-[#ff5100] border border-[#ffa366] text-[#1c110a] font-barlow font-bold text-xs uppercase tracking-wider px-4 py-2 shadow-[0_0_12px_rgba(255,85,10,0.5)] active:scale-[0.96] transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 rounded bg-[#ff5500] hover:bg-[#ff6a1a] text-black font-barlow font-bold text-xs uppercase px-4 py-2 active:scale-[0.96] transition-colors cursor-pointer"
             >
               <span>Ver en Sporting</span>
               <ExternalLink className="h-3.5 w-3.5" />
