@@ -33,6 +33,7 @@ web/.env*
 *.tsbuildinfo
 
 # Herramientas de IA y skills
+.gemini/
 .taste-skill/
 .impeccable/
 AGENTS.md
