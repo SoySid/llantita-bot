@@ -107,6 +107,7 @@ async def procesar_mensajes_telegram(conn, session):
     if not updates:
         return
 
+    respuestas_interactivas = []
     with conn:
         with conn.cursor() as cur:
             for update in updates:
@@ -123,10 +124,21 @@ async def procesar_mensajes_telegram(conn, session):
                         VALUES (%s, TRUE)
                         ON CONFLICT (chat_id) DO UPDATE SET activo = TRUE;
                     """, (chat_id,))
+                    respuestas_interactivas.append((
+                        chat_id,
+                        "👟 <b>¡Hola! Te suscribiste a las alertas de Llantita.</b>\n\n"
+                        "Te avisaré automáticamente cuando detecte una baja de precio con stock confirmado en talle 43.\n\n"
+                        "Para pausar las notificaciones cuando quieras, enviá /stop."
+                    ))
                 elif texto.startswith("/stop") or texto.startswith("/desuscribir"):
                     cur.execute("""
                         UPDATE usuarios_telegram SET activo = FALSE WHERE chat_id = %s;
                     """, (chat_id,))
+                    respuestas_interactivas.append((
+                        chat_id,
+                        "👋 <b>Suscripción pausada.</b> No recibirás más alertas automáticas.\n\n"
+                        "Para volver a activarla cuando quieras, enviá /start."
+                    ))
 
     ultimo_update_id = updates[-1]["update_id"]
     try:
@@ -134,10 +146,13 @@ async def procesar_mensajes_telegram(conn, session):
     except Exception:
         pass
 
+    for cid, msg in respuestas_interactivas:
+        await enviar_mensaje_telegram(session, cid, msg, conn=conn)
 
-async def enviar_mensaje_telegram(session, chat_id, texto):
+
+async def enviar_mensaje_telegram(session, chat_id, texto, conn=None):
     if not TELEGRAM_BOT_TOKEN:
-        return
+        return False
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {
         "chat_id": chat_id, 
@@ -150,14 +165,21 @@ async def enviar_mensaje_telegram(session, chat_id, texto):
         try:
             async with session.post(url, json=payload, timeout=20) as res:
                 if res.status == 200:
-                    return
+                    return True
 
                 error_text = await res.text()
 
-                # 429 (rate limit) y 5xx (errores transitorios del lado de
-                # Telegram, ej. 502 Bad Gateway) se reintentan. El resto de
-                # errores (400, 403 chat bloqueado, etc.) son permanentes:
-                # reintentar no sirve de nada.
+                # Si el usuario bloqueó el bot o eliminó el chat (403), desactivar en la BD
+                if res.status == 403:
+                    print(f"ℹ️ El usuario {chat_id} bloqueó el bot (HTTP 403). Marcando como inactivo.")
+                    if conn:
+                        try:
+                            with conn.cursor() as cur:
+                                cur.execute("UPDATE usuarios_telegram SET activo = FALSE WHERE chat_id = %s;", (chat_id,))
+                        except Exception:
+                            pass
+                    return False
+
                 if res.status == 429 or res.status >= 500:
                     print(f"⚠️ Telegram devolvió {res.status} para chat {chat_id} (Intento {intento + 1}/5): {error_text}")
                     espera = 3 * (intento + 1)
@@ -171,15 +193,16 @@ async def enviar_mensaje_telegram(session, chat_id, texto):
                     continue
                 else:
                     print(f"Telegram devolvió {res.status} para chat {chat_id}: {error_text}")
-                    return
+                    return False
         except asyncio.TimeoutError:
             print(f"⚠️ Telegram Timeout enviando mensaje a {chat_id} (Intento {intento + 1}/5)")
             await asyncio.sleep(3 * (intento + 1))
         except Exception as e:
             print(f"Error enviando mensaje a {chat_id}: {sanitizar_error(e)}")
-            return
+            return False
 
     print(f"❌ No se pudo enviar el mensaje a {chat_id} tras 5 intentos.")
+    return False
 
 
 def obtener_usuarios_activos(conn):
@@ -355,24 +378,32 @@ async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
         for i, tanda in enumerate(tandas)
     ]
 
+    sem_broadcast = asyncio.Semaphore(10)
+
+    async def enviar_con_limite(cid, msg):
+        async with sem_broadcast:
+            await enviar_mensaje_telegram(session, cid, msg, conn=conn)
+            await asyncio.sleep(0.05)
+
     for mensaje in mensajes:
-        tareas = [enviar_mensaje_telegram(session, chat_id, mensaje) for chat_id in usuarios_activos]
+        tareas = [enviar_con_limite(chat_id, mensaje) for chat_id in usuarios_activos]
         await asyncio.gather(*tareas)
 
 
 def obtener_estado_anterior(conn):
     with conn.cursor() as cur:
-        cur.execute("SELECT id, precio_talle_43, talles FROM productos;")
+        cur.execute("SELECT id, precio, precio_talle_43, talles FROM productos;")
         res = {}
         for row in cur.fetchall():
             p_id = str(row[0])
-            precio_43 = round(float(row[1]), 2) if row[1] is not None else None
-            talles = row[2] or ""
-            res[p_id] = {"precio_43": precio_43, "talles": talles}
+            precio = round(float(row[1]), 2) if row[1] is not None else None
+            precio_43 = round(float(row[2]), 2) if row[2] is not None else None
+            talles = row[3] or ""
+            res[p_id] = {"precio": precio, "precio_43": precio_43, "talles": talles}
         return res
 
 
-async def procesar_y_guardar(conn, session, productos_actuales):
+async def procesar_y_guardar(conn, session, productos_actuales, catalogo_completo=True):
     estado_anterior = obtener_estado_anterior(conn)
 
     cambios = []
@@ -403,10 +434,11 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 movimientos_log.append(f"✨ [NUEVO] [{p_marca}] {p_nombre} (Sin Talle 43)")
             registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_imagen_url, p_activo))
         else:
+            precio_viejo = prev["precio"]
             precio_43_viejo = prev["precio_43"]
             talles_viejos = prev["talles"]
 
-            # Solo evaluamos ofertas/cambios si el producto TIENE talle 43 en stock
+            # Si TIENE talle 43 en stock para compra:
             if tiene_43 and p_precio_43 is not None:
                 if precio_43_viejo is None:
                     # Entró por primera vez en stock de talle 43
@@ -425,12 +457,13 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                         )
                     registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_imagen_url, p_activo))
                     historial_registros.append((p_id, p_precio_43))
-                elif p_talles != talles_viejos:
+                elif p_talles != talles_viejos or p_precio != precio_viejo:
                     registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, p_precio_43, p_talles, p_marca, p_categoria, p_imagen_url, p_activo))
             else:
                 # Actualmente sin talle 43 en stock
-                if p_talles != talles_viejos:
-                    # Si cambiaron los talles generales, actualizamos talles preservando precio_talle_43 previo si existía
+                # Si cambiaron los talles generales o cambió el precio general, actualizamos en BD
+                # fijando precio_talle_43 en None (para no arrastrar precios de stock agotado)
+                if p_talles != talles_viejos or p_precio != precio_viejo or precio_43_viejo is not None:
                     registros_a_guardar.append((p_id, p_nombre, p_url, p_precio, None, p_talles, p_marca, p_categoria, p_imagen_url, p_activo))
 
     if movimientos_log:
@@ -460,7 +493,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 )
 
             if cambios:
-                await notificar_cambios_agrupados(session, usuarios_activos, cambios)
+                await notificar_cambios_agrupados(conn, session, usuarios_activos, cambios)
 
             if registros_a_guardar:
                 query_productos = """
@@ -470,7 +503,7 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                         nombre = EXCLUDED.nombre,
                         url = EXCLUDED.url,
                         precio = EXCLUDED.precio,
-                        precio_talle_43 = COALESCE(EXCLUDED.precio_talle_43, productos.precio_talle_43),
+                        precio_talle_43 = EXCLUDED.precio_talle_43,
                         talles = EXCLUDED.talles,
                         marca = EXCLUDED.marca,
                         categoria = EXCLUDED.categoria,
@@ -487,19 +520,23 @@ async def procesar_y_guardar(conn, session, productos_actuales):
                 print(f"✅ Se actualizaron/insertaron {len(registros_a_guardar)} productos en la base de datos.")
 
             # Desactivar productos que ya no figuran en el catálogo en vivo de Sporting
-            ids_activos_ahora = [p["id"] for p in productos_actuales if p.get("activo")]
-            if len(ids_activos_ahora) >= 500:
-                cur.execute(
-                    """
-                    UPDATE productos 
-                    SET activo = FALSE 
-                    WHERE id NOT IN %s AND activo = TRUE;
-                    """,
-                    (tuple(ids_activos_ahora),)
-                )
-                desactivados = cur.rowcount
-                if desactivados > 0:
-                    print(f"📦 Se marcaron como inactivos {desactivados} productos que ya no figuran en Sporting.")
+            # Se ejecuta únicamente si la extracción no fue truncada por el límite de 2500 de VTEX
+            if catalogo_completo:
+                ids_activos_ahora = [p["id"] for p in productos_actuales if p.get("activo")]
+                if len(ids_activos_ahora) >= 500:
+                    cur.execute(
+                        """
+                        UPDATE productos 
+                        SET activo = FALSE 
+                        WHERE activo = TRUE AND NOT (id = ANY(%s));
+                        """,
+                        (ids_activos_ahora,)
+                    )
+                    desactivados = cur.rowcount
+                    if desactivados > 0:
+                        print(f"📦 Se marcaron como inactivos {desactivados} productos que ya no figuran en Sporting.")
+            else:
+                print("ℹ️ Catálogo parcial por tope de paginación de VTEX: se preservó el estado de actividad de los registros.")
 
 
 async def obtener_pagina(sem, session, categoria_fq, desde, hasta):
@@ -644,7 +681,7 @@ async def obtener_cadena_categoria_zapatillas(session):
                 return None
             arbol = await res.json()
     except Exception as e:
-        print(f"⚠️ Error leyendo el árbol de categorías: {e}")
+        print(f"⚠️ Error leyendo el árbol de categorías: {sanitizar_error(e)}")
         return None
 
     def buscar(nodos, camino_ids, camino_nombres):
@@ -696,10 +733,12 @@ async def extraer_catalogo(session):
     # resultados por categoría. Avisamos en vez de truncar en silencio
     # (la solución sería partir la consulta por "genero" o por subtipo,
     # ej. Zapatillas Running, Zapatillas Training, etc.)
+    catalogo_completo = True
     if total_records > 2500:
         print(f"⚠️ La categoría tiene {total_records} productos, por encima del límite de paginación de VTEX (2500). "
               f"Se van a perder productos al final del listado. Considerá dividir la consulta por género o subtipo.")
         total_records = 2500
+        catalogo_completo = False
 
     print(f"✅ Total a escanear: {total_records}.")
 
@@ -715,7 +754,7 @@ async def extraer_catalogo(session):
                 procesar_productos(data, productos_dict)
 
     print(f"✅ Catálogo de calzado finalizado: {len(productos_dict)} productos extraídos.")
-    return list(productos_dict.values())
+    return list(productos_dict.values()), catalogo_completo
 
 
 def p_precio_valido(val):
@@ -736,7 +775,12 @@ async def main():
     }
 
     async with aiohttp.ClientSession(headers=headers, cookies=cookies) as session:
-        conn_inicial = obtener_conexion()
+        try:
+            conn_inicial = obtener_conexion()
+        except Exception as e:
+            print(f"❌ Error al conectar con la base de datos inicial: {sanitizar_error(e)}")
+            return
+
         try:
             print("📦 [BD] Inicializando tablas y procesando usuarios de Telegram...")
             inicializar_bd(conn_inicial)
@@ -745,13 +789,18 @@ async def main():
             conn_inicial.close() 
 
         print("🚀 Iniciando extracción del catálogo de calzado...")
-        datos = await extraer_catalogo(session)
+        datos, catalogo_completo = await extraer_catalogo(session)
 
         if datos:
-            conn_guardado = obtener_conexion()
+            try:
+                conn_guardado = obtener_conexion()
+            except Exception as e:
+                print(f"❌ Error al conectar con la base de datos de guardado: {sanitizar_error(e)}")
+                return
+
             try:
                 print(f"💾 [BD] Procesando {len(datos)} productos en la base de datos...")
-                await procesar_y_guardar(conn_guardado, session, datos)
+                await procesar_y_guardar(conn_guardado, session, datos, catalogo_completo=catalogo_completo)
             finally:
                 conn_guardado.close()
 

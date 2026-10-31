@@ -34,6 +34,10 @@ web/.env*
 
 # Herramientas de IA y skills
 .gemini/
+.antigravity/
+.agent/
+brain/
+.system_generated/
 .taste-skill/
 .impeccable/
 AGENTS.md

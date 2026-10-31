@@ -1,25 +1,31 @@
 import { z } from 'zod';
 import { NextRequest, NextResponse } from 'next/server';
 
-// 1. Rate Limiting en memoria por IP (Ventana fija de 60s)
+// 1. Rate Limiting en memoria por IP (Ventana fija de 60s con poda pasiva apta para serverless)
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 60;
 const ipHits = new Map<string, { count: number; resetTime: number }>();
 
-// Limpieza periódica para evitar fugas de memoria
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, entry] of ipHits.entries()) {
-    if (now > entry.resetTime) {
-      ipHits.delete(ip);
+function pruneExpired(now: number) {
+  if (ipHits.size > 150) {
+    for (const [key, entry] of ipHits.entries()) {
+      if (now > entry.resetTime) {
+        ipHits.delete(key);
+      }
     }
   }
-}, 5 * 60 * 1000);
+}
 
 export function checkRateLimit(request: NextRequest): NextResponse | null {
-  const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+  // Prioriza cabeceras seguras de proxy en Vercel/Cloudflare antes de x-forwarded-for
+  const ip =
+    request.headers.get('x-real-ip') ||
+    request.headers.get('x-vercel-forwarded-for') ||
+    request.headers.get('x-forwarded-for')?.split(',')[0].trim() ||
+    '127.0.0.1';
+
   const now = Date.now();
+  pruneExpired(now);
 
   const entry = ipHits.get(ip);
   if (!entry || now > entry.resetTime) {
