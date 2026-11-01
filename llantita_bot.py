@@ -309,7 +309,7 @@ def formatear_bloque_producto(nombre, precio_anterior, precio_nuevo, url, marca,
     )
 
 
-async def notificar_cambios_agrupados(session, usuarios_activos, cambios):
+async def notificar_cambios_agrupados(conn, session, usuarios_activos, cambios):
     """
     Junta varios productos con BAJA de precio en un mismo mensaje de
     Telegram, en vez de mandar un mensaje por producto. Si son muchos,
@@ -492,9 +492,6 @@ async def procesar_y_guardar(conn, session, productos_actuales, catalogo_complet
                     template="(%s, %s, CURRENT_TIMESTAMP)"
                 )
 
-            if cambios:
-                await notificar_cambios_agrupados(conn, session, usuarios_activos, cambios)
-
             if registros_a_guardar:
                 query_productos = """
                     INSERT INTO productos (id, nombre, url, precio, precio_talle_43, talles, marca, categoria, imagen_url, activo, ultima_actualizacion)
@@ -537,6 +534,9 @@ async def procesar_y_guardar(conn, session, productos_actuales, catalogo_complet
                         print(f"📦 Se marcaron como inactivos {desactivados} productos que ya no figuran en Sporting.")
             else:
                 print("ℹ️ Catálogo parcial por tope de paginación de VTEX: se preservó el estado de actividad de los registros.")
+
+    if cambios:
+        await notificar_cambios_agrupados(conn, session, usuarios_activos, cambios)
 
 
 async def obtener_pagina(sem, session, categoria_fq, desde, hasta):
